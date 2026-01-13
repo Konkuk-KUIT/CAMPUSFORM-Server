@@ -1,6 +1,5 @@
 package com.campusform.server.recruiting.domain.model.applicant;
 
-import com.campusform.server.recruiting.domain.model.applicant.value.ApplicantStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -8,6 +7,8 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import com.campusform.server.recruiting.domain.model.applicant.value.ApplicantStatus;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -61,7 +62,9 @@ public class Applicant {
     private Boolean bookmarked = false;
 
     /**
-     * 지원자의 추가 질문 답변 목록 (같은 컨텍스트 내부 관계)
+     * 지원자의 추가 질문 답변 목록
+     * 
+     * 방향 매핑을 통해 연관된 답변 데이터를 도메인 객체 그래프 탐색으로 쉽게 사용할 수 있도록 설계한 것입니다.
      */
     @OneToMany(mappedBy = "applicant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ApplicantExtraAnswer> extraAnswers = new ArrayList<>();

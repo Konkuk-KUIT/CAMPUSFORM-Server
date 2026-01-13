@@ -1,4 +1,4 @@
-package com.campusform.server.notification.domain.model.usernotificationsettings;
+package com.campusform.server.notification.domain.model;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

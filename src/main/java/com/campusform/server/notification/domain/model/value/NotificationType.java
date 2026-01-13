@@ -1,4 +1,4 @@
-package com.campusform.server.notification.domain.model.notification.value;
+package com.campusform.server.notification.domain.model.value;
 
 /**
  * 알림 타입 Enum

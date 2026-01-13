@@ -1,12 +1,13 @@
-package com.campusform.server.notification.domain.model.notification;
+package com.campusform.server.notification.domain.model;
 
-import com.campusform.server.notification.domain.model.notification.value.NotificationType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import com.campusform.server.notification.domain.model.value.NotificationType;
 
 import java.time.LocalDateTime;
 

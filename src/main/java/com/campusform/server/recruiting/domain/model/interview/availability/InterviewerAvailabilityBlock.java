@@ -1,7 +1,5 @@
 package com.campusform.server.recruiting.domain.model.interview.availability;
 
-import com.campusform.server.recruiting.domain.model.interview.setup.InterviewDay;
-
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -22,12 +20,12 @@ import java.time.LocalDateTime;
            @UniqueConstraint(name = "uk_admin_day_time", columnNames = {"admin_id", "interview_day_id", "start_time"})
        },
        indexes = {
-           @Index(name = "idx_interview_day_time", columnList = "interview_day_id, start_time")
+          // @Index(name = "idx_interview_day_time", columnList = "interview_day_id, start_time")
        })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-public class InterviewerAvailabilityBlock {
+public class InterviewerAvailabilityBlock { 
 
     @Id
     @GeneratedValue
@@ -36,10 +34,8 @@ public class InterviewerAvailabilityBlock {
     @Column(name = "admin_id", nullable = false)
     private Long adminId;
 
-    // 동일 애그리거트 -> 연관 아닌 참조로 관계 설정
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "interview_day_id", nullable = false)
-    private InterviewDay interviewDay;
+    @Column(name = "interview_day_id", nullable = false)
+    private Long interviewDayId;
 
     /**
      * 시작 시간 (end_time은 start_time + 30분)

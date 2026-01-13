@@ -1,7 +1,5 @@
-package com.campusform.server.project.domain.model.project;
+package com.campusform.server.project.domain.model.setting;
 
-import com.campusform.server.project.domain.model.project.value.ProjectState;
-import com.campusform.server.project.domain.model.project.value.SyncStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -10,8 +8,13 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.campusform.server.project.domain.model.setting.value.ProjectState;
+import com.campusform.server.project.domain.model.setting.value.SyncStatus;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 프로젝트(모집 공고) Entity
@@ -61,6 +64,7 @@ public class Project {
     @Column(name = "end_at", nullable = false)
     private LocalDate endAt;
 
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -68,4 +72,7 @@ public class Project {
     @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProjectAdmin> admins = new ArrayList<>();
 }

@@ -1,12 +1,13 @@
-package com.campusform.server.project.domain.model.projectadmin;
+package com.campusform.server.project.domain.model.setting;
 
-import com.campusform.server.project.domain.model.projectadmin.value.ProjectRole;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import com.campusform.server.project.domain.model.setting.value.ProjectRole;
 
 import java.time.LocalDateTime;
 
@@ -29,18 +30,29 @@ public class ProjectAdmin {
     @GeneratedValue
     private Long id;
 
-    // 다른 어그리거트 -> 참조 아닌 연관으로 관계 설정
-    @Column(name = "project_id", nullable = false)
-    private Long projectId;
+    /**
+     * 프로젝트 (부모 Aggregate Root)
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id", nullable = false)
+    private Project project;
 
-    // 다른 어그리거트 -> 참조 아닌 연관으로 관계 설정
+    /**
+     * 관리자 ID (Identity Context 참조이므로 ID만 저장)
+     */
     @Column(name = "admin_id", nullable = false)
     private Long adminId;
 
+    /**
+     * 관리자 역할 (확장 대비)
+     */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ProjectRole role = ProjectRole.ADMIN;
 
+    /**
+     * 관리자 추가 시간
+     */
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

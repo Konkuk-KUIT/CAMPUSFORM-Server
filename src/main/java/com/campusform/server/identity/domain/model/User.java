@@ -1,4 +1,4 @@
-package com.campusform.server.identity.domain.model.user;
+package com.campusform.server.identity.domain.model;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

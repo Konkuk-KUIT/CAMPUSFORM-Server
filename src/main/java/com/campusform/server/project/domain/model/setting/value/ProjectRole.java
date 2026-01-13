@@ -1,4 +1,4 @@
-package com.campusform.server.project.domain.model.projectadmin.value;
+package com.campusform.server.project.domain.model.setting.value;
 
 /**
  * 프로젝트 관리자 역할 Enum

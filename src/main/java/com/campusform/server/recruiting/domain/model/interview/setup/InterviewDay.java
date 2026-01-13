@@ -1,5 +1,7 @@
 package com.campusform.server.recruiting.domain.model.interview.setup;
 
+import java.time.LocalDate;
+
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -12,9 +14,9 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "interview_days",
        uniqueConstraints = {
-           @UniqueConstraint(name = "uk_project_interview_date", columnNames = {"project_id", "interview_date"})
+           @UniqueConstraint(name = "uk_setting_interview_date", columnNames = {"interview_setting_id", "interview_date"})
        },
-       indexes = @Index(name = "idx_project_id", columnList = "project_id"))
+       indexes = @Index(name = "idx_setting_id", columnList = "interview_setting_id"))
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class InterviewDay {
@@ -24,14 +26,12 @@ public class InterviewDay {
     private Long id;
 
     /**
-     * 프로젝트 ID (Project Context 참조이므로 ID만 저장)
+     * 면접 설정 (부모 Aggregate Root)
      */
-    @Column(name = "project_id", nullable = false)
-    private Long projectId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "interview_setting_id", nullable = false)
+    private InterviewSetting setting;
 
-    /**
-     * 면접 날짜
-     */
     @Column(name = "interview_date", nullable = false)
-    private java.time.LocalDate interviewDate;
+    private LocalDate interviewDate;
 }

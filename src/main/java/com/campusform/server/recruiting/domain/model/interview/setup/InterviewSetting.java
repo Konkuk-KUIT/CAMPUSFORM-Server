@@ -8,6 +8,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.time.LocalDateTime;
 
 /**
@@ -76,4 +78,15 @@ public class InterviewSetting {
     @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    // InterviewSetting (루트)
+    @OneToMany(mappedBy = "setting", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<InterviewDay> days = new ArrayList<>();
+
+    @OneToMany(mappedBy = "setting", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<InterviewRequiredInterviewer> requiredInterviewers = new ArrayList<>();
+
+    @OneToOne(mappedBy = "setting", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private InterviewAvailabilityInvestigationLink investigationLink;
+    
 }

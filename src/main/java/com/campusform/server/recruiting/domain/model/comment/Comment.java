@@ -20,8 +20,8 @@ import java.util.List;
 @Entity
 @Table(name = "comments",
        indexes = {
-           @Index(name = "idx_applicant_id", columnList = "applicant_id"),
-           @Index(name = "idx_parent_comment_id", columnList = "parent_comment_id")
+        //    @Index(name = "idx_applicant_id", columnList = "applicant_id"),
+           @Index(name = "idx_parent_comment_id", columnList = "parent_comment_id, created_at")
        })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

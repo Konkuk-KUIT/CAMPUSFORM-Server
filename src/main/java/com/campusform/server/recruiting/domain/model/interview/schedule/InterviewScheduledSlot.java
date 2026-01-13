@@ -1,13 +1,13 @@
 package com.campusform.server.recruiting.domain.model.interview.schedule;
 
-import com.campusform.server.recruiting.domain.model.interview.setup.InterviewDay;
-
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 배정된 면접 슬롯 Entity
@@ -29,11 +29,15 @@ public class InterviewScheduledSlot {
     @Column(name = "project_id", nullable = false)
     private Long projectId;
 
-    // 동일 애그리거트 -> 연관 아닌 참조로 관계 설정
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "interview_day_id", nullable = false)
-    private InterviewDay interviewDay;
+    @Column(name = "interview_day_id", nullable = false)
+    private Long interviewDayId;
 
     @Column(name = "start_time", nullable = false)
     private LocalTime startTime;
+
+    @OneToMany(mappedBy = "scheduleSlot", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<InterviewScheduledSlotApplicant> applicants = new ArrayList<>();
+
+    @OneToMany(mappedBy = "scheduleSlot", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<InterviewScheduledSlotInterviewer> interviewers = new ArrayList<>();
 }

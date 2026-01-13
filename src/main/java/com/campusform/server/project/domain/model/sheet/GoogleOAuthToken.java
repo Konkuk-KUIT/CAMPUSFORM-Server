@@ -1,4 +1,4 @@
-package com.campusform.server.project.domain.model.googleoauthtoken;
+package com.campusform.server.project.domain.model.sheet;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

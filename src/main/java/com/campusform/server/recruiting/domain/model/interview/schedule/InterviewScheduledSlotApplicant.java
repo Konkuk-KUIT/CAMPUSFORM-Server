@@ -13,8 +13,8 @@ import lombok.NoArgsConstructor;
 @Table(name = "interview_scheduled_slot_applicants",
        uniqueConstraints = {
            @UniqueConstraint(name = "uk_slot_applicant", columnNames = {"schedule_slot_id", "applicant_id"})
-       },
-       indexes = @Index(name = "idx_applicant_id", columnList = "applicant_id"))
+       })
+      // indexes = @Index(name = "idx_applicant_id", columnList = "applicant_id"))
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class InterviewScheduledSlotApplicant {

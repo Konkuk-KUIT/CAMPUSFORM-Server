@@ -14,8 +14,8 @@ import java.time.LocalDateTime;
  * 시트에서 고정 컬럼으로 매핑되지 않은 질문을 별도 테이블로 관리합니다.
  */
 @Entity
-@Table(name = "applicant_extra_answers",
-       indexes = @Index(name = "idx_applicant_id", columnList = "applicant_id"))
+@Table(name = "applicant_extra_answers")
+       //indexes = @Index(name = "idx_applicant_id", columnList = "applicant_id"))
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)

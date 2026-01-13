@@ -8,8 +8,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
-
+import java.time.LocalDateTime;  
+         
 /**
  * 필수 면접관 Entity
  * 필수 면접관 관리를 담당합니다.
@@ -17,9 +17,9 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "interview_required_interviewers",
        uniqueConstraints = {
-           @UniqueConstraint(name = "uk_project_admin", columnNames = {"project_id", "admin_id"})
-       },
-       indexes = @Index(name = "idx_project_id", columnList = "project_id"))
+           @UniqueConstraint(name = "uk_setting_admin", columnNames = {"interview_setting_id", "admin_id"})
+       })
+       // indexes = @Index(name = "idx_setting_id", columnList = "interview_setting_id"))
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
@@ -29,15 +29,13 @@ public class InterviewRequiredInterviewer {
     @GeneratedValue
     private Long id;
 
-    @Column(name = "project_id", nullable = false)
-    private Long projectId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "interview_setting_id", nullable = false)
+    private InterviewSetting setting;
 
     @Column(name = "admin_id", nullable = false)
     private Long adminId;
 
-    /**
-     * 필수 면접관 여부
-     */
     @Column(nullable = false)
     private Boolean required = false;
 

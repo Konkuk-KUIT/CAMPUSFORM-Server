@@ -1,4 +1,4 @@
-package com.campusform.server.project.domain.model.project.value;
+package com.campusform.server.project.domain.model.setting.value;
 
 /**
  * 프로젝트 진행 단계(상태) Enum

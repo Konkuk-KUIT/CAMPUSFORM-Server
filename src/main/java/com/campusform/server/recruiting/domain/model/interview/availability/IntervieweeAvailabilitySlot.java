@@ -1,6 +1,5 @@
 package com.campusform.server.recruiting.domain.model.interview.availability;
 
-import com.campusform.server.recruiting.domain.model.interview.setup.InterviewDay;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -26,18 +25,11 @@ public class IntervieweeAvailabilitySlot {
     @GeneratedValue
     private Long id;
 
-    /**
-     * 지원자 ID (다른 애그리거트이므로 ID만 저장)
-     */
     @Column(name = "applicant_id", nullable = false)
     private Long applicantId;
 
-    /**
-     * 면접 일자 (동일 애그리거트 내부이므로 참조로 관계 설정)
-     */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "interview_day_id", nullable = false)
-    private InterviewDay interviewDay;
+    @Column(name = "interview_day_id", nullable = false)
+    private Long interviewDayId;
 
     /**
      * 시작 시간 (end_time은 start_time + slot_duration_min)

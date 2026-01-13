@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Table(name = "interview_availability_investigation_links",
-       indexes = @Index(name = "idx_project_id", columnList = "project_id", unique = true))
+       indexes = @Index(name = "idx_setting_id", columnList = "interview_setting_id", unique = true))
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
@@ -26,8 +26,12 @@ public class InterviewAvailabilityInvestigationLink {
     @GeneratedValue
     private Long id;
 
-    @Column(name = "project_id", nullable = false, unique = true)
-    private Long projectId;
+    /**
+     * 면접 설정 (부모 Aggregate Root)
+     */
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "interview_setting_id", nullable = false, unique = true)
+    private InterviewSetting setting;
 
     @Column(nullable = false, unique = true)
     private String token;

@@ -1,4 +1,4 @@
-package com.campusform.server.project.domain.model.project;
+package com.campusform.server.recruiting.domain.model.message;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -19,15 +19,10 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-public class ProjectMessageTemplate {
-
-    /**
-     * 프로젝트 참조 (동일 애그리거트 내부이므로 참조로 관계 설정)
-     */
-    @MapsId
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id", nullable = false)
-    private Project project;
+public class MessageTemplate {
+    @Id
+    @Column(name = "project_id", nullable = false)
+    private Long projectId;
 
     /**
      * 서류 합격 메시지 템플릿

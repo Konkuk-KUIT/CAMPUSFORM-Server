@@ -22,21 +22,12 @@ public class InterviewScheduleUnassignedApplicant {
     @GeneratedValue
     private Long id;
 
-    /**
-     * 프로젝트 ID (다른 애그리거트이므로 ID만 저장)
-     */
     @Column(name = "project_id", nullable = false)
     private Long projectId;
 
-    /**
-     * 지원자 ID (다른 애그리거트이므로 ID만 저장)
-     */
     @Column(name = "applicant_id", nullable = false)
     private Long applicantId;
 
-    /**
-     * 배정 실패 사유
-     */
     @Column(name = "reason", nullable = false, columnDefinition = "TEXT")
     private String reason;
 }
