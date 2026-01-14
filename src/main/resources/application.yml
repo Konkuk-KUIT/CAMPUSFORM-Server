@@ -1,11 +1,14 @@
 spring:
+  profiles:
+    active: default
+  
   application:
     name: CampusFormServer
   datasource:
-    url: jdbc:h2:tcp://localhost/~/testdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
   h2:
     console:
       enabled: true
@@ -16,6 +19,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        show_sql: true
     defer-datasource-initialization: true
   output:
     ansi:
@@ -24,3 +28,16 @@ spring:
 logging:
   level:
     org.hibernate.SQL: debug
+
+
+---
+spring:
+  config:
+    activate:
+      on-profile: temporary
+
+  datasource:
+    url: jdbc:h2:tcp://localhost/~/testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
