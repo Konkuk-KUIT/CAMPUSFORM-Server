@@ -1,9 +1,10 @@
 package com.campusform.server.project.domain.model.setting;
 
-import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -11,18 +12,27 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import com.campusform.server.project.domain.model.setting.value.ProjectState;
 import com.campusform.server.project.domain.model.setting.value.SyncStatus;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 /**
  * 프로젝트(모집 공고) Entity
  * Project Context의 핵심 도메인 모델입니다.
  */
 @Entity
-@Table(name = "projects",
-       indexes = @Index(name = "idx_owner_id", columnList = "owner_id"))
+@Table(name = "projects", indexes = @Index(name = "idx_owner_id", columnList = "owner_id"))
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
@@ -49,6 +59,7 @@ public class Project {
     @Enumerated(EnumType.STRING)
     @Column(name = "last_sync_status", nullable = false)
     private SyncStatus lastSyncStatus = SyncStatus.OK;
+
     @Column(name = "last_synced_at")
     private LocalDateTime lastSyncedAt;
 
@@ -64,7 +75,6 @@ public class Project {
     @Column(name = "end_at", nullable = false)
     private LocalDate endAt;
 
-
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -75,4 +85,20 @@ public class Project {
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProjectAdmin> admins = new ArrayList<>();
+
+    public static Project create(String title, Long ownerId, String sheetUrl, LocalDate startAt, LocalDate endAt) {
+        Project project = new Project();
+        project.title = title;
+        project.ownerId = ownerId;
+        project.sheetUrl = sheetUrl;
+        project.startAt = startAt;
+        project.endAt = endAt;
+        return project;
+    }
+
+    // 편의메서드
+    public void addAdmin(ProjectAdmin admin) {
+        ProjectAdmin projectAdmin = ProjectAdmin.create(this, admin.getAdminId());
+        admins.add(admin);
+    }
 }
