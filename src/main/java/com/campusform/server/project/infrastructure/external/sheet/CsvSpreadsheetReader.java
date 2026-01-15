@@ -28,8 +28,7 @@ public class CsvSpreadsheetReader implements SpreadsheetReader {
 
     @Override
     public List<ColumnInfo> readHeader(String sheetUrl) {
-        String id = extractSheetId(sheetUrl);
-        String csvUrl = "https://docs.google.com/spreadsheets/d/" + id + "/export?format=csv";
+        String csvUrl = getCsvUrl(sheetUrl);
 
         List<ColumnInfo> columnInfos = new ArrayList<>();
 
@@ -61,7 +60,39 @@ public class CsvSpreadsheetReader implements SpreadsheetReader {
         }
     }
 
-    private String extractSheetId(String sheetUrl) {
-        return sheetUrl.split("/d/")[1].split("/")[0];
+    @Override
+    public List<String> readAllLines(String sheetUrl) {
+        String csvUrl = getCsvUrl(sheetUrl);
+
+        List<String> lines = new ArrayList<>();
+
+        List<ColumnInfo> columnInfos = new ArrayList<>();
+
+        try {
+            URL url = new URL(csvUrl);
+
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(url.openStream(), StandardCharsets.UTF_8))) {
+
+                String header = reader.readLine();
+                if (header == null || header.trim().isEmpty()) {
+                    throw new IllegalArgumentException("CSV 파일의 헤더가 비어있습니다.");
+                }
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    lines.add(line);
+                }
+            }
+            return lines;
+
+        } catch (IOException e) {
+            throw new RuntimeException("CSV 파일을 읽는 중 오류가 발생했습니다: " + sheetUrl, e);
+        }
+    }
+
+    public static String getCsvUrl(String sheetUrl) {
+        String id = sheetUrl.split("/d/")[1].split("/")[0];
+        return "https://docs.google.com/spreadsheets/d/" + id + "/export?format=csv";
     }
 }

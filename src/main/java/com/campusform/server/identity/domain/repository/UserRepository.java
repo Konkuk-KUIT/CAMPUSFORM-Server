@@ -5,14 +5,15 @@ import java.util.Optional;
 import com.campusform.server.identity.domain.model.User;
 
 /**
- * User Repository 인터페이스 (도메인 관점)
- *
- * DDD 관점에서 Repository 인터페이스는 도메인 계층에 위치합니다.
- * (Spring Data JPA 같은 기술 의존은 infrastructure 구현체에서만 사용)
+ * 도메인 계층의 infrastructure 인터페이스
+ * 
+ * 특정 기술에 의존하지 않고 도메인 관점에서 인터페이스를 서술합니다.
+ * 
+ * 따라서 Repository를 사용할 때 본 인터페이스를 사용합니다.
  */
 public interface UserRepository {
 
-    Optional<User> getUserById(Long adminId);
+    void save(User user);
 
     boolean existsByEmail(String email);
 

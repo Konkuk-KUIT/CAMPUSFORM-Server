@@ -1,18 +1,14 @@
 package com.campusform.server.identity.presentation;
 
-import java.util.Optional;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.campusform.server.identity.domain.model.User;
-import com.campusform.server.identity.domain.repository.UserRepository;
+import com.campusform.server.identity.application.dto.response.UserExistsResponse;
+import com.campusform.server.identity.application.service.UserQueryService;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -26,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserRepository userRepository;
+    private final UserQueryService userQueryService;
 
     /**
      * 이메일로 회원 존재 여부 확인
@@ -36,22 +32,7 @@ public class UserController {
      */
     @GetMapping("/exists")
     public ResponseEntity<UserExistsResponse> existsByEmail(@RequestParam String email) {
-        Optional<User> userOpt = userRepository.findByEmail(email);
-        if (userOpt.isEmpty()) {
-            return ResponseEntity.ok(new UserExistsResponse(false, null, null, email));
-        }
-
-        User user = userOpt.get();
-        return ResponseEntity.ok(new UserExistsResponse(true, user.getId(), user.getNickname(), user.getEmail()));
-    }
-
-    @Getter
-    @AllArgsConstructor
-    public static class UserExistsResponse {
-        private boolean exists;
-        private Long userId;
-        private String nickname;
-        private String email;
+        return ResponseEntity.ok(userQueryService.findByEmail(email));
     }
 }
 

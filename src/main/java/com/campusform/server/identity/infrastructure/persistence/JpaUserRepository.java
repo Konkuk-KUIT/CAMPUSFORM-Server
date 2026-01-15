@@ -7,17 +7,10 @@ import org.springframework.stereotype.Repository;
 
 import com.campusform.server.identity.domain.model.User;
 
-/**
- * Spring Data JPA를 위한 User Repository
- */
 @Repository
 public interface JpaUserRepository extends JpaRepository<User, Long> {
-
-    Optional<User> findById(Long adminId);
 
     boolean existsByEmail(String email);
 
     Optional<User> findByEmail(String email);
-
-    boolean existsById(Long adminId);
 }

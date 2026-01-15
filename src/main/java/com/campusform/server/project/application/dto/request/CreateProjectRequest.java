@@ -3,8 +3,6 @@ package com.campusform.server.project.application.dto.request;
 import java.time.LocalDate;
 import java.util.List;
 
-import com.campusform.server.project.application.dto.ColumnInfo;
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -16,26 +14,27 @@ import lombok.Setter;
  * 클라이언트로부터 받은 프로젝트 생성 정보를 담는 객체입니다.
  */
 @Getter
-@Setter
 @NoArgsConstructor
 public class CreateProjectRequest {
 
     /**
-     * 요청 예시
-     * POST /api/projects
-     * 
+     * 요청 메시지 예시 (Request body example)
+     *
      * {
-     * "title": "2024 하계 연구프로젝트",
-     * "sheetUrl": "https://docs.google.com/spreadsheets/d/xxxxx",
-     * "startAt": "2024-07-01",
-     * "endAt": "2024-09-30",
-     * "adminIds": [2, 3],
-     * "mappings": [
-     * { "name": "이름", "index": 0 },
-     * { "name": "학교", "index": 1 },
-     * { "name": "학과", "index": 2 },
-     * { "name": "성별", "index": 3 }
-     * ]
+     * "title": "캠퍼스 폼 개발 프로젝트",
+     * "sheetUrl": "https://docs.google.com/spreadsheets/d/xxxxxx",
+     * "startAt": "2024-06-01",
+     * "endAt": "2024-12-31",
+     * "adminIds": [1, 2, 3],
+     * "requiredMappings": {
+     * "nameIdx": 1,
+     * "schoolIdx": -1,
+     * "majorId": 3,
+     * "genderId": 4,
+     * "phoneId": 5,
+     * "emailId": 6,
+     * "positionId": 7
+     * }
      * }
      */
 
@@ -53,11 +52,18 @@ public class CreateProjectRequest {
 
     private List<Long> adminIds;
 
-    /**
-     * 스프레드시트 컬럼 매핑 정보
-     * 
-     * 프로젝트 생성 시 스프레드시트의 컬럼과 표준 항목 간의 매핑 정보를 포함합니다.
-     * 필수 항목(이름, 이메일)이 포함되어야 합니다.
-     */
-    public List<ColumnInfo> mappings;
+    private RequiredMappings requiredMappings;
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class RequiredMappings {
+        private Integer nameIdx;
+        private Integer schoolIdx;
+        private Integer majorIdx;
+        private Integer genderIdx;
+        private Integer phoneIdx;
+        private Integer emailIdx;
+        private Integer positionIdx;
+    }
 }

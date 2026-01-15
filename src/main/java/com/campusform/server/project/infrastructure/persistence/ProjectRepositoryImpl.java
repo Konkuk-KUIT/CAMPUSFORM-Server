@@ -10,15 +10,9 @@ import com.campusform.server.project.domain.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Project Repository 구현체
+ * ProjectRepository 구현체
  * 
- * DDD 관점에서 Repository 인터페이스는 domain에 있고,
- * 구현체는 infrastructure에 위치합니다.
- * 
- * 이 클래스는 도메인 Repository 인터페이스를 구현하며,
- * 내부적으로 Spring Data JPA Repository를 사용합니다.
- * 
- * Spring Data JPA의 메서드를 직접 사용하려면 JpaProjectRepository를 주입받아 사용하세요.
+ * 적절히 SpringDataJpa 또는 Querydsl에 작업을 위임합니다.
  */
 @Repository
 @RequiredArgsConstructor
@@ -34,5 +28,10 @@ public class ProjectRepositoryImpl implements ProjectRepository {
     @Override
     public Optional<Project> findById(Long id) {
         return jpaProjectRepository.findById(id);
+    }
+
+    @Override
+    public Optional<Project> findBySheetUrl(String sheetUrl) {
+        return jpaProjectRepository.findBySheetUrl(sheetUrl);
     }
 }

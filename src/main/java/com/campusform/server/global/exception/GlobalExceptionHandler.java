@@ -1,7 +1,8 @@
 package com.campusform.server.global.exception;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -9,19 +10,19 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.HashMap;
-import java.util.Map;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 /**
  * 전역 예외 처리 핸들러
  * 
  * @RestControllerAdvice를 사용하여 모든 컨트롤러에서 발생하는 예외를
- * 한 곳에서 처리합니다. 이를 통해:
- * 1. 일관된 에러 응답 형식 제공
- * 2. 예외 처리 로직 중복 제거
- * 3. 예외 발생 시 적절한 HTTP 상태 코드 반환
+ *                        한 곳에서 처리합니다. 이를 통해:
+ *                        1. 일관된 에러 응답 형식 제공
+ *                        2. 예외 처리 로직 중복 제거
+ *                        3. 예외 발생 시 적절한 HTTP 상태 코드 반환
  * 
- * 실무에서는 더 세밀한 예외 분류와 에러 코드 체계를 구축합니다.
+ *                        실무에서는 더 세밀한 예외 분류와 에러 코드 체계를 구축합니다.
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -30,7 +31,7 @@ public class GlobalExceptionHandler {
      * 요청 데이터 검증 실패 예외 처리
      * 
      * @Valid 어노테이션으로 검증 실패 시 발생하는 예외를 처리합니다.
-     * 각 필드의 검증 오류 메시지를 모아서 반환합니다.
+     *        각 필드의 검증 오류 메시지를 모아서 반환합니다.
      * 
      * @param ex MethodArgumentNotValidException
      * @return 에러 응답
@@ -38,20 +39,19 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
-        
+
         // 각 필드의 검증 오류를 맵에 저장
         ex.getBindingResult().getAllErrors().forEach((error) -> {
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         });
-        
+
         ErrorResponse response = new ErrorResponse(
                 "VALIDATION_ERROR",
                 "입력 데이터 검증에 실패했습니다.",
-                errors
-        );
-        
+                errors);
+
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
@@ -69,9 +69,8 @@ public class GlobalExceptionHandler {
         ErrorResponse response = new ErrorResponse(
                 "ILLEGAL_ARGUMENT",
                 ex.getMessage(),
-                null
-        );
-        
+                null);
+
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
@@ -89,9 +88,8 @@ public class GlobalExceptionHandler {
         ErrorResponse response = new ErrorResponse(
                 "ILLEGAL_STATE",
                 ex.getMessage(),
-                null
-        );
-        
+                null);
+
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
@@ -106,15 +104,16 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
+
+        ex.printStackTrace();
         // 실무에서는 로깅 추가
         // log.error("Unexpected error occurred", ex);
-        
+
         ErrorResponse response = new ErrorResponse(
                 "INTERNAL_SERVER_ERROR",
-                "서버 내부 오류가 발생했습니다.",
-                null
-        );
-        
+                "서버 내부 오류가 발생했습니다." + ex.getMessage(),
+                null);
+
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
@@ -129,12 +128,12 @@ public class GlobalExceptionHandler {
          * 에러 코드 (클라이언트에서 에러 타입을 구분하기 위해 사용)
          */
         private String code;
-        
+
         /**
          * 에러 메시지 (사용자에게 보여줄 메시지)
          */
         private String message;
-        
+
         /**
          * 상세 에러 정보 (검증 오류 등에서 사용)
          */

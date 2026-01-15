@@ -63,7 +63,7 @@ public class ProjectAdmin {
      * @param adminId 관리자 ID
      * @return 생성된 ProjectAdmin 인스턴스
      */
-    public static ProjectAdmin create(Project project, Long adminId) {
+    static ProjectAdmin create(Project project, Long adminId) {
         ProjectAdmin admin = new ProjectAdmin();
         admin.project = project;
         admin.adminId = adminId;
