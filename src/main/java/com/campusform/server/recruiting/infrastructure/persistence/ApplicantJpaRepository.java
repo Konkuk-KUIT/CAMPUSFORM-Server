@@ -5,6 +5,11 @@ import org.springframework.stereotype.Repository;
 
 import com.campusform.server.recruiting.domain.model.applicant.Applicant;
 
+/**
+ * Spring Data JPA를 위한 Applicant Repository
+ * 
+ * 기본 CRUD 메서드를 제공합니다.
+ */
 @Repository
-public interface JpaApplicantRepository extends JpaRepository<Applicant, Long> {
+public interface ApplicantJpaRepository extends JpaRepository<Applicant, Long> {
 }

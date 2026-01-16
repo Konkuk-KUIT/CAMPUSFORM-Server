@@ -12,26 +12,27 @@ import lombok.RequiredArgsConstructor;
 /**
  * ProjectRepository 구현체
  * 
- * 적절히 SpringDataJpa 또는 Querydsl에 작업을 위임합니다.
+ * Spring Data JPA에 작업을 위임합니다.
+ * 향후 Querydsl이 필요하면 여기에 추가할 수 있습니다.
  */
 @Repository
 @RequiredArgsConstructor
 public class ProjectRepositoryImpl implements ProjectRepository {
 
-    private final JpaProjectRepository jpaProjectRepository;
+    private final ProjectJpaRepository projectJpaRepository;
 
     @Override
-    public Project save(Project project) {
-        return jpaProjectRepository.save(project);
+    public void save(Project project) {
+        projectJpaRepository.save(project);
     }
 
     @Override
     public Optional<Project> findById(Long id) {
-        return jpaProjectRepository.findById(id);
+        return projectJpaRepository.findById(id);
     }
 
     @Override
     public Optional<Project> findBySheetUrl(String sheetUrl) {
-        return jpaProjectRepository.findBySheetUrl(sheetUrl);
+        return projectJpaRepository.findBySheetUrl(sheetUrl);
     }
 }

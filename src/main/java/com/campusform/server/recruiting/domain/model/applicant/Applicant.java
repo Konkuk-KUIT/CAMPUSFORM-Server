@@ -42,7 +42,6 @@ public class Applicant {
     @GeneratedValue
     private Long id;
 
-    // 다른 어그리거트 -> 참조 아닌 연관으로 관계 설정
     @Column(name = "project_id", nullable = false)
     private Long projectId;
 

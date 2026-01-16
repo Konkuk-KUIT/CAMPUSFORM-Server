@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ColumnInfo {
+public class SpreadsheetColumnResponse {
     private String name;
     private Integer index;
 }

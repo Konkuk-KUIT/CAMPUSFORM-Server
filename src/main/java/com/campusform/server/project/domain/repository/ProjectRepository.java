@@ -13,7 +13,7 @@ import com.campusform.server.project.domain.model.setting.Project;
  */
 public interface ProjectRepository {
 
-    Project save(Project project);
+    void save(Project project);
 
     Optional<Project> findById(Long id);
 

@@ -4,6 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * 사용자 존재 여부 확인 응답 DTO
+ * 
+ * 이메일로 사용자 존재 여부를 확인한 결과를 담는 객체입니다.
+ */
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor

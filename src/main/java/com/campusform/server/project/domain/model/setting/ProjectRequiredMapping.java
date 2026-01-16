@@ -2,7 +2,7 @@ package com.campusform.server.project.domain.model.setting;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.campusform.server.project.application.dto.request.CreateProjectRequest.RequiredMappings;
+import com.campusform.server.project.domain.model.setting.value.RequiredFieldMapping;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -16,6 +16,11 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * 프로젝트 필수 필드 매핑 Entity
+ * 
+ * 스프레드시트의 컬럼 인덱스와 필수 필드(이름, 이메일 등)를 매핑합니다.
+ */
 @Entity
 @Table(name = "project_mappings")
 @Getter
@@ -39,16 +44,19 @@ public class ProjectRequiredMapping {
     private Integer emailIdx;
     private Integer positionIdx;
 
-    public static ProjectRequiredMapping create(Project project, RequiredMappings requiredMappings) {
+    /**
+     * 매핑 정보 생성 팩토리 메서드
+     */
+    public static ProjectRequiredMapping create(Project project, RequiredFieldMapping mappingValue) {
         ProjectRequiredMapping mapping = new ProjectRequiredMapping();
         mapping.project = project;
-        mapping.nameIdx = requiredMappings.getNameIdx();
-        mapping.schoolIdx = requiredMappings.getSchoolIdx();
-        mapping.majorIdx = requiredMappings.getMajorIdx();
-        mapping.genderIdx = requiredMappings.getGenderIdx();
-        mapping.phoneIdx = requiredMappings.getPhoneIdx();
-        mapping.emailIdx = requiredMappings.getEmailIdx();
-        mapping.positionIdx = requiredMappings.getPositionIdx();
+        mapping.nameIdx = mappingValue.getNameIdx();
+        mapping.schoolIdx = mappingValue.getSchoolIdx();
+        mapping.majorIdx = mappingValue.getMajorIdx();
+        mapping.genderIdx = mappingValue.getGenderIdx();
+        mapping.phoneIdx = mappingValue.getPhoneIdx();
+        mapping.emailIdx = mappingValue.getEmailIdx();
+        mapping.positionIdx = mappingValue.getPositionIdx();
         return mapping;
     }
 }

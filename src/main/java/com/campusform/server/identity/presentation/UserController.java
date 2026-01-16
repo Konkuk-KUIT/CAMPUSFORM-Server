@@ -11,12 +11,6 @@ import com.campusform.server.identity.application.service.UserQueryService;
 
 import lombok.RequiredArgsConstructor;
 
-/**
- * "프로젝트 생성 전 관리자 추가"를 위한 회원 존재 검증 API
- *
- * - 프론트에서 이메일을 입력받아 '추가' 버튼을 누르기 전에,
- *   서버에 존재 여부를 확인해서 미가입이면 바로 안내할 수 있습니다.
- */
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
@@ -26,13 +20,10 @@ public class UserController {
 
     /**
      * 이메일로 회원 존재 여부 확인
-     *
-     * - 존재하면 userId/nickname을 함께 내려주면,
-     *   프론트에서 '추가할 관리자' 목록을 구성하기 쉽습니다.
      */
     @GetMapping("/exists")
     public ResponseEntity<UserExistsResponse> existsByEmail(@RequestParam String email) {
-        return ResponseEntity.ok(userQueryService.findByEmail(email));
+        UserExistsResponse response = userQueryService.findByEmail(email);
+        return ResponseEntity.ok(response);
     }
 }
-
