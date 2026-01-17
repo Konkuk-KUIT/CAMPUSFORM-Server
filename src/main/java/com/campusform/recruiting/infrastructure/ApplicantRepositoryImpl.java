@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-public interface ApplicantRepositoryImpl implements ApplicantRepository {
+public class ApplicantRepositoryImpl {
     private final ApplicantRepository applicantJpaRepository;
 
     @Override
@@ -15,3 +15,4 @@ public interface ApplicantRepositoryImpl implements ApplicantRepository {
         applicantJpaRepository.save(applicant);
     }
 }
+

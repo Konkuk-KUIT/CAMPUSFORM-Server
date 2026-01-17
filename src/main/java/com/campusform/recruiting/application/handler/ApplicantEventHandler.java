@@ -1,11 +1,15 @@
 package com.campusform.recruiting.application.handler;
 
+import com.campusform.recruiting.application.port.SmsSender;
 import com.campusform.recruiting.domain.applicant.EvaluationStatus;
 import com.campusform.recruiting.domain.event.ApplicantUpdated;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
+@RequiredArgsConstructor
 public class ApplicantEventHandler {
 
     private final SmsSender smsSender;
