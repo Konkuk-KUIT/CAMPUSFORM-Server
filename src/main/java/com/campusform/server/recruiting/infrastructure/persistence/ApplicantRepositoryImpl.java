@@ -7,6 +7,8 @@ import com.campusform.server.recruiting.domain.repository.ApplicantRepository;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+
 /**
  * ApplicantRepository 구현체
  * 
@@ -22,5 +24,15 @@ public class ApplicantRepositoryImpl implements ApplicantRepository {
     @Override
     public void save(Applicant applicant) {
         applicantJpaRepository.save(applicant);
+    }
+
+    @Override
+    public List<com.campusform.server.recruiting.domain.model.applicant.Applicant> findAllById(List<Long> longs) {
+        return List.of();
+    }
+
+    @Override
+    public void save(List<com.campusform.server.recruiting.domain.model.applicant.Applicant> applicants) {
+
     }
 }

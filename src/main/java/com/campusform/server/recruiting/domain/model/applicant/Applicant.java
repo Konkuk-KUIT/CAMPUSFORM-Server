@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.campusform.recruiting.domain.applicant.EvaluationStatus;
+import com.campusform.server.recruiting.domain.model.event.ApplicantUpdated;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -99,5 +101,22 @@ public class Applicant {
 
     public void addExtraAnswer(String questionText, String answerText) {
         extraAnswers.add(ApplicantExtraAnswer.create(this, questionText, answerText));
+    }
+
+    /**
+     * [비즈니스 로직] 서류 심사 결과 업데이트 및 이벤트 발행
+     */
+    public void updateApplicantStatus(EvaluationStatus newStatus) {
+        if (this.documentStatus == newStatus) {
+            return;
+        }
+        this.documentStatus = newStatus;
+
+        this.registerEvent(new ApplicantUpdated(
+                this.id,
+                this.name,
+                this.phone,
+                this.documentStatus
+        ));
     }
 }

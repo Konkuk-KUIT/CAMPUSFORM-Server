@@ -2,6 +2,8 @@ package com.campusform.server.recruiting.domain.repository;
 
 import com.campusform.server.recruiting.domain.model.applicant.Applicant;
 
+import java.util.List;
+
 /**
  * 도메인 계층의 Repository 인터페이스
  * 
@@ -11,4 +13,10 @@ import com.campusform.server.recruiting.domain.model.applicant.Applicant;
 public interface ApplicantRepository {
 
     void save(Applicant applicant);
+
+    List<com.campusform.server.recruiting.domain.model.applicant.Applicant> findAllById(List<Long> longs);
+
+    void save(List<com.campusform.server.recruiting.domain.model.applicant.Applicant> applicants);
+
+
 }
