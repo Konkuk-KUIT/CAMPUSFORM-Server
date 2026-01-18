@@ -1,6 +1,7 @@
 package com.campusform.server.identity.infrastructure.oauth2;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -43,9 +44,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         User user = userRepository.findByEmail(email)
                 .orElseGet(() -> createUser(email, name, picture));
 
+        Map<String, Object> extendedAttributes = new HashMap<>(attributes);
+        extendedAttributes.put("userId", user.getId());
+
         return new DefaultOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")),
-                attributes,
+                extendedAttributes,
                 "email"
         );
     }

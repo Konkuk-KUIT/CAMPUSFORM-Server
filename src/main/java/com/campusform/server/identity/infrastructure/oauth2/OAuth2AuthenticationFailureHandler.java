@@ -21,14 +21,14 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
 
-    @Value("${app.oauth2.redirect-uri:http://localhost:3000}")
+    @Value("${app.oauth2.redirect-uri}")
     private String redirectUri;
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
                                         AuthenticationException exception) throws IOException, ServletException {
         String errorMessage = URLEncoder.encode(exception.getMessage(), StandardCharsets.UTF_8);
-        String targetUrl = redirectUri + "/login?error=" + errorMessage;
+        String targetUrl = redirectUri + "?error=" + errorMessage;
 
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
