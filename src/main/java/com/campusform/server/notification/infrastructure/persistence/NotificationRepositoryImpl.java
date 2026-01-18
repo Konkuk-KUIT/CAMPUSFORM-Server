@@ -41,4 +41,9 @@ public class NotificationRepositoryImpl implements NotificationRepository {
     public long countByReceiverIdAndReadAtIsNull(Long receiverId) {
         return notificationJpaRepository.countByReceiverIdAndReadAtIsNull(receiverId);
     }
+
+    @Override
+    public int markAllAsReadByReceiverId(Long receiverId) {
+        return notificationJpaRepository.markAllAsReadByReceiverId(receiverId);
+    }
 }

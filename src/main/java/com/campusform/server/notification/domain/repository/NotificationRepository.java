@@ -22,4 +22,9 @@ public interface NotificationRepository {
     Page<Notification> findByReceiverIdOrderByCreatedAtDesc(Long receiverId, Pageable pageable);
 
     long countByReceiverIdAndReadAtIsNull(Long receiverId);
+
+    /**
+     * 사용자의 모든 안읽은 알림을 읽음 처리 (벌크 업데이트)
+     */
+    int markAllAsReadByReceiverId(Long receiverId);
 }

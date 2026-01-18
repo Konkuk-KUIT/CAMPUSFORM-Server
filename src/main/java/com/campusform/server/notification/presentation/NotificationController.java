@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.campusform.server.notification.application.dto.response.MarkAllAsReadResponse;
 import com.campusform.server.notification.application.dto.response.NotificationListResponse;
 import com.campusform.server.notification.application.dto.response.NotificationResponse;
 import com.campusform.server.notification.application.dto.response.UnreadCountResponse;
@@ -59,5 +60,16 @@ public class NotificationController {
 
         Long userId = oauth2User.getAttribute("userId");
         return notificationService.getUnreadCount(userId);
+    }
+
+    /**
+     * 모든 알림 읽음 처리 (로그인한 사용자 본인의 것)
+     */
+    @PatchMapping("/read-all")
+    public MarkAllAsReadResponse markAllAsRead(@AuthenticationPrincipal OAuth2User oauth2User) {
+
+        Long userId = oauth2User.getAttribute("userId");
+        int count = notificationService.markAllAsRead(userId);
+        return new MarkAllAsReadResponse(count);
     }
 }
