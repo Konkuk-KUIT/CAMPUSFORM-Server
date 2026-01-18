@@ -108,19 +108,54 @@ public class NotificationService {
      * 안읽은 알림 개수 조회
      *
      * 정책: 알림 수신 설정 OFF 시 0 반환
-     *
-     * @param userId 사용자 ID
-     * @return 안읽은 알림 개수
      */
     @Transactional(readOnly = true)
     public UnreadCountResponse getUnreadCount(Long userId) {
-        // 알림 수신 설정 확인
         if (!isNotificationEnabled(userId)) {
             return UnreadCountResponse.zero();
         }
 
         long count = notificationRepository.countByReceiverIdAndReadAtIsNull(userId);
         return UnreadCountResponse.of(count);
+    }
+
+    /**
+     * 모든 알림 읽음 처리
+     *
+     * @return 읽음 처리된 알림 개수
+     */
+    @Transactional
+    public int markAllAsRead(Long userId) {
+        return notificationRepository.markAllAsReadByReceiverId(userId);
+    }
+
+    /**
+     * 알림 수신 설정 변경
+     *
+     * @param userId 사용자 ID
+     * @param enabled 활성화 여부
+     * @return 변경된 설정 상태
+     */
+    @Transactional
+    public boolean updateNotificationSetting(Long userId, boolean enabled) {
+        UserNotificationSettings settings = settingsRepository.findByUserId(userId)
+                .orElseGet(() -> settingsRepository.save(UserNotificationSettings.create(userId)));
+
+        if (enabled) {
+            settings.enableNotification();
+        } else {
+            settings.disableNotification();
+        }
+
+        return settings.isNotificationEnabled();
+    }
+
+    /**
+     * 알림 수신 설정 조회
+     */
+    @Transactional(readOnly = true)
+    public boolean getNotificationSetting(Long userId) {
+        return isNotificationEnabled(userId);
     }
 
     // ============ Private Helper Methods ============
