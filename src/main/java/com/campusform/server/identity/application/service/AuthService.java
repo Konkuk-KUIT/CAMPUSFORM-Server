@@ -34,11 +34,9 @@ public class AuthService {
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
         String email = oAuth2User.getAttribute("email");
 
-        User user = userRepository.findByEmail(email).orElse(null);
-        if (user == null)
-            return AuthMeResponse.unauthenticated();
-
-        return AuthMeResponse.authenticated(user.getId(), user.getEmail(), user.getNickname());
+        return userRepository.findByEmail(email)
+                .map(user -> AuthMeResponse.authenticated(user.getId(), user.getEmail(), user.getNickname()))
+                .orElseGet(AuthMeResponse::unauthenticated);
     }
 
     /**

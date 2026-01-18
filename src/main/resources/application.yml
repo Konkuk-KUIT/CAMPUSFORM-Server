@@ -39,7 +39,7 @@ spring:
 # OAuth2 리다이렉트 URL 설정
 app:
   oauth2:
-    redirect-uri: ${FRONTEND_URL:http://localhost:8080}
+    redirect-uri: ${FRONTEND_URL:http://localhost:3000}
 
 logging:
   level:
