@@ -1,12 +1,12 @@
 package com.campusform.server.recruiting.domain.model.event;
 
-import com.campusform.recruiting.domain.applicant.EvaluationStatus;
+import com.campusform.server.recruiting.domain.model.applicant.Applicant;
+import com.campusform.server.recruiting.domain.model.applicant.value.ApplicantStatus;
 
 // 변경된 상태와 문자 발송에 필요한 정보(전화번호, 이름 등)
 public record ApplicantUpdated(
         Long applicantId,
         String applicantName,
         String applicantPhone,
-        EvaluationStatus status
-){
-}
+        ApplicantStatus status
+){}

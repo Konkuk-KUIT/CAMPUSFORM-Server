@@ -17,12 +17,4 @@ public class SmsSenderImpl implements SmsSender {
 
         log.info("[SMS 전송] 수신번호: {}, 내용: {}", phoneNumber, content);
     }
-//    @Override
-//    public void sendPassNotification(String phoneNumber, String applicantName) {
-//        log.info("[SMS 발송] To: {}, 내용: {}님, 축하합니다! 서류 전형에 합격하셨습니다.", phoneNumber, applicantName);
-//    }
-//    @Override
-//    public void sendFailNotification(String phoneNumber, String applicantName) {
-//        log.info("[SMS 발송] To: {}, 내용: {}님, 아쉽게도 이번에는 함께하지 못하게 되었습니다.", phoneNumber, applicantName);
-//    }
 }

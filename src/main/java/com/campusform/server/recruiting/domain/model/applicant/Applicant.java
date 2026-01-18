@@ -4,13 +4,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.campusform.recruiting.domain.applicant.EvaluationStatus;
+import com.campusform.server.recruiting.domain.model.applicant.value.ApplicantStatus;
 import com.campusform.server.recruiting.domain.model.event.ApplicantUpdated;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.domain.AbstractAggregateRoot;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import com.campusform.server.recruiting.domain.model.applicant.value.ApplicantStatus;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -38,7 +37,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-public class Applicant {
+public class Applicant extends AbstractAggregateRoot<Applicant> {
 
     @Id
     @GeneratedValue
@@ -104,9 +103,9 @@ public class Applicant {
     }
 
     /**
-     * [비즈니스 로직] 서류 심사 결과 업데이트 및 이벤트 발행
+     * [비즈니스 로직] 서류 심사 결과 업데이트 및 이벤트 발행 , 오류나는중
      */
-    public void updateApplicantStatus(EvaluationStatus newStatus) {
+    public void updateApplicantStatus(ApplicantStatus newStatus) {
         if (this.documentStatus == newStatus) {
             return;
         }

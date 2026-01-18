@@ -2,18 +2,20 @@ package com.campusform.server.recruiting.presentation;
 
 
 import com.campusform.server.recruiting.application.ResultService;
-import com.campusform.server.recruiting.application.dto.ResultAnnouncementRequest;
+import com.campusform.server.recruiting.application.SmsService;
+import com.campusform.server.recruiting.application.dto.request.ResultAnnouncementRequest;
 import com.campusform.server.recruiting.application.dto.request.SmsTemplateSaveRequest;
 import com.campusform.server.recruiting.application.dto.response.ResultListResponse;
 import com.campusform.server.recruiting.application.dto.response.SmsPreviewResponse;
+import com.campusform.server.recruiting.domain.model.applicant.value.ApplicantStatus;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/projects/{projectId}")
 @RequiredArgsConstructor
+@RequestMapping("/projects/{projectId}")
 public class ResultController {
     private final ResultService resultService;
     private final SmsService smsService;
@@ -23,10 +25,11 @@ public class ResultController {
     public ApiResponse<ResultListResponse> getResultList(
             @PathVariable Long projectId,
             @RequestParam String stage, //document
-            @RequestParam Enum status //pass
+            @RequestParam String status //pass
     ){
-        ResultListResponse response=resultService.getResults(projectId,stage,status);
-        return ApiResponse.success("결과 명단조회에 성공했습니다.",response);
+        ApplicantStatus statusEnum = ApplicantStatus.valueOf(status.toUpperCase());
+        ResultListResponse response=resultService.getResults(projectId,stage,statusEnum);
+        return ApiResponse.success(response);
     }
     // 1.6.2 문자 템플릿 저장
     @PostMapping("/sms/templates")

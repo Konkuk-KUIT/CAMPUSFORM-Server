@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
 
@@ -19,7 +20,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-public class MessageTemplate {
+public class MessageTemplate{
     @Id
     @Column(name = "project_id", nullable = false)
     private Long projectId;
@@ -51,4 +52,21 @@ public class MessageTemplate {
     @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    // MessageTemplate.java 내부에 추가
+    public static MessageTemplate createEmpty(Long projectId) {
+        MessageTemplate template = new MessageTemplate();
+        template.projectId = projectId;
+        return template;
+    }
+
+    public void updateTemplate(String stage, String status, String content) {
+        if ("DOCUMENT".equalsIgnoreCase(stage)) {
+            if ("PASS".equalsIgnoreCase(status)) this.templateDocumentPass = content;
+            else this.templateDocumentFail = content;
+        } else { // INTERVIEW
+            if ("PASS".equalsIgnoreCase(status)) this.templateInterviewPass = content;
+            else this.templateInterviewFail = content;
+        }
+    }
 }

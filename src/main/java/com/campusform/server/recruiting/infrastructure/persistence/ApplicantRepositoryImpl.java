@@ -1,5 +1,6 @@
 package com.campusform.server.recruiting.infrastructure.persistence;
 
+import com.campusform.server.recruiting.domain.model.applicant.value.ApplicantStatus;
 import org.springframework.stereotype.Repository;
 
 import com.campusform.server.recruiting.domain.model.applicant.Applicant;
@@ -21,18 +22,47 @@ public class ApplicantRepositoryImpl implements ApplicantRepository {
 
     private final ApplicantJpaRepository applicantJpaRepository;
 
+    // 1. 저장 (단건)
     @Override
-    public void save(Applicant applicant) {
-        applicantJpaRepository.save(applicant);
+    public Applicant save(Applicant applicant) {
+        return applicantJpaRepository.save(applicant);
     }
 
+    // 2. 저장 (여러 건)
     @Override
-    public List<com.campusform.server.recruiting.domain.model.applicant.Applicant> findAllById(List<Long> longs) {
-        return List.of();
+    public void save(List<Applicant> applicants) {
+        applicantJpaRepository.saveAll(applicants);
     }
 
+    // 3. ID로 조회 (여러 건)
     @Override
-    public void save(List<com.campusform.server.recruiting.domain.model.applicant.Applicant> applicants) {
+    public List<Applicant> findAllById(List<Long> ids) {
+        return applicantJpaRepository.findAllById(ids);
+    }
 
+    // 4. ID로 조회 (단건) - SmsService 등에서 사용
+    @Override
+    public java.util.Optional<Applicant> findById(Long id) {
+        return applicantJpaRepository.findById(id);
+    }
+
+    // --- 아래는 아까 추가한 통계/조회용 메서드들 (이게 없어서 에러가 났던 겁니다!) ---
+
+    // 5. 프로젝트별 전체 지원자 수
+    @Override
+    public long countByProjectId(Long projectId) {
+        return applicantJpaRepository.countByProjectId(projectId);
+    }
+
+    // 6. 서류 전형 상태별 조회
+    @Override
+    public List<Applicant> findByProjectIdAndDocumentStatus(Long projectId, ApplicantStatus status) {
+        return applicantJpaRepository.findByProjectIdAndDocumentStatus(projectId, status);
+    }
+
+    // 7. 면접 전형 상태별 조회
+    @Override
+    public List<Applicant> findByProjectIdAndInterviewStatus(Long projectId, ApplicantStatus status) {
+        return applicantJpaRepository.findByProjectIdAndInterviewStatus(projectId, status);
     }
 }

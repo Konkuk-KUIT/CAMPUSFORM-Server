@@ -1,22 +1,103 @@
 package com.campusform.server.recruiting.application;
 
-import com.campusform.server.recruiting.application.dto.ResultAnnouncementRequest;
+import com.campusform.server.recruiting.application.dto.request.ResultAnnouncementRequest;
+import com.campusform.server.recruiting.application.dto.response.ResultListResponse;
 import com.campusform.server.recruiting.domain.model.applicant.Applicant;
+import com.campusform.server.recruiting.domain.model.applicant.value.ApplicantStatus;
 import com.campusform.server.recruiting.domain.repository.ApplicantRepository;
+import com.campusform.server.recruiting.domain.repository.MessageTemplateRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ResultService {
     private final ApplicantRepository applicantRepository;
-    //private final SmsSender smsSender;
+    private final MessageTemplateRepository templateRepository;
 
-    //private static final String PASS_TEMPLATE = "[CAMPUS:FORM] 안녕하세요 @이름님! 축하드립니다. 서류 전형에 합격하셨습니다.";
-    //private static final String FAIL_TEMPLATE = "[CAMPUS:FORM] 안녕하세요 @이름님. 아쉽게도 이번 전형에서는 모시지 못하게 되었습니다.";
+    public ResultListResponse getResults(Long projectId, String stage, ApplicantStatus status){
+        List<Applicant> applicants;
+
+        // 2. 단계(Stage)에 따라 데이터 조회 분기 처리
+        if ("DOCUMENT".equalsIgnoreCase(stage)) {
+            applicants = applicantRepository.findByProjectIdAndDocumentStatus(projectId, status);
+        } else {
+            // INTERVIEW
+            applicants = applicantRepository.findByProjectIdAndInterviewStatus(projectId, status);
+        }
+
+        // 3. 통계 데이터 계산
+        long totalCount = applicantRepository.countByProjectId(projectId);
+        long currentPassCount = applicants.size(); // 현재 리스트 개수 (PASS라고 가정 시)
+
+        // 경쟁률 (전체 / 현재합격자) - 0으로 나누기 방지
+        String competitionRate = currentPassCount > 0
+                ? String.format("%.1f:1", (double) totalCount / currentPassCount)
+                : "0:1";
+
+        // 성비 계산 (현재 조회된 명단 기준)
+        ResultListResponse.GenderRatio genderRatio = calculateGenderRatio(applicants);
+
+        // 4. 저장된 템플릿 가져오기 (없으면 빈 문자열)
+        String templateContent = getTemplateContent(projectId, stage, status);
+
+        // 5. DTO 변환 및 반환
+        List<ResultListResponse.ApplicantSummary> applicantSummaries = applicants.stream()
+                .map(app -> ResultListResponse.ApplicantSummary.builder()
+                        .applicantId(app.getId())
+                        .name(app.getName())
+                        .school(app.getSchool())
+                        .major(app.getMajor())
+                        .position(app.getPosition())
+                        .build())
+                .collect(Collectors.toList());
+
+        return ResultListResponse.builder()
+                .stas(ResultListResponse.ResultStats.builder()
+                        .totalApplicantCount(totalCount)
+                        .currentStagePassCount(currentPassCount)
+                        .competitionRate(competitionRate)
+                        .genderRatio(genderRatio)
+                        .build())
+                .template(ResultListResponse.TemplateInfo.builder()
+                        .content(templateContent)
+                        .build())
+                .applicants(applicantSummaries)
+                .build();
+    }
+
+    // 성비 계산 헬퍼 메서드
+    private ResultListResponse.GenderRatio calculateGenderRatio(List<Applicant> applicants) {
+        if (applicants.isEmpty()) return ResultListResponse.GenderRatio.builder().malePercent(0).femalePercent(0).build();
+
+        long maleCount = applicants.stream()
+                .filter(a -> "남".equals(a.getGender()) || "Male".equalsIgnoreCase(a.getGender()))
+                .count();
+
+        int malePercent = (int) ((maleCount * 100) / applicants.size());
+        return ResultListResponse.GenderRatio.builder()
+                .malePercent(malePercent)
+                .femalePercent(100 - malePercent)
+                .build();
+    }
+
+    // 템플릿 내용 조회 헬퍼 메서드
+    private String getTemplateContent(Long projectId, String stage, ApplicantStatus status) {
+        return templateRepository.findById(projectId)
+                .map(t -> {
+                    if ("DOCUMENT".equalsIgnoreCase(stage)) {
+                        return status == ApplicantStatus.PASS ? t.getTemplateDocumentPass() : t.getTemplateDocumentFail();
+                    } else {
+                        return status == ApplicantStatus.PASS ? t.getTemplateInterviewPass() : t.getTemplateInterviewFail();
+                    }
+                })
+                .orElse("");
+    }
 
     @Transactional
     public void announceResults(ResultAnnouncementRequest request){
@@ -29,40 +110,7 @@ public class ResultService {
         }
 
         //3. 저장 ( 이때 update 쿼리가 나가고 registerEvent 했던 이벤트들이 발행된다.)
-        applicantRepository.save(applicants);
+        applicantRepository.save((Applicant) applicants);
     }
-
-//    // 문자 발송 로직 분리
-//    private void sendNotificationToApplicants(List<Applicant> applicants) {
-//        // 3-1. 합격/불합격자 분류 (Stream groupingBy 사용)
-//        // 결과 예시: {PASSED=[철수, 영희], FAILED=[길동]}
-//        Map<EvaluationStatus, List<Applicant>> groupedApplicants = applicants.stream()
-//                .collect(Collectors.groupingBy(Applicant::getDocumentStatus));
-//
-//        // 3-2. 합격자 발송
-//        List<Applicant> passedApplicants = groupedApplicants.get(EvaluationStatus.PASSED);
-//        if (passedApplicants != null) {
-//            sendBulkSms(passedApplicants, PASS_TEMPLATE);
-//        }
-//
-//        // 3-3. 불합격자 발송
-//        List<Applicant> failedApplicants = groupedApplicants.get(EvaluationStatus.FAILED);
-//        if (failedApplicants != null) {
-//            sendBulkSms(failedApplicants, FAIL_TEMPLATE);
-//        }
-//    }
-//
-//    // 템플릿 적용 및 실제 발송 (공통 메서드)
-//    private void sendBulkSms(List<Applicant> targets, String template) {
-//        for (Applicant applicant : targets) {
-//            // 4. 템플릿 치환 (@이름 -> 실제이름)
-//            String message = template.replace("@이름", applicant.getName());
-//
-//            // 5. 발송 (전화번호가 없으면 건너뛰는 방어 로직 추가 가능)
-//            if (applicant.getPhone() != null) {
-//                smsSender.sendSms(applicant.getPhone(), message);
-//            }
-//        }
-//    }
 
 }
