@@ -30,9 +30,10 @@ public class ApplicantRepositoryImpl implements ApplicantRepository {
 
     // 2. 저장 (여러 건)
     @Override
-    public void save(List<Applicant> applicants) {
+    public void saveAll(List<Applicant> applicants) {
         applicantJpaRepository.saveAll(applicants);
     }
+
 
     // 3. ID로 조회 (여러 건)
     @Override
