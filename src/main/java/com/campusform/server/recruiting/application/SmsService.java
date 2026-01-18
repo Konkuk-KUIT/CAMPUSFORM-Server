@@ -21,30 +21,14 @@ public class SmsService {
     private final ApplicantRepository applicantRepository;
     private final MessageTemplateRepository templateRepository;
 
-    // [기존 코드] 결과 발표 (상태 변경)
-    @Transactional
-    public void announceResults(ResultAnnouncementRequest request){
-        List<Applicant> applicants = applicantRepository.findAllById(request.applicantIds());
-        for (Applicant applicant : applicants){
-            applicant.updateApplicantStatus(request.status());
-        }
-        applicantRepository.saveAll(applicants); // save -> saveAll이 더 성능이 좋습니다
-    }
 
-    // [추가 코드] 1.6.1 합불자 명단 및 통계 조회
-    public ResultListResponse getResults(Long projectId, String stage, String status) {
-        // 1. DB에서 조건에 맞는 지원자들 조회
-        List<Applicant> applicants = applicantRepository.findByProjectIdAndStageAndStatus(projectId, stage, status);
-
-        // 2. 통계 계산 (전체 지원자 수, 경쟁률 등)
-        // ... 통계 로직 ...
-
-        // 3. DTO로 변환해서 리턴
-        return ResultListResponse.builder()
-                // ... 데이터 채우기
-                .build();
-    }
-    // 1.6.2 템플릿 저장
+    /**
+     * 문자 관련 로직만
+     * 1.6.2 템플릿 저장
+     * @param projectId
+     * @param stage
+     * @param request
+     */
     @Transactional
     public void saveTemplate(Long projectId, String stage, SmsTemplateSaveRequest request) {
         // 1. 없으면 생성, 있으면 가져오기
@@ -57,29 +41,29 @@ public class SmsService {
         // Dirty Checking으로 자동 저장됨 (Transaction 종료 시)
     }
 
-    // 1.6.3 미리보기 (특정 1인)
+    /**
+     * [1.6.3] 개인별 문자메시지 미리보기
+     */
     @Transactional(readOnly = true)
     public SmsPreviewResponse getPreview(Long projectId, Long applicantId) {
+        // 1. 지원자 조회
         Applicant applicant = applicantRepository.findById(applicantId)
                 .orElseThrow(() -> new IllegalArgumentException("지원자가 없습니다."));
 
-        // 1. 현재 지원자의 상태에 맞는 템플릿 찾기
-        // (주의: 미리보기는 현재 합격 상태인 사람에게 보낼 메시지를 보는 것이므로 status를 추론해야 함)
-        // 일단 기본적으로 서류 합격 템플릿을 가져온다고 가정하거나, 요청에서 stage를 받아야 정확함.
-        // 여기선 '서류 합격' 상태라고 가정하고 코드를 짭니다.
+        // 2. 템플릿 조회 (일단 서류 합격 템플릿을 기본으로 가져옴 - 로직에 따라 변경 가능)
         String templateContent = templateRepository.findById(projectId)
-                .map(MessageTemplate::getTemplateDocumentPass) // 편의상 서류 합격 사용
-                .orElse("템플릿이 없습니다.");
+                .map(MessageTemplate::getTemplateDocumentPass)
+                .orElse("저장된 템플릿이 없습니다.");
 
-        // 2. 치환
-        String finalContent = templateContent
-                .replace("@이름", applicant.getName());
+        // 3. 변수 치환 (@이름 -> 실제 이름)
+        String finalContent = templateContent.replace("@이름", applicant.getName());
 
+        // 4. 응답 DTO 생성
         SmsPreviewResponse.PreviewMessage message = SmsPreviewResponse.PreviewMessage.builder()
                 .applicantId(applicant.getId())
                 .name(applicant.getName())
-                .phoneNumber(applicant.getPhone()) // Entity 필드명: phone
-                .info(applicant.getSchool() + " / " + applicant.getMajor() + " / " + applicant.getPosition())
+                .phoneNumber(applicant.getPhone())
+                .info(makeInfoString(applicant)) // 정보 문자열 만드는 헬퍼 메서드 사용
                 .content(finalContent)
                 .build();
 
@@ -87,5 +71,11 @@ public class SmsService {
                 .count(1)
                 .messages(List.of(message))
                 .build();
+    }
+    // 미리보기용 정보 문자열 생성 ("학교 / 전공 / 지원분야")
+    private String makeInfoString(Applicant applicant) {
+        return (applicant.getSchool() != null ? applicant.getSchool() : "-") + " / " +
+                (applicant.getMajor() != null ? applicant.getMajor() : "-") + " / " +
+                (applicant.getPosition() != null ? applicant.getPosition() : "-");
     }
 }

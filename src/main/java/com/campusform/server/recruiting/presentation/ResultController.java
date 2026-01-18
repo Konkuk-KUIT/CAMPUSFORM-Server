@@ -8,7 +8,7 @@ import com.campusform.server.recruiting.application.dto.request.SmsTemplateSaveR
 import com.campusform.server.recruiting.application.dto.response.ResultListResponse;
 import com.campusform.server.recruiting.application.dto.response.SmsPreviewResponse;
 import com.campusform.server.recruiting.domain.model.applicant.value.ApplicantStatus;
-import io.swagger.v3.oas.models.responses.ApiResponse;
+import com.campusform.server.global.common.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,7 +39,7 @@ public class ResultController {
             @RequestBody SmsTemplateSaveRequest request
     ) {
         smsService.saveTemplate(projectId, stage, request);
-        return ApiResponse.success("템플릿을 저장했습니다.");
+        return ApiResponse.success("템플릿을 저장했습니다.",null);
     }
 
     // 1.6.3 개인별 문자메시지 미리보기
