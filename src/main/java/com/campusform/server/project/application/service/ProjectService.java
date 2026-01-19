@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 /**
  * 프로젝트 관련 비즈니스 로직을 처리하는 서비스
  * 
- * 프로젝트 생성, 관리자 검증 등의 핵심 기능을 제공합니다.
+ * 프로젝트 생성, 관리자 검증, 프로젝트 종료 등의 핵심 기능을 제공합니다.
  */
 @Service
 @RequiredArgsConstructor
@@ -74,5 +74,41 @@ public class ProjectService {
         projectRepository.findBySheetUrl(request.getSheetUrl()).ifPresent(project -> {
             throw new IllegalArgumentException("이미 해당하는 Url로 생성된 프로젝트가 존재합니다.");
         });
+    }
+
+    /**
+     * 서류 단계 종료 및 프로젝트 종료
+     * 
+     * @param projectId 종료할 프로젝트 ID
+     * @return 종료된 프로젝트 정보
+     * @throws IllegalArgumentException 프로젝트가 존재하지 않는 경우
+     * @throws IllegalStateException    현재 상태에서 종료할 수 없는 경우
+     */
+    @Transactional
+    public ProjectResponse completeDocument(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new IllegalArgumentException("프로젝트를 찾을 수 없습니다. projectId=" + projectId));
+
+        project.completeDocument();
+
+        return ProjectResponse.from(project);
+    }
+
+    /**
+     * 면접 단계 종료 및 프로젝트 종료
+     * 
+     * @param projectId 종료할 프로젝트 ID
+     * @return 종료된 프로젝트 정보
+     * @throws IllegalArgumentException 프로젝트가 존재하지 않는 경우
+     * @throws IllegalStateException    현재 상태에서 종료할 수 없는 경우
+     */
+    @Transactional
+    public ProjectResponse completeAll(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new IllegalArgumentException("프로젝트를 찾을 수 없습니다. projectId=" + projectId));
+
+        project.completeAll();
+
+        return ProjectResponse.from(project);
     }
 }
