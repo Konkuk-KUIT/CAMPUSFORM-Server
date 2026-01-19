@@ -1,5 +1,6 @@
 package com.campusform.server.recruiting.domain.model.comment;
 
+import com.campusform.server.recruiting.domain.model.applicant.Applicant;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -8,6 +9,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.lang.reflect.Member;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,4 +74,23 @@ public class Comment {
     @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    // 생성자 (Factory Method 패턴 권장)
+    public static Comment create(Applicant applicant, Member member, String content) {
+        Comment comment = new Comment();
+        comment.applicant = applicant;
+        comment.member = member;
+        comment.content = content;
+        return comment;
+    }
+
+    // 수정 비즈니스 로직
+    public void updateContent(String newContent) {
+        this.content = newContent;
+    }
+
+    // 작성자 검증 로직
+    public boolean isWrittenBy(Member member) {
+        return this.member.getId().equals(member.getId());
+    }
 }
