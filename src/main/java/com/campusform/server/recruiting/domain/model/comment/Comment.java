@@ -75,22 +75,60 @@ public class Comment {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // 생성자 (Factory Method 패턴 권장)
-    public static Comment create(Applicant applicant, Member member, String content) {
-        Comment comment = new Comment();
-        comment.applicant = applicant;
-        comment.member = member;
-        comment.content = content;
-        return comment;
+    // 1. Private 생성자 : 외부에서 new Content() 금지
+    public Comment(Long applicantId, Long authorId, String content, Comment parent) {
+        if(content == null || content.isBlank()){
+            throw new IllegalArgumentException("Content cannot be null or blank");
+        }
+        this.applicantId = applicantId;
+        this.authorId = authorId;
+        this.content = content;
+        this.parent = parent;
     }
 
-    // 수정 비즈니스 로직
+    // 2. 생성 로직
+
+    /**
+     * 최초 댓글 생성 : 부모가 없는 루트 댓글 작성
+     */
+    public static Comment createRoot(Long applicantId, Long authorId, String content) {
+        return new Comment(applicantId, authorId, content, null);
+    }
+
+    /**
+     * 답글(대댓글) 작성 : 특정 댓글에 대한 댓글을 생성한다.
+     */
+    public static Comment createReply(Comment parent, Long applicantId, Long authorId, String content) {
+        if(parent == null){
+            throw new IllegalArgumentException("Parent comment cannot be null");
+        }
+        Comment reply = new Comment(applicantId, authorId, content, parent);
+        parent.addReply(reply);
+        return reply;
+    }
+
+    // 3. 비즈니스 로직 (수정, 연관관계 등)
+
+    /**
+     * 답글 내용 수정
+     */
     public void updateContent(String newContent) {
+        if(newContent == null || newContent.isBlank()){
+            throw new IllegalArgumentException("Content cannot be null or blank");
+        }
         this.content = newContent;
     }
+    /**
+     * 연관관계 편의 메서드 (답글 추가 시 양방향 관계 설정)
+     */
+    private void addReply(Comment reply) {
+        this.replies.add(reply);
+    }
 
-    // 작성자 검증 로직
-    public boolean isWrittenBy(Member member) {
-        return this.member.getId().equals(member.getId());
+    /**
+     * 작성자 본인 확인
+     */
+    public boolean isWrittenBy(Long currentMemberId) {
+        return this.authorId.equals(currentMemberId);
     }
 }
