@@ -1,5 +1,6 @@
 package com.campusform.server;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,6 +22,7 @@ import lombok.RequiredArgsConstructor;
  * 프로젝트 상태를 직접 설정할 수 있는 테스트용 API를 제공합니다.
  * 프로덕션 환경에서는 비활성화하거나 삭제해야 합니다.
  */
+@Profile("temporary") // API 테스트 환경에서만 활성화
 @RestController
 @RequestMapping("/api/test/projects")
 @RequiredArgsConstructor
