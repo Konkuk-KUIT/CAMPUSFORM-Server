@@ -86,6 +86,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler
     public ResponseEntity<ErrorResponse> handleNotificationAccessDeniedException(NotificationAccessDeniedException ex) {
+        log.warn("알림 접근 거부: {}", ex.getDetailMessage());
         ErrorResponse response = new ErrorResponse("Forbidden", ex.getMessage(), null);
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
