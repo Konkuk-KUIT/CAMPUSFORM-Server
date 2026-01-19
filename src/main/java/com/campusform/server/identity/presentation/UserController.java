@@ -9,11 +9,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.campusform.server.identity.application.dto.response.UserExistsResponse;
 import com.campusform.server.identity.application.dto.request.UpdateNotificationSettingRequest;
 import com.campusform.server.identity.application.dto.response.NotificationSettingResponse;
-import com.campusform.server.identity.application.port.out.UserNotificationPort;
+import com.campusform.server.identity.application.dto.response.UserExistsResponse;
 import com.campusform.server.identity.application.service.UserQueryService;
+import com.campusform.server.notification.application.service.NotificationService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
 
     private final UserQueryService userQueryService;
-    private final UserNotificationPort userNotificationPort;
+    private final NotificationService notificationService;
 
     /**
      * 이메일로 회원 존재 여부 확인
@@ -39,7 +39,7 @@ public class UserController {
     @GetMapping("/notification-setting")
     public NotificationSettingResponse getNotificationSetting(@AuthenticationPrincipal OAuth2User oauth2User) {
         Long userId = oauth2User.getAttribute("userId");
-        boolean enabled = userNotificationPort.getNotificationSetting(userId);
+        boolean enabled = notificationService.getNotificationSetting(userId);
         return new NotificationSettingResponse(enabled);
     }
 
@@ -51,7 +51,7 @@ public class UserController {
             @AuthenticationPrincipal OAuth2User oauth2User,
             @RequestBody UpdateNotificationSettingRequest request) {
         Long userId = oauth2User.getAttribute("userId");
-        boolean enabled = userNotificationPort.updateNotificationSettings(userId, request.enabled());
+        boolean enabled = notificationService.updateNotificationSetting(userId, request.enabled());
         return new NotificationSettingResponse(enabled);
     }
 }
