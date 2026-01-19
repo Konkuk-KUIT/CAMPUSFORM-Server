@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.campusform.server.identity.application.dto.response.UserExistsResponse;
 import com.campusform.server.identity.application.dto.request.UpdateNotificationSettingRequest;
 import com.campusform.server.identity.application.dto.response.NotificationSettingResponse;
-import com.campusform.server.identity.application.dto.response.UserExistsResponse;
 import com.campusform.server.identity.application.port.out.UserNotificationPort;
 import com.campusform.server.identity.application.service.UserQueryService;
 

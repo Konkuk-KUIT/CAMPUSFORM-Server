@@ -1,7 +1,7 @@
 package com.campusform.server.project.application.service;
 
-import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -109,15 +109,15 @@ public class SpreadsheetService {
     }
 
     /**
-     * 프로젝트의 모든 관리자 ID 목록 조회 (OWNER 포함)
+     * 프로젝트의 모든 관리자 ID 목록 조회 (OWNER 포함, 중복 제거)
      */
     private List<Long> getProjectAdminIds(Project project) {
-        List<Long> adminIds = new ArrayList<>();
-        adminIds.add(project.getOwnerId()); // OWNER
+        Set<Long> adminIds = new LinkedHashSet<>();
+        adminIds.add(project.getOwnerId());
         for (ProjectAdmin admin : project.getAdmins()) {
             adminIds.add(admin.getAdminId());
         }
-        return adminIds;
+        return List.copyOf(adminIds);
     }
 
     /**

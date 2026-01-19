@@ -1,17 +1,41 @@
 package com.campusform.server.global.config;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
+
+import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 비동기 처리 설정
  *
- * @EnableAsync를 통해 @Async 어노테이션을 활성화합니다.
- * 이벤트 핸들러에서 비동기로 알림을 생성할 수 있도록 합니다.
+ * ThreadPoolTaskExecutor를 사용하여 스레드 풀을 관리합니다.
  */
+@Slf4j
 @Configuration
 @EnableAsync
-public class AsyncConfig {
-    // 기본 SimpleAsyncTaskExecutor 사용
-    // 필요시 ThreadPoolTaskExecutor를 빈으로 등록하여 스레드 풀 커스터마이징 가능
+public class AsyncConfig implements AsyncConfigurer {
+
+    @Override
+    public Executor getAsyncExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(2);
+        executor.setMaxPoolSize(10);
+        executor.setQueueCapacity(100);
+        executor.setThreadNamePrefix("notification-async-");
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        executor.initialize();
+        return executor;
+    }
+
+    @Override
+    public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
+        return (ex, method, params) ->
+            log.error("Async method {} threw exception: {}", method.getName(), ex.getMessage(), ex);
+    }
 }

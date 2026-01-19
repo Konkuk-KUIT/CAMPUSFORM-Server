@@ -56,12 +56,12 @@ public class ProjectService {
         // 부모 엔티티로 한 번에 저장
         projectRepository.save(project);
 
-        // 관리자 추가 알림 이벤트 발행
-        for (Long adminId : adminIds) {
+        // 관리자 추가 알림 이벤트 발행 (중복 제거)
+        adminIds.stream().distinct().forEach(adminId ->
             eventPublisher.publishEvent(new AdminAddedEvent(
                     project.getId(), adminId, project.getTitle()
-            ));
-        }
+            ))
+        );
 
         // 스프레드시트 초기 동기화 (지원자 데이터 가져오기)
         spreadsheetService.syncInitialApplicants(request.getSheetUrl());

@@ -1,6 +1,7 @@
 package com.campusform.server.notification.application.eventhandler;
 
-import org.springframework.context.event.EventListener;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -33,7 +34,7 @@ public class NotificationEventHandler {
     /**
      * 시트 동기화 완료 이벤트 처리
      */
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Async
     public void handleSheetSyncCompleted(SheetSyncCompletedEvent event) {
         log.info("시트 동기화 완료 이벤트 수신 - projectId: {}, syncedCount: {}, success: {}",
@@ -56,7 +57,7 @@ public class NotificationEventHandler {
     /**
      * 관리자 추가 이벤트 처리
      */
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Async
     public void handleAdminAdded(AdminAddedEvent event) {
         log.info("관리자 추가 이벤트 수신 - projectId: {}, addedAdminId: {}",
@@ -77,7 +78,7 @@ public class NotificationEventHandler {
     /**
      * 새 지원자 유입 이벤트 처리
      */
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Async
     public void handleNewApplicant(NewApplicantEvent event) {
         log.info("새 지원자 유입 이벤트 수신 - projectId: {}, applicantName: {}",
@@ -100,7 +101,7 @@ public class NotificationEventHandler {
     /**
      * 댓글 생성 이벤트 처리
      */
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Async
     public void handleCommentCreated(CommentCreatedEvent event) {
         log.info("댓글 생성 이벤트 수신 - projectId: {}, applicantId: {}, commenterId: {}",
