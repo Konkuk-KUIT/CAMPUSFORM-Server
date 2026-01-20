@@ -50,6 +50,16 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * 인증이 없거나 인증 컨텍스트가 유효하지 않을 때의 예외 처리
+     * 예: 로그인 안했는데 보호 API 호출, principal에 userId 누락 등
+     */
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> handleUnauthorizedException(UnauthorizedException ex) {
+        ErrorResponse response = new ErrorResponse("Unauthorized", ex.getMessage(), null);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
+    /**
      * 잘못된 인자 예외 처리
      * 예: 존재하지 않는 프로젝트 조회, 중복된 관리자 추가 등
      */
