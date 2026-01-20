@@ -42,45 +42,45 @@ public class SecurityConfig {
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
                 http
-                                // CORS 설정
-                                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                        // CORS 설정
+                        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                                // CSRF 비활성화 (세션 기반이지만 API 서버이므로)
-                                .csrf(csrf -> csrf.disable())
+                        // CSRF 비활성화 (세션 기반이지만 API 서버이므로)
+                        .csrf(csrf -> csrf.disable())
 
-                                // 요청 권한 설정
-                                .authorizeHttpRequests(auth -> auth
-                                                // 인증 없이 접근 가능한 경로
-                                                .requestMatchers(
-                                                                "/",
-                                                                "/login/**",
-                                                                "/oauth2/**",
-                                                                "/api/auth/**",
-                                                                "/swagger-ui/**",
-                                                                "/v3/api-docs/**",
-                                                                "/h2-console/**")
-                                                .permitAll()
-                                                // 나머지 요청은 인증 필요
-                                                .anyRequest().authenticated())
+                        // 요청 권한 설정
+                        .authorizeHttpRequests(auth -> auth
+                                // 인증 없이 접근 가능한 경로
+                                .requestMatchers(
+                                                "/",
+                                                "/login/**",
+                                                "/oauth2/**",
+                                                "/api/auth/**",
+                                                "/swagger-ui/**",
+                                                "/v3/api-docs/**",
+                                                "/h2-console/**")
+                                .permitAll()
+                                // 나머지 요청은 인증 필요
+                                .anyRequest().authenticated())
 
-                                // H2 콘솔을 위한 설정
-                                .headers(headers -> headers
-                                                .frameOptions(frame -> frame.sameOrigin()))
+                        // H2 콘솔을 위한 설정
+                        .headers(headers -> headers
+                                .frameOptions(frame -> frame.sameOrigin()))
 
-                                // OAuth2 로그인 설정
-                                .oauth2Login(oauth2 -> oauth2
-                                                .userInfoEndpoint(userInfo -> userInfo
-                                                                .userService(customOAuth2UserService))
-                                                .successHandler(successHandler)
-                                                .failureHandler(failureHandler))
+                        // OAuth2 로그인 설정
+                        .oauth2Login(oauth2 -> oauth2
+                                .userInfoEndpoint(userInfo -> userInfo
+                                        .userService(customOAuth2UserService))
+                                .successHandler(successHandler)
+                                .failureHandler(failureHandler))
 
-                                // 로그아웃 설정
-                                .logout(logout -> logout
-                                                .logoutUrl("/api/auth/logout")
-                                                .logoutSuccessHandler(logoutSuccessHandler)
-                                                .invalidateHttpSession(true)
-                                                .clearAuthentication(true)
-                                                .deleteCookies("JSESSIONID"));
+                        // 로그아웃 설정
+                        .logout(logout -> logout
+                                .logoutUrl("/api/auth/logout")
+                                .logoutSuccessHandler(logoutSuccessHandler)
+                                .invalidateHttpSession(true)
+                                .clearAuthentication(true)
+                                .deleteCookies("JSESSIONID"));
 
                 return http.build();
         }
