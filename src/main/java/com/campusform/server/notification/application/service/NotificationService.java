@@ -59,8 +59,8 @@ public class NotificationService {
     /**
      * 사용자별 알림 목록 조회 (최신순, 페이징)
      *
-     * 정책: 알림 수신 설정 OFF 시 빈 목록 반환
-     *      설정을 다시 ON 하면 그동안 쌓인 알림 확인 가능
+     * 정책: 알림 수신 설정과 무관하게 항상 조회 가능
+     *      (알림 수신 설정은 푸시/실시간 알림 수신 여부만 제어)
      *
      * @param userId 사용자 ID
      * @param page 페이지 번호 (0부터 시작)
@@ -69,11 +69,6 @@ public class NotificationService {
      */
     @Transactional(readOnly = true)
     public NotificationListResponse getNotifications(Long userId, int page, int size) {
-        // 알림 수신 설정 확인
-        if (!isNotificationEnabled(userId)) {
-            return NotificationListResponse.empty();
-        }
-
         int pageSize = size > 0 ? size : DEFAULT_PAGE_SIZE;
         Pageable pageable = PageRequest.of(page, pageSize);
 
@@ -107,14 +102,11 @@ public class NotificationService {
     /**
      * 안읽은 알림 개수 조회
      *
-     * 정책: 알림 수신 설정 OFF 시 0 반환
+     * 정책: 알림 수신 설정과 무관하게 항상 조회 가능
+     *      (알림 수신 설정은 푸시/실시간 알림 수신 여부만 제어)
      */
     @Transactional(readOnly = true)
     public UnreadCountResponse getUnreadCount(Long userId) {
-        if (!isNotificationEnabled(userId)) {
-            return UnreadCountResponse.zero();
-        }
-
         long count = notificationRepository.countByReceiverIdAndReadAtIsNull(userId);
         return UnreadCountResponse.of(count);
     }
