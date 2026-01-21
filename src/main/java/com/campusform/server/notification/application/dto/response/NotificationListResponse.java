@@ -40,18 +40,4 @@ public class NotificationListResponse {
                 notificationPage.hasPrevious()
         );
     }
-
-    /**
-     * 빈 응답 생성 (알림 설정 OFF 시 사용)
-     */
-    public static NotificationListResponse empty() {
-        return new NotificationListResponse(
-                List.of(),
-                0,
-                0,
-                0,
-                false,
-                false
-        );
-    }
 }

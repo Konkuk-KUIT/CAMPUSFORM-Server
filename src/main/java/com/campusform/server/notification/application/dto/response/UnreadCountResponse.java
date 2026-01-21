@@ -17,11 +17,4 @@ public class UnreadCountResponse {
     public static UnreadCountResponse of(long count) {
         return new UnreadCountResponse(count);
     }
-
-    /**
-     * 알림 설정 OFF 시 사용
-     */
-    public static UnreadCountResponse zero() {
-        return new UnreadCountResponse(0);
-    }
 }
