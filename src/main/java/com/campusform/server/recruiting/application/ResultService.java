@@ -58,7 +58,7 @@ public class ResultService {
                 .collect(Collectors.toList());
 
         return ResultListResponse.builder()
-                .stas(ResultListResponse.ResultStats.builder()
+                .stats(ResultListResponse.ResultStats.builder()
                         .totalApplicantCount(totalCount)
                         .currentStagePassCount(currentPassCount)
                         .competitionRate(competitionRate)
@@ -110,7 +110,7 @@ public class ResultService {
         }
 
         //3. 저장 ( 이때 update 쿼리가 나가고 registerEvent 했던 이벤트들이 발행된다.)
-        applicantRepository.save((Applicant) applicants);
+        applicantRepository.saveAll(applicants);
     }
 
 }

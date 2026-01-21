@@ -48,6 +48,7 @@ public class SmsService {
     public SmsPreviewResponse getPreview(Long projectId, Long applicantId) {
         // 1. 지원자 조회
         Applicant applicant = applicantRepository.findById(applicantId)
+                .filter(a->a.getProjectId().equals(projectId))
                 .orElseThrow(() -> new IllegalArgumentException("지원자가 없습니다."));
 
         // 2. 템플릿 조회 (일단 서류 합격 템플릿을 기본으로 가져옴 - 로직에 따라 변경 가능)

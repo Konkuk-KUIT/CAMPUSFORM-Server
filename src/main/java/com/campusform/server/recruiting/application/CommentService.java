@@ -57,9 +57,10 @@ public class CommentService {
     // 3. 댓글 삭제
     public void deleteComment(Long commentId, Long authorId) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 댓글입니다."));
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 댓글입니다."));
 
         // 작성자 본인 확인 로직 필요
+        validateAuthor(comment, authorId);
 
         commentRepository.delete(comment);
     }

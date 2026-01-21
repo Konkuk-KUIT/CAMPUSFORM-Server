@@ -8,7 +8,7 @@ import java.util.List;
 @Getter
 @Builder
 public class ResultListResponse {
-    private ResultStats stas;
+    private ResultStats stats;
     private TemplateInfo template;
     private List<ApplicantSummary> applicants;
 

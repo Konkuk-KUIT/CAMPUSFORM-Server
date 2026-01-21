@@ -38,8 +38,13 @@ public class ApplicantEventHandler {
 
         // 6. 보낼 메시지가 있을 때만(합/불 일때만) 전송
         if (message != null && event.applicantPhone() != null) {
-            smsSender.sendSms(event.applicantPhone(), message);
-            log.info("문자 발송 완료: To={}, Msg={}", event.applicantPhone(), message);
+            try {
+                smsSender.sendSms(event.applicantPhone(), message);
+                log.info("문자 발송 완료: 지원자 ID={}", event.applicantId());
+            } catch (Exception e) {
+                log.error("문자 발송 실패: 지원자 ID={}, 원인={}", event.applicantId(), e.getMessage(), e);
+                // TODO: 재시도 로직 또는 실패 큐 추가 고려
+            }
         }
     }
 }

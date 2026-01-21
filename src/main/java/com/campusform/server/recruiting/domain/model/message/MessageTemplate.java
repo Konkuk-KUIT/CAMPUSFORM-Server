@@ -61,6 +61,12 @@ public class MessageTemplate{
     }
 
     public void updateTemplate(String stage, String status, String content) {
+        if (!"DOCUMENT".equalsIgnoreCase(stage) && !"INTERVIEW".equalsIgnoreCase(stage)) {
+            throw new IllegalArgumentException("stage must be DOCUMENT or INTERVIEW");
+        }
+        if (!"PASS".equalsIgnoreCase(status) && !"FAIL".equalsIgnoreCase(status)) {
+            throw new IllegalArgumentException("status must be PASS or FAIL");
+        }
         if ("DOCUMENT".equalsIgnoreCase(stage)) {
             if ("PASS".equalsIgnoreCase(status)) this.templateDocumentPass = content;
             else this.templateDocumentFail = content;
