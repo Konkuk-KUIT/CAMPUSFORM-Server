@@ -1,5 +1,6 @@
 package com.campusform.server.recruiting.application.dto.request;
 
+import com.campusform.server.recruiting.domain.model.applicant.value.ApplicantStatus;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,7 +12,7 @@ public class SmsTemplateSaveRequest {
     @NotBlank
     private String stage;   // "DOCUMENT"
 
-    private Enum status;  // "PASS" or "FAIL"
+    private ApplicantStatus status;  // "PASS" or "FAIL"
 
     @NotBlank(message = "문자 내용은 필수입니다.")
     private String content; // "안녕하세요 [요리퐁]입니다..."

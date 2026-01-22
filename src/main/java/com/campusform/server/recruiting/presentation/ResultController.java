@@ -27,6 +27,7 @@ public class ResultController {
             @RequestParam String stage, //document
             @RequestParam String status //pass
     ){
+        System.out.println(">>> 컨트롤러 도착함! ID: " + projectId);
         ApplicantStatus statusEnum = ApplicantStatus.valueOf(status.toUpperCase());
         ResultListResponse response=resultService.getResults(projectId,stage,statusEnum);
         return ApiResponse.success(response);

@@ -13,7 +13,7 @@ public class SmsSenderImpl implements SmsSender {
         // 지금은 로그만 찍지만, 나중에는 CoolSMS, Twilio 같은 외부 API 코드가 들어갑니다.
 
         // 예: 실제 외부 API 연동 코드
-        // messageService.sendOne(new SingleMessage(phoneNumber, content));
+        //messageService.sendOne(new SingleMessage(phoneNumber, content));
 
         log.info("[SMS 전송] 수신번호: {}, 내용: {}", phoneNumber, content);
     }
