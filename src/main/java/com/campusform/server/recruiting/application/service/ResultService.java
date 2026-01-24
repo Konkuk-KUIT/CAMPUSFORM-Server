@@ -1,9 +1,10 @@
-package com.campusform.server.recruiting.application;
+package com.campusform.server.recruiting.application.service;
 
 import com.campusform.server.recruiting.application.dto.request.ResultAnnouncementRequest;
 import com.campusform.server.recruiting.application.dto.response.ResultListResponse;
 import com.campusform.server.recruiting.domain.model.applicant.Applicant;
 import com.campusform.server.recruiting.domain.model.applicant.value.ApplicantStatus;
+import com.campusform.server.recruiting.domain.model.applicant.value.StageStatus;
 import com.campusform.server.recruiting.domain.repository.ApplicantRepository;
 import com.campusform.server.recruiting.domain.repository.MessageTemplateRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,11 +21,15 @@ public class ResultService {
     private final ApplicantRepository applicantRepository;
     private final MessageTemplateRepository templateRepository;
 
+    // 합,불 명단/ 통계 조회
     public ResultListResponse getResults(Long projectId, String stage, ApplicantStatus status){
+
+        //1. Enum으로 변환
+        StageStatus stageStatus = StageStatus.valueOf(stage.toUpperCase());
         List<Applicant> applicants;
 
         // 2. 단계(Stage)에 따라 데이터 조회 분기 처리
-        if ("DOCUMENT".equalsIgnoreCase(stage)) {
+        if (stageStatus==StageStatus.DOCUMENT) {
             applicants = applicantRepository.findByProjectIdAndDocumentStatus(projectId, status);
         } else {
             // INTERVIEW
@@ -33,7 +38,7 @@ public class ResultService {
 
         // 3. 통계 데이터 계산
         long totalCount = applicantRepository.countByProjectId(projectId);
-        long currentPassCount = applicants.size(); // 현재 리스트 개수 (PASS라고 가정 시)
+        long currentPassCount = applicants.size(); // 현재 리스트 개수 (PASS라고 가정)
 
         // 경쟁률 (전체 / 현재합격자) - 0으로 나누기 방지
         String competitionRate = currentPassCount > 0
@@ -44,7 +49,10 @@ public class ResultService {
         ResultListResponse.GenderRatio genderRatio = calculateGenderRatio(applicants);
 
         // 4. 저장된 템플릿 가져오기 (없으면 빈 문자열)
-        String templateContent = getTemplateContent(projectId, stage, status);
+        //String templateContent = getTemplateContent(projectId, stage, status);
+        String templateContent=templateRepository.findById(projectId)
+                .map(t->t.getTemplateContent(stageStatus,status))
+                .orElse("");
 
         // 5. DTO 변환 및 반환
         List<ResultListResponse.ApplicantSummary> applicantSummaries = applicants.stream()
@@ -71,7 +79,7 @@ public class ResultService {
                 .build();
     }
 
-    // 성비 계산 헬퍼 메서드
+    // 성비 계산 메서드
     private ResultListResponse.GenderRatio calculateGenderRatio(List<Applicant> applicants) {
         if (applicants.isEmpty()) return ResultListResponse.GenderRatio.builder().malePercent(0).femalePercent(0).build();
 
@@ -87,17 +95,17 @@ public class ResultService {
     }
 
     // 템플릿 내용 조회 헬퍼 메서드
-    private String getTemplateContent(Long projectId, String stage, ApplicantStatus status) {
-        return templateRepository.findById(projectId)
-                .map(t -> {
-                    if ("DOCUMENT".equalsIgnoreCase(stage)) {
-                        return status == ApplicantStatus.PASS ? t.getTemplateDocumentPass() : t.getTemplateDocumentFail();
-                    } else {
-                        return status == ApplicantStatus.PASS ? t.getTemplateInterviewPass() : t.getTemplateInterviewFail();
-                    }
-                })
-                .orElse("");
-    }
+//    private String getTemplateContent(Long projectId, String stage, ApplicantStatus status) {
+//        return templateRepository.findById(projectId)
+//                .map(t -> {
+//                    if ("DOCUMENT".equalsIgnoreCase(stage)) {
+//                        return status == ApplicantStatus.PASS ? t.getTemplateDocumentPass() : t.getTemplateDocumentFail();
+//                    } else {
+//                        return status == ApplicantStatus.PASS ? t.getTemplateInterviewPass() : t.getTemplateInterviewFail();
+//                    }
+//                })
+//                .orElse("");
+//    }
 
     @Transactional
     public void announceResults(ResultAnnouncementRequest request){

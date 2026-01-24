@@ -18,11 +18,12 @@ public class SmsPreviewResponse {
     @Builder
     @AllArgsConstructor
     @NoArgsConstructor
+    // static선언을 해줘야 독립적으로 사용가능하다
     public static class PreviewMessage {
         private Long applicantId;
         private String name;
-        private String info;
         private String phoneNumber;
+        private String info;
         private String content;
     }
 }

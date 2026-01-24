@@ -1,11 +1,11 @@
 package com.campusform.server.recruiting.presentation;
 
-import com.campusform.server.global.common.ApiResponse;
-import com.campusform.server.recruiting.application.CommentService;
+import com.campusform.server.recruiting.application.service.CommentService;
 import com.campusform.server.recruiting.application.dto.request.CommentRequest;
 import com.campusform.server.recruiting.application.dto.response.CommentCreateResponse;
 import com.campusform.server.recruiting.application.dto.response.CommentUpdateResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,7 +16,7 @@ public class CommentController {
 
     // 댓글 작성
     @PostMapping
-    public ApiResponse<CommentCreateResponse> createComment(
+    public ResponseEntity<CommentCreateResponse> createComment(
         @PathVariable Long projectId,
         @PathVariable Long applicantId,
         @RequestParam(defaultValue = "document") String stage,
@@ -26,12 +26,12 @@ public class CommentController {
 
         CommentCreateResponse response = commentService.createComment(applicantId, memberId, request);
 
-        return ApiResponse.success("댓글 작성에 성공했습니다.", response);
+        return ResponseEntity.ok(response);
     }
 
     // 댓글 수정
     @PatchMapping("/{commentId}")
-    public ApiResponse<CommentUpdateResponse> updateComment(
+    public ResponseEntity<CommentUpdateResponse> updateComment(
             @PathVariable Long projectId,
             @PathVariable Long applicantId,
             @PathVariable Long commentId,
@@ -42,12 +42,12 @@ public class CommentController {
 
         CommentUpdateResponse response = commentService.updateComment(commentId, memberId, request);
 
-        return ApiResponse.success("댓글 수정에 성공했습니다.", response);
+        return ResponseEntity.ok(response);
     }
 
     // 댓글 삭제
     @DeleteMapping("/{commentId}")
-    public ApiResponse<?> deleteComment(
+    public ResponseEntity<?> deleteComment(
             @PathVariable Long projectId,
             @PathVariable Long applicantId,
             @PathVariable Long commentId,
@@ -57,6 +57,6 @@ public class CommentController {
 
         commentService.deleteComment(commentId, memberId);
 
-        return ApiResponse.success("댓글 삭제에 성공했습니다.");
+        return ResponseEntity.ok().build();
     }
 }

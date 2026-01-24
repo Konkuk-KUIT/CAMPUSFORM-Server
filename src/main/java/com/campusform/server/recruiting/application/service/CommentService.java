@@ -1,4 +1,4 @@
-package com.campusform.server.recruiting.application;
+package com.campusform.server.recruiting.application.service;
 
 import com.campusform.server.recruiting.application.dto.request.CommentRequest;
 import com.campusform.server.recruiting.application.dto.response.CommentCreateResponse;
