@@ -1,10 +1,12 @@
 package com.campusform.server.recruiting.presentation;
 
+import com.campusform.server.identity.application.service.AuthService;
 import com.campusform.server.recruiting.application.service.CommentService;
 import com.campusform.server.recruiting.application.dto.request.CommentRequest;
 import com.campusform.server.recruiting.application.dto.response.CommentCreateResponse;
 import com.campusform.server.recruiting.application.dto.response.CommentUpdateResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/projects/{projectId}/applicants/{applicantId}/comments")
 public class CommentController {
     private final CommentService commentService;
+    private final AuthService authService;
 
     // 댓글 작성
     @PostMapping
@@ -20,9 +23,10 @@ public class CommentController {
         @PathVariable Long projectId,
         @PathVariable Long applicantId,
         @RequestParam(defaultValue = "document") String stage,
-        @RequestBody CommentRequest request
+        @RequestBody CommentRequest request,
+        Authentication authentication
     ){
-        Long memberId = 1L; // 임시 하드코딩 (로그인 구현 시 교체 필요)
+        Long memberId = authService.extractUserId(authentication);
 
         CommentCreateResponse response = commentService.createComment(applicantId, memberId, request);
 
@@ -36,9 +40,10 @@ public class CommentController {
             @PathVariable Long applicantId,
             @PathVariable Long commentId,
             @RequestParam(defaultValue = "document") String stage,
-            @RequestBody CommentRequest request
+            @RequestBody CommentRequest request,
+            Authentication authentication
     ) {
-        Long memberId = 1L; // 임시 하드코딩
+        Long memberId = authService.extractUserId(authentication);
 
         CommentUpdateResponse response = commentService.updateComment(commentId, memberId, request);
 
