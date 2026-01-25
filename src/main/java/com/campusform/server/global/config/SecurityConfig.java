@@ -54,7 +54,6 @@ public class SecurityConfig {
                                                                 "/login/**",
                                                                 "/oauth2/**",
                                                                 "/api/auth/**",
-                                                                "/api/test/auth/**", // 테스트용 세션 생성 API
                                                                 "/swagger-ui/**",
                                                                 "/v3/api-docs/**",
                                                                 "/h2-console/**")
