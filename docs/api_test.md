@@ -30,3 +30,17 @@ select * from PROJECT_ADMINS;
     }
 }
 (참고로 -1의 의미는 매핑을 하지 않겠다는 뜻)
+
+# 면접 설정
+localhost:8080/api/recruiting/projects/1/interview-setting?JSESSIONID=세션ID
+{
+  "startDate": "2024-08-27",
+  "endDate": "2024-09-01",
+ "startTime": "10:00",
+  "endTime": "18:00",
+  "maxApplicantsPerSlot": 333,
+  "minInterviewersPerSlot": 2,
+  "maxInterviewersPerSlot": 3,
+  "slotDurationMin": 20,
+  "slotBreakMin": 5
+}

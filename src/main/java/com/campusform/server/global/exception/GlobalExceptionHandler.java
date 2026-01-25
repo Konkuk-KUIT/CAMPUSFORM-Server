@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.campusform.server.notification.domain.exception.NotificationAccessDeniedException;
 import com.campusform.server.notification.domain.exception.NotificationNotFoundException;
+import com.campusform.server.project.domain.exception.ProjectAccessDeniedException;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -99,6 +100,15 @@ public class GlobalExceptionHandler {
         log.warn("알림 접근 거부: {}", ex.getDetailMessage());
         ErrorResponse response = new ErrorResponse("Forbidden", ex.getMessage(), null);
 
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
+    /**
+     * 프로젝트 권한(OWNER 전용 등) 예외 처리
+     */
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> handleProjectAccessDeniedException(ProjectAccessDeniedException ex) {
+        ErrorResponse response = new ErrorResponse("Forbidden", ex.getMessage(), null);
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 
