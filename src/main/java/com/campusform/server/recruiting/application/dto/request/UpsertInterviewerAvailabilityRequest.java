@@ -4,6 +4,9 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,6 +22,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UpsertInterviewerAvailabilityRequest {
 
+    /**
+     * 날짜별 가능 시간 블록 목록
+     */
+    @NotNull(message = "날짜별 가능 시간 목록은 필수입니다.")
+    @NotEmpty(message = "날짜별 가능 시간 목록은 비어있을 수 없습니다.")
+    @Valid // 중첩된 객체 검증 활성화
     private List<DayAvailability> availabilities;
 
     /**
@@ -29,9 +38,17 @@ public class UpsertInterviewerAvailabilityRequest {
     @AllArgsConstructor
     public static class DayAvailability {
 
+        /**
+         * 면접 날짜
+         */
+        @NotNull(message = "면접 날짜는 필수입니다.")
         private LocalDate date;
 
-        // 30분 단위 시작 시간 목록
+        /**
+         * 30분 단위 시작 시간 목록
+         */
+        @NotNull(message = "시작 시간 목록은 필수입니다.")
+        @NotEmpty(message = "시작 시간 목록은 비어있을 수 없습니다.")
         private List<LocalTime> startTimes;
     }
 }

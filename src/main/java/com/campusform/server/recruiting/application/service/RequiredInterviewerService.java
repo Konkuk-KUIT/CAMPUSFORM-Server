@@ -48,14 +48,17 @@ public class RequiredInterviewerService {
         InterviewSetting setting = ctx.setting();
 
         // 요청에 포함된 면접관 ID가 프로젝트 관리자인지 검증
-        if (request.getAdminIds() != null) {
-            for (Long adminId : request.getAdminIds()) {
+        // @NotNull 검증으로 null은 이미 차단되지만, 방어적 프로그래밍 차원에서 명시적으로 처리
+        List<Long> adminIds = request.getAdminIds();
+        if (adminIds != null) {
+            for (Long adminId : adminIds) {
                 project.validateAdminAccess(adminId);
             }
         }
 
         // 변경 감지(Dirty Checking)
-        setting.replaceRequiredInterviewers(request.getAdminIds());
+        // 도메인 메서드에서 null을 안전하게 처리하지만, 서비스 계층에서도 명시적으로 처리
+        setting.replaceRequiredInterviewers(adminIds);
 
         return RequiredInterviewersResponse.of(setting.getRequiredInterviewerIds());
     }
@@ -72,8 +75,15 @@ public class RequiredInterviewerService {
         project.validateAdminAccess(adminId);
         InterviewSetting setting = ctx.setting();
 
+        // @NotNull 검증으로 null은 이미 차단되지만, 방어적 프로그래밍 차원에서 명시적으로 처리
+        Boolean required = request.getRequired();
+        if (required == null) {
+            throw new IllegalArgumentException("필수 면접관 여부는 필수입니다.");
+        }
+
         // 영속화된 엔티티이므로 변경 감지(Dirty Checking)로 자동 업데이트됨
-        setting.setRequiredInterviewer(adminId, request.getRequired());
+        // 원시 boolean 타입으로 언박싱 (null이면 위에서 이미 예외 발생)
+        setting.setRequiredInterviewer(adminId, required);
 
         return RequiredInterviewersResponse.of(setting.getRequiredInterviewerIds());
     }

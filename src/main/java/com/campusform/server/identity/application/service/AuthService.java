@@ -43,14 +43,18 @@ public class AuthService {
      * Authentication에서 현재 사용자 ID 추출
      */
     public Long extractUserId(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
+        if (!isAuthenticated(authentication)) {
             // 인증이 없는 요청(로그인 필요)은 401로 내려주는 게 REST 관점에서 자연스럽습니다.
             throw new UnauthorizedException("인증이 필요합니다.");
         }
 
-        // OAuth2 로그인 기준으로 principal은 OAuth2User 입니다.
-        // (컨트롤러/서비스가 이 캐스팅 로직을 직접 알지 않게 하려고 여기로 모읍니다)
-        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+        Object principal = authentication.getPrincipal();
+        if (!(principal instanceof OAuth2User)) {
+            // 예상할 수 없는 인증 객체에 대해서도 401 반환
+            throw new UnauthorizedException("유효하지 않은 인증 방식입니다.");
+        }
+
+        OAuth2User oAuth2User = (OAuth2User) principal;
         Object userIdObj = oAuth2User.getAttribute("userId");
 
         if (userIdObj == null) {
