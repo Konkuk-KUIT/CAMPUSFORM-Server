@@ -172,7 +172,7 @@ public class Project {
     public void completeAll(Long userId) {
         // 상태 검증: INTERVIEW_LOCKED 상태에서만 가능
         if (state != ProjectState.INTERVIEW_LOCKED) {
-            throw new IllegalStateException("전체 종료는 INTERVIEW_LOCKED 상태에서만 가능합니다.");
+            throw new ProjectAccessDeniedException("전체 종료는 INTERVIEW_LOCKED 상태에서만 가능합니다.");
         }
 
         // OWNER 검증: 프로젝트의 ownerId와 요청한 사용자 ID가 일치해야 함

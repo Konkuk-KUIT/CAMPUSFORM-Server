@@ -200,28 +200,6 @@ public class InterviewSetting {
     }
 
     /**
-     * 슬롯 시작 시간 목록 생성
-     */
-    public List<LocalTime> generateSlots(List<LocalTime> blocks) {
-        TimeRange timeRange = getTimeRange();
-        SlotConfiguration slotConfig = getSlotConfiguration();
-        int slotLengthMin = slotConfig.getSlotLengthMin();
-
-        List<LocalTime> slots = new ArrayList<>();
-
-        // 각 블록 시작 시간에서 슬롯 생성
-        for (LocalTime blockStart : blocks) {
-            LocalTime slotEnd = blockStart.plusMinutes(slotLengthMin);
-            // 슬롯이 시간 범위 내에 완전히 포함되는 경우만 추가
-            if (!slotEnd.isAfter(timeRange.getEndTime())) {
-                slots.add(blockStart);
-            }
-        }
-
-        return slots;
-    }
-
-    /**
      * 면접 날짜 목록 교체
      * clear() 후 바로 add()하면 영속성 컨텍스트와 DB 동기화 문제가 발생할 수 있어서
      * diff 기반으로 추가/삭제만 수행
@@ -260,8 +238,7 @@ public class InterviewSetting {
      */
     public void replaceRequiredInterviewers(List<Long> adminIds) {
         if (adminIds == null) {
-            this.requiredInterviewers.clear();
-            return;
+            throw new IllegalArgumentException("adminIds는 null일 수 없습니다. 빈 리스트로 전체 해제를 표현하세요.");
         }
 
         // 중복 제거
