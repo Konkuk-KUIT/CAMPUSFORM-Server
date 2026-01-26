@@ -52,7 +52,11 @@ spring:
       on-profile: temporary
   jpa:
     hibernate:
+<<<<<<< HEAD
       ddl-auto: update
+=======
+      ddl-auto: create
+>>>>>>> e8ddf56 ([Fix] 다수 버그 해결 3)
 
   datasource:
     url: jdbc:h2:tcp://localhost/~/testdb
