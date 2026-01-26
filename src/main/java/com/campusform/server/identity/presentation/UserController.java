@@ -11,9 +11,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.campusform.server.identity.application.dto.request.UpdateNicknameRequest;
 import com.campusform.server.identity.application.dto.request.UpdateNotificationSettingRequest;
 import com.campusform.server.identity.application.dto.response.DeleteProfileImageResponse;
 import com.campusform.server.identity.application.dto.response.NotificationSettingResponse;
+import com.campusform.server.identity.application.dto.response.UpdateNicknameResponse;
 import com.campusform.server.identity.application.dto.response.UpdateProfileImageResponse;
 import com.campusform.server.identity.application.dto.response.UserExistsResponse;
 import com.campusform.server.identity.application.service.UserQueryService;
@@ -82,5 +84,17 @@ public class UserController {
         Long userId = oauth2User.getAttribute("userId");
         userService.deleteProfileImage(userId);
         return DeleteProfileImageResponse.success();
+    }
+
+    /**
+     * 닉네임 수정
+     */
+    @PatchMapping("/nickname")
+    public UpdateNicknameResponse updateNickname(
+            @AuthenticationPrincipal OAuth2User oauth2User,
+            @RequestBody UpdateNicknameRequest request) {
+        Long userId = oauth2User.getAttribute("userId");
+        String nickname = userService.updateNickname(userId, request.nickname());
+        return new UpdateNicknameResponse(nickname);
     }
 }

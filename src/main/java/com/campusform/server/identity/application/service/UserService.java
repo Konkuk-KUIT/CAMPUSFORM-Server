@@ -71,4 +71,23 @@ public class UserService {
 
         log.info("프로필 이미지 삭제 완료: userId={}", userId);
     }
+
+    /**
+     * 닉네임 수정
+     *
+     * @param userId 사용자 ID
+     * @param newNickname 새로운 닉네임
+     * @return 수정된 닉네임
+     */
+    @Transactional
+    public String updateNickname(Long userId, String newNickname) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+        user.updateNickname(newNickname);
+
+        log.info("닉네임 수정 완료: userId={}, newNickname={}", userId, newNickname);
+
+        return user.getNickname();
+    }
 }

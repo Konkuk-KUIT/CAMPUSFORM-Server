@@ -40,9 +40,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String name = (String) attributes.get("name");
         String picture = (String) attributes.get("picture");
 
+        // name이 없으면 이메일 로컬 부분을 닉네임으로 사용
+        String nickname = (name != null && !name.trim().isEmpty()) ? name : extractNicknameFromEmail(email);
+
         // 기존 사용자 조회 또는 신규 사용자 생성
         User user = userRepository.findByEmail(email)
-                .orElseGet(() -> createUser(email, name, picture));
+                .orElseGet(() -> createUser(email, nickname, picture));
 
         Map<String, Object> extendedAttributes = new HashMap<>(attributes);
         extendedAttributes.put("userId", user.getId());
@@ -57,9 +60,23 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     /**
      * 신규 사용자 생성 및 저장
      */
-    private User createUser(String email, String name, String profileImageUrl) {
-        User user = User.create(email, name, profileImageUrl);
+    private User createUser(String email, String nickname, String profileImageUrl) {
+        User user = User.create(email, nickname, profileImageUrl);
         userRepository.save(user);
         return user;
+    }
+
+    /**
+     * 이메일에서 닉네임 추출 (@ 앞부분)
+     */
+    private String extractNicknameFromEmail(String email) {
+        if (email == null || email.isEmpty()) {
+            return "사용자";
+        }
+        int atIndex = email.indexOf('@');
+        if (atIndex > 0) {
+            return email.substring(0, atIndex);
+        }
+        return email;
     }
 }
