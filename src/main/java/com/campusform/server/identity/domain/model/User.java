@@ -66,16 +66,18 @@ public class User {
      * @param newNickname 새로운 닉네임 (1~12자, 한글/영어만 허용)
      */
     public void updateNickname(String newNickname) {
-        validateNickname(newNickname);
-        this.nickname = newNickname;
+        String validatedNickname = validateNickname(newNickname);
+        this.nickname = validatedNickname;
     }
 
     /**
      * 닉네임 유효성 검증
      * - 1~12자
      * - 한글, 영어만 허용
+     *
+     * @return trim된 검증된 닉네임
      */
-    private void validateNickname(String nickname) {
+    private String validateNickname(String nickname) {
         if (nickname == null || nickname.trim().isEmpty()) {
             throw new IllegalArgumentException("닉네임은 비어있을 수 없습니다.");
         }
@@ -90,5 +92,7 @@ public class User {
         if (!trimmed.matches("^[가-힣a-zA-Z]+$")) {
             throw new IllegalArgumentException("닉네임은 한글과 영어만 사용할 수 있습니다.");
         }
+
+        return trimmed;
     }
 }

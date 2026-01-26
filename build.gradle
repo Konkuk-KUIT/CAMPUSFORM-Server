@@ -55,7 +55,7 @@ dependencies {
 	runtimeOnly 'com.h2database:h2'
 
 	// 6. AWS S3
-	implementation platform('software.amazon.awssdk:bom:2.20.26')
+	implementation platform('software.amazon.awssdk:bom:2.34.0')
 	implementation 'software.amazon.awssdk:s3'
 
 	// 7. Google Sheet API

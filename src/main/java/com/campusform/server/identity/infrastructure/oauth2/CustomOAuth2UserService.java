@@ -40,8 +40,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String name = (String) attributes.get("name");
         String picture = (String) attributes.get("picture");
 
-        // name이 없으면 이메일 로컬 부분을 닉네임으로 사용
-        String nickname = (name != null && !name.trim().isEmpty()) ? name : extractNicknameFromEmail(email);
+        // OAuth name에서 한글/영어만 추출, 최대 12자로 제한
+        String nickname = normalizeNickname(name);
 
         // 기존 사용자 조회 또는 신규 사용자 생성
         User user = userRepository.findByEmail(email)
@@ -67,16 +67,26 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
 
     /**
-     * 이메일에서 닉네임 추출 (@ 앞부분)
+     * OAuth name에서 유효한 닉네임 추출
+     * 한글/영어만 필터링, 1~12자 제한
+     *
+     * @param name Google OAuth name 필드
+     * @return 검증 규칙에 맞는 닉네임
      */
-    private String extractNicknameFromEmail(String email) {
-        if (email == null || email.isEmpty()) {
+    private String normalizeNickname(String name) {
+        if (name == null || name.trim().isEmpty()) {
             return "사용자";
         }
-        int atIndex = email.indexOf('@');
-        if (atIndex > 0) {
-            return email.substring(0, atIndex);
+
+        // 한글, 영어만 추출 (공백, 숫자, 특수문자 제거)
+        String filtered = name.trim().replaceAll("[^가-힣a-zA-Z]", "");
+
+        // 필터링 후 비어있으면 기본값
+        if (filtered.isEmpty()) {
+            return "사용자";
         }
-        return email;
+
+        // 12자 초과 시 잘라내기
+        return filtered.length() > 12 ? filtered.substring(0, 12) : filtered;
     }
 }

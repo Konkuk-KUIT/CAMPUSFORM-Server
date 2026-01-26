@@ -2,6 +2,8 @@ package com.campusform.server.identity.application.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.campusform.server.global.infrastructure.S3Service;
@@ -34,16 +36,24 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
-        // 기존 프로필 이미지가 S3에 있다면 삭제
         String oldProfileImageUrl = user.getProfileImageUrl();
-        if (oldProfileImageUrl != null)
-            s3Service.deleteFile(oldProfileImageUrl);
 
-        // 새 이미지 업로드
+        // 새 이미지 업로드 (먼저 수행)
         String newProfileImageUrl = s3Service.uploadProfileImage(imageFile, userId);
 
         // 사용자 정보 업데이트
         user.updateProfileImage(newProfileImageUrl);
+
+        // 트랜잭션 커밋 후 기존 이미지 삭제 (안전하게)
+        if (oldProfileImageUrl != null) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    s3Service.deleteFile(oldProfileImageUrl);
+                    log.info("기존 프로필 이미지 삭제 완료: {}", oldProfileImageUrl);
+                }
+            });
+        }
 
         log.info("프로필 이미지 업데이트 완료: userId={}, newUrl={}", userId, newProfileImageUrl);
 
@@ -62,12 +72,19 @@ public class UserService {
 
         String profileImageUrl = user.getProfileImageUrl();
 
-        // S3에서 이미지 삭제
-        if (profileImageUrl != null)
-            s3Service.deleteFile(profileImageUrl);
-
-        // 사용자 프로필 이미지 null로 설정
+        // 사용자 프로필 이미지 null로 설정 (먼저 수행)
         user.updateProfileImage(null);
+
+        // 트랜잭션 커밋 후 S3에서 이미지 삭제 (안전하게)
+        if (profileImageUrl != null) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    s3Service.deleteFile(profileImageUrl);
+                    log.info("S3 프로필 이미지 삭제 완료: {}", profileImageUrl);
+                }
+            });
+        }
 
         log.info("프로필 이미지 삭제 완료: userId={}", userId);
     }
