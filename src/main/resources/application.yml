@@ -2,9 +2,6 @@ spring:
   profiles:
     active: temporary
 
-  profiles:
-    active: temporary
-
   application:
     name: CampusFormServer
   datasource:
@@ -15,13 +12,8 @@ spring:
   h2:
     console:
       enabled: true
-  h2:
-    console:
-      enabled: true
   jpa:
     hibernate:
-      ddl-auto: create
-    show-sql: true
       ddl-auto: create
     show-sql: true
     properties:
@@ -52,3 +44,18 @@ app:
 logging:
   level:
     org.hibernate.SQL: debug
+
+---
+spring:
+  config:
+    activate:
+      on-profile: temporary
+  jpa:
+    hibernate:
+      ddl-auto: create
+
+  datasource:
+    url: jdbc:h2:tcp://localhost/~/testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
