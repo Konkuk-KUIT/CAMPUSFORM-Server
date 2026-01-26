@@ -17,8 +17,6 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * 지원자 면접 가능 시간 조사 공개 API
- * 
- * 토큰 기반으로 지원자가 면접 가능 시간 슬롯을 조회하고 제출합니다.
  * 인증 없이 접근 가능한 공개 API입니다.
  */
 @RestController
