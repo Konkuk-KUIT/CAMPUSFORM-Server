@@ -56,9 +56,10 @@ public class CommentController {
             @PathVariable Long projectId,
             @PathVariable Long applicantId,
             @PathVariable Long commentId,
-            @RequestParam(defaultValue = "document") String stage
+            @RequestParam(defaultValue = "document") String stage,
+            Authentication authentication
     ) {
-        Long memberId = 1L; // 임시 하드코딩
+        Long memberId = authService.extractUserId(authentication);
 
         commentService.deleteComment(commentId, memberId);
 

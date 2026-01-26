@@ -1,8 +1,11 @@
 package com.campusform.server.recruiting.application.eventhandler;
 
+import com.campusform.server.recruiting.application.component.MessageGenerator;
 import com.campusform.server.recruiting.application.port.SmsSender;
 import com.campusform.server.recruiting.domain.model.applicant.value.ApplicantStatus;
+import com.campusform.server.recruiting.domain.model.applicant.value.StageStatus;
 import com.campusform.server.recruiting.domain.model.event.ApplicantUpdated;
+import com.campusform.server.recruiting.domain.model.message.MessageTemplate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -16,36 +19,54 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class ApplicantEventHandler {
 
     private final SmsSender smsSender;
-
-    // 문구 템플릿 정의 (상수로 관리)
-    private static final String PASS_TEMPLATE = "[CAMPUS:FORM] %s님, 축하합니다! 서류 전형에 합격하셨습니다.";
-    private static final String FAIL_TEMPLATE = "[CAMPUS:FORM] %s님, 아쉽게도 이번 전형에서 모시지 못하게 되었습니다.";
+    private final MessageGenerator messageGenerator;
 
     @Async // 비동기 처리
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) // 커밋 성공후에만 실행
     public void handleApplicantUpdated(ApplicantUpdated event) {
-        log.info("이벤트 수신: 지원자 ID={}, 상태={}", event.applicantId(), event.status());
+        log.info("이벤트 수신: 지원자 ID={}, 상태={}, 단계={}", event.applicantId(), event.status(),event.stage());
 
-        // 상태에 따라 다른 문구 생성
-        String message = null;
+        try {
+            // 메시지 생성 위임 (복잡한 if문 사라짐)
+            // DB 템플릿 우선 사용
+            String message = messageGenerator.generateMessage(
+                    event.applicantId(),
+                    event.stage(),
+                    event.status(),
+                    event.applicantName(),
+                    event.positionName()
+            );
 
-        if (event.status() == ApplicantStatus.PASS) {
-            // 이름(%s) 치환해서 문구 완성
-            message = String.format(PASS_TEMPLATE, event.applicantName());
-        } else if (event.status() == ApplicantStatus.FAIL) {
-            message = String.format(FAIL_TEMPLATE, event.applicantName());
-        }
-
-        // 보낼 메시지가 있을 때만(합/불 일때만) 전송
-        if (message != null && event.applicantPhone() != null) {
-            try {
+            // 메시지가 생성된 경우에만 전송 (null이면 해당 단계/상태에 맞는 템플릿이 없다는 뜻)
+            if (message != null && event.applicantPhone() != null) {
                 smsSender.sendSms(event.applicantPhone(), message);
                 log.info("문자 발송 완료: 지원자 ID={}", event.applicantId());
-            } catch (Exception e) {
-                log.error("문자 발송 실패: 지원자 ID={}, 원인={}", event.applicantId(), e.getMessage(), e);
-                // TODO: 재시도 로직 또는 실패 큐 추가 고려
-
             }
+        } catch (Exception e) {
+            log.error("문자 발송 실패: 지원자 ID={}, 원인={}", event.applicantId(), e.getMessage(), e);
         }
+//        // 상태에 따라 다른 문구 생성
+//        String message = null;
+//        if (event.stage() == StageStatus.DOCUMENT) {
+//            if (event.status() == ApplicantStatus.PASS) {
+//                // 이름(%s), 포지션(%s) 치환해서 문구 완성
+//                message = String.format(DOCUMENT_PASS_TEMPLATE, event.applicantName());
+//            }else{
+//                message = String.format(DOCUMENT_FAIL_TEMPLATE, event.applicantName());
+//            }
+//        }
+//
+//
+//        // 보낼 메시지가 있을 때만(합/불 일때만) 전송
+//        if (message != null && event.applicantPhone() != null) {
+//            try {
+//                smsSender.sendSms(event.applicantPhone(), message);
+//                log.info("문자 발송 완료: 지원자 ID={}", event.applicantId());
+//            } catch (Exception e) {
+//                log.error("문자 발송 실패: 지원자 ID={}, 원인={}", event.applicantId(), e.getMessage(), e);
+//
+//
+//            }
+//        }
     }
 }

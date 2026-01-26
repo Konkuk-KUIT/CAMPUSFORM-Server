@@ -66,4 +66,6 @@ public class ApplicantRepositoryImpl implements ApplicantRepository {
     public List<Applicant> findByProjectIdAndInterviewStatus(Long projectId, ApplicantStatus status) {
         return applicantJpaRepository.findByProjectIdAndInterviewStatus(projectId, status);
     }
+
+
 }

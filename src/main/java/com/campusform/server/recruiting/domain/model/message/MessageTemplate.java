@@ -98,11 +98,14 @@ public class MessageTemplate {
 
     public String getTemplateContent(StageStatus stage, ApplicantStatus status) {
         if(stage==StageStatus.DOCUMENT){
-            return (status==ApplicantStatus.PASS) ? templateDocumentPass : templateDocumentFail;
+            if(status==ApplicantStatus.PASS) return templateDocumentPass;
+            if(status==ApplicantStatus.FAIL) return templateDocumentFail;
         }else{
-            return (status==ApplicantStatus.PASS) ? templateInterviewPass : templateInterviewFail;
+            if(status==ApplicantStatus.PASS) return templateInterviewPass;
+            if(status==ApplicantStatus.FAIL) return templateInterviewFail;
         }
 
+        return "";
     }
 
 }

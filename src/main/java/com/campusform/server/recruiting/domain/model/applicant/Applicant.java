@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.campusform.server.recruiting.domain.model.applicant.value.ApplicantStatus;
+import com.campusform.server.recruiting.domain.model.applicant.value.StageStatus;
 import com.campusform.server.recruiting.domain.model.event.ApplicantUpdated;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -105,20 +106,32 @@ public class Applicant extends AbstractAggregateRoot<Applicant> {
     /**
      * [비즈니스 로직] 서류 심사 결과 업데이트 및 이벤트 발행
      */
-    public void updateApplicantStatus(ApplicantStatus newStatus) {
-        if (newStatus == null) {
+    public void updateApplicantStatus(StageStatus stage, ApplicantStatus status) {
+        if (status == null) {
             throw new IllegalArgumentException("newStatus must not be null");
         }
-        if (this.documentStatus == newStatus) {
-            return;
+        if(stage==StageStatus.DOCUMENT) {
+            if (this.documentStatus == status) {
+                return;
+            }
+
+        }else{
+            if(stage==StageStatus.INTERVIEW) {
+                if (this.interviewStatus == status) {
+                    return;
+                }
+            }
         }
-        this.documentStatus = newStatus;
+        this.documentStatus = status;
 
         this.registerEvent(new ApplicantUpdated(
                 this.id,
+                this.projectId,
                 this.name,
                 this.phone,
-                this.documentStatus
+                this.position,
+                status,
+                stage
         ));
     }
 }

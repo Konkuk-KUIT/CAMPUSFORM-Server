@@ -38,4 +38,5 @@ public interface ApplicantRepository{
     // 2. 면접 단계 상태로 조회
     List<Applicant> findByProjectIdAndInterviewStatus(Long projectId, ApplicantStatus status);
 
+
 }

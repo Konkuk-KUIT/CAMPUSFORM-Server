@@ -10,10 +10,10 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class SmsTemplateSaveRequest {
-    @NotBlank(message = "단계는 필수입니다.")
+    @NotNull(message = "단계는 필수입니다.")
     private StageStatus stage;   // "DOCUMENT", "INTERVIEW"
 
-    @NotBlank(message="상태값은 필수입니다.")
+    @NotNull(message="상태값은 필수입니다.")
     private ApplicantStatus status;  // "PASS" , "FAIL", "HOLD"
 
     @NotBlank(message = "문자 내용은 필수입니다.")

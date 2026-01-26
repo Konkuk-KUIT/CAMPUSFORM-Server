@@ -23,7 +23,7 @@ public class ResultController {
     @GetMapping("/results")
     public ResponseEntity<ResultListResponse> getResultList(
             @PathVariable Long projectId,
-            @RequestParam String stage, //document
+            @RequestParam String stage,
             @RequestParam String status //pass
     ){
         ApplicantStatus statusEnum = ApplicantStatus.valueOf(status.toUpperCase());

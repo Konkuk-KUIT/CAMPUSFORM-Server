@@ -109,12 +109,13 @@ public class ResultService {
 
     @Transactional
     public void announceResults(ResultAnnouncementRequest request){
-        // 1. 대상 지원자 일괄 조회
+        // 1. 대상 지원자 조회
         List<Applicant> applicants = applicantRepository.findAllById(request.applicantIds());
 
+        StageStatus stage = StageStatus.valueOf(request.stage().toUpperCase());
         //2. 상태 변경 (도메인 로직 실행)
         for (Applicant applicant : applicants){
-            applicant.updateApplicantStatus(request.status());
+            applicant.updateApplicantStatus(stage,request.status());
         }
 
         //3. 저장 ( 이때 update 쿼리가 나가고 registerEvent 했던 이벤트들이 발행된다.)
