@@ -50,4 +50,13 @@ public class User {
         user.profileImageUrl = profileImageUrl;
         return user;
     }
+
+    /**
+     * 프로필 이미지 업데이트
+     *
+     * @param newProfileImageUrl 새로운 프로필 이미지 URL
+     */
+    public void updateProfileImage(String newProfileImageUrl) {
+        this.profileImageUrl = newProfileImageUrl;
+    }
 }
