@@ -34,7 +34,7 @@ public class ApplicantInterviewLinkController {
     private final AuthService authService;
 
     /**
-     * 지원자 링크 조회
+     * 응답 예시
      * 
      * <pre>
      * 응답 예시:
@@ -43,6 +43,10 @@ public class ApplicantInterviewLinkController {
      *   "url": "/submit?token=550e8400-e29b-41d4-a716-446655440000"
      * }
      * </pre>
+     * 
+     * @param projectId
+     * @param authentication
+     * @return
      */
     @GetMapping("/{projectId}/investigation-link")
     public ResponseEntity<ApplicantInterviewLinkResponse> getApplicantLink(

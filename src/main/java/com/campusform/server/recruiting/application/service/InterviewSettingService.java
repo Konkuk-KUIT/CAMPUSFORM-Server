@@ -106,6 +106,6 @@ public class InterviewSettingService {
                 setting.getMaxInterviewersPerSlot(),
                 setting.getSlotDurationMin(),
                 setting.getSlotBreakMin(),
-                setting.getInvestigationLink().getToken());
+                setting.getInvestigationLink() != null ? setting.getInvestigationLink().getToken() : null);
     }
 }
