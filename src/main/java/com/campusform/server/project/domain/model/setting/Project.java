@@ -150,7 +150,7 @@ public class Project {
     public void completeDocument(Long userId) {
         // 상태 검증: DOCUMENT_LOCKED 상태에서만 가능
         if (state != ProjectState.DOCUMENT_LOCKED) {
-            throw new IllegalStateException("서류 단계 종료는 DOCUMENT_LOCKED 상태에서만 가능합니다.");
+            throw new ProjectAccessDeniedException("서류 단계 종료는 DOCUMENT_LOCKED 상태에서만 가능합니다.");
         }
 
         // OWNER 검증: 프로젝트의 ownerId와 요청한 사용자 ID가 일치해야 함
