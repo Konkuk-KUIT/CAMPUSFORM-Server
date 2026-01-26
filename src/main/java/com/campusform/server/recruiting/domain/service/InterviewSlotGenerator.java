@@ -69,6 +69,13 @@ public class InterviewSlotGenerator {
         LocalTime interviewStartTime = setting.getStartTime();
         LocalTime interviewEndTime = setting.getEndTime();
 
+        if (slotDurationMin <= 0) {
+            throw new IllegalArgumentException("slotDurationMin은 0보다 커야 합니다.");
+        }
+        if (slotBreakMin < 0) {
+            throw new IllegalArgumentException("slotBreakMin은 0 이상이어야 합니다.");
+        }
+
         List<SlotInfo> slots = new ArrayList<>();
 
         // 각 연속 범위 내에서 슬롯 생성

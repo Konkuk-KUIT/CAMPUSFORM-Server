@@ -20,9 +20,10 @@ import com.campusform.server.identity.infrastructure.oauth2.OAuth2Authentication
 import lombok.RequiredArgsConstructor;
 
 /**
- * Spring Security 설정
+ * Spring Security 설정 (로컬 테스트용)
  *
- * OAuth2 로그인 및 세션 기반 인증 설정
+ * temporary 프로필에서 사용되며, OAuth2 로그인 없이 동작합니다.
+ * S3 서비스 의존성 없이 로컬 테스트를 위해 간소화된 설정입니다.
  */
 @Configuration
 @EnableWebSecurity

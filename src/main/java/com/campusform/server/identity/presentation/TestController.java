@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
  *
  * 프로덕션 배포 시 이 파일은 삭제하거나 @Profile("temporary")로 제한됩니다.
  */
-@Profile("temporary")
+@Profile("temporary1")
 @RestController
 @RequestMapping("/api/test")
 @RequiredArgsConstructor
@@ -34,7 +34,7 @@ public class TestController {
      * 로컬 테스트용 프로필 이미지 업데이트 (인증 불필요)
      *
      * @param userId 테스트할 사용자 ID
-     * @param image 업로드할 이미지
+     * @param image  업로드할 이미지
      */
     @PatchMapping("/profile-image")
     public UpdateProfileImageResponse testUpdateProfileImage(
@@ -59,7 +59,7 @@ public class TestController {
     /**
      * 로컬 테스트용 닉네임 수정 (인증 불필요)
      *
-     * @param userId 테스트할 사용자 ID
+     * @param userId  테스트할 사용자 ID
      * @param request 닉네임 수정 요청
      */
     @PatchMapping("/nickname")

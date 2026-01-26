@@ -49,21 +49,13 @@ dependencies {
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
-<<<<<<< HEAD
 	// 5. Swagger 
-=======
-	// Swagger 
->>>>>>> 7a455c55c362dee62807b557e551c3a316845892
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0' 
 
 	runtimeOnly 'com.h2database:h2'
 
 	// 변경된 클래스만 새로 로드하는 라이브러리
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-<<<<<<< HEAD
-
-=======
->>>>>>> 7a455c55c362dee62807b557e551c3a316845892
 
 	// AWS S3
 	implementation platform('software.amazon.awssdk:bom:2.34.0')
