@@ -27,9 +27,7 @@ public class CommentController {
         Authentication authentication
     ){
         Long memberId = authService.extractUserId(authentication);
-
         CommentCreateResponse response = commentService.createComment(applicantId, memberId, request);
-
         return ResponseEntity.ok(response);
     }
 
@@ -45,7 +43,9 @@ public class CommentController {
     ) {
         Long memberId = authService.extractUserId(authentication);
 
-        CommentUpdateResponse response = commentService.updateComment(commentId, memberId, request);
+        CommentUpdateResponse response = commentService.updateComment(
+                projectId, applicantId,commentId, memberId, request
+        );
 
         return ResponseEntity.ok(response);
     }

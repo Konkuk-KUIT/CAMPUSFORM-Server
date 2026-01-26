@@ -131,4 +131,6 @@ public class Comment {
     public boolean isWrittenBy(Long currentMemberId) {
         return this.authorId.equals(currentMemberId);
     }
+
+
 }

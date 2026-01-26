@@ -1,5 +1,6 @@
 package com.campusform.server.recruiting.application.service;
 
+import com.campusform.server.recruiting.application.component.MessageGenerator;
 import com.campusform.server.recruiting.application.dto.request.SmsTemplateSaveRequest;
 import com.campusform.server.recruiting.application.dto.response.SmsPreviewResponse;
 import com.campusform.server.recruiting.domain.model.applicant.Applicant;
@@ -20,6 +21,7 @@ public class SmsService {
     //문자 메시지 내용, 템플릿, 발송 서비스
     private final ApplicantRepository applicantRepository;
     private final MessageTemplateRepository templateRepository;
+    private final MessageGenerator messageGenerator;
 
     /**
      * 문자 관련 로직만
@@ -63,7 +65,8 @@ public class SmsService {
 
         //4. 메시지 생성 로직을 엔티티에게 위임 -> DDD 형태!!!
         // 변수 바꾸기를 엔티티에서 알아서 할거임
-        String finalContent = templateContent.generateMessage(
+        String finalContent = messageGenerator.generateMessage(
+                projectId,
                 stageStatus,
                 applicantStatus,
                 applicant.getName(),

@@ -42,7 +42,7 @@ public class CommentService {
     }
 
     // 3. 댓글 수정
-    public CommentUpdateResponse updateComment(Long commentId, Long authorId, CommentRequest request) {
+    public CommentUpdateResponse updateComment(Long projectId, Long applicantId,Long commentId, Long authorId, CommentRequest request) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 댓글입니다."));
 
