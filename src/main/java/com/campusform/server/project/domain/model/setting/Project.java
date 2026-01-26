@@ -156,7 +156,7 @@ public class Project {
         // OWNER 검증: 프로젝트의 ownerId와 요청한 사용자 ID가 일치해야 함
         if (!this.ownerId.equals(userId)) {
             // 권한 문제는 400이 아니라 403으로 내려가야 하므로 도메인 예외로 분리합니다.
-            throw new ProjectAccessDeniedException("프로젝트 OWNER만 단계를 종료할 수 있습니다.");
+            throw new IllegalStateException("프로젝트 OWNER만 단계를 종료할 수 있습니다.");
         }
 
         this.state = ProjectState.DOCUMENT_DONE;
@@ -172,12 +172,12 @@ public class Project {
     public void completeAll(Long userId) {
         // 상태 검증: INTERVIEW_LOCKED 상태에서만 가능
         if (state != ProjectState.INTERVIEW_LOCKED) {
-            throw new ProjectAccessDeniedException("전체 종료는 INTERVIEW_LOCKED 상태에서만 가능합니다.");
+            throw new IllegalStateException("전체 종료는 INTERVIEW_LOCKED 상태에서만 가능합니다.");
         }
 
         // OWNER 검증: 프로젝트의 ownerId와 요청한 사용자 ID가 일치해야 함
         if (!this.ownerId.equals(userId)) {
-            throw new ProjectAccessDeniedException("프로젝트 OWNER만 단계를 종료할 수 있습니다.");
+            throw new IllegalStateException("프로젝트 OWNER만 단계를 종료할 수 있습니다.");
         }
 
         this.state = ProjectState.ALL_COMPLETE;
