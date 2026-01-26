@@ -37,146 +37,152 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 public class IntervieweeAvailabilityService {
 
-    private final InterviewContextLoader contextLoader;
-    private final InterviewerAvailabilityBlockRepository availabilityBlockRepository;
-    private final ApplicantRepository applicantRepository;
-    private final IntervieweeAvailabilitySlotRepository slotRepository;
-    private final InterviewSlotGenerator slotGenerator = new InterviewSlotGenerator(); // 도메인 서비스
-
-    /**
-     * 토큰으로 면접 슬롯 목록 조회
-     * 공개 API에서 사용되며, 인증 없이 토큰만으로 접근 가능합니다.
-     */
-    public InterviewSlotListResponse getSlotsByToken(String token) {
-        // 토큰으로 프로젝트와 면접 설정 조회
-        InterviewContext ctx = contextLoader.loadContextByToken(token);
-        InterviewSetting setting = ctx.setting();
-
-        // 면접 정보 설정 기반으로 날짜별 슬롯 생성
-        List<InterviewSlotListResponse.DaySlotSummary> summaries = setting.getDays().stream()
-                .sorted(Comparator.comparing(InterviewDay::getInterviewDate))
-                .map(day -> {
-                    LocalDate date = day.getInterviewDate();
-                    Long dayId = day.getId();
-
-                    // 해당 날짜의 모든 면접관 가능 시간 블록 조회
-                    List<InterviewerAvailabilityBlock> dayBlocks = availabilityBlockRepository
-                            .findByInterviewDayId(dayId);
-
-                    // 도메인 서비스를 사용하여 슬롯 생성
-                    List<InterviewSlotGenerator.SlotInfo> domainSlots = slotGenerator.generateSlots(setting,
-                            dayBlocks);
-
-                    // 도메인 DTO를 응답 DTO로 변환 (availableInterviewerCount가 0보다 큰 슬롯만 포함)
-                    // InterviewSlotGenerator에서 이미 0인 슬롯은 생성하지 않으므로 필터링은 방어적 프로그래밍 차원에서 유지
-                    List<InterviewSlotListResponse.SlotInfo> slots = domainSlots.stream()
-                            .filter(slot -> slot.availableInterviewerCount() > 0) // 면접관이 없는 슬롯은 제외
-                            .map(slot -> InterviewSlotListResponse.SlotInfo.of(
-                                    slot.startTime(), slot.endTime(), slot.availableInterviewerCount()))
-                            .toList();
-
-                    return InterviewSlotListResponse.DaySlotSummary.of(date, slots);
-                })
-                .toList();
-
-        return InterviewSlotListResponse.of(summaries);
-    }
-
-    /**
-     * 지원자 면접 가능 슬롯 제출
-     * 기존 제출 내역은 삭제하고 새로 제출한 슬롯으로 덮어쓰기합니다.
-     */
-    @Transactional
-    public void submitSlots(String token, SubmitSlotsRequest request) {
-        // 토큰으로 프로젝트와 면접 설정 조회
-        InterviewContext ctx = contextLoader.loadContextByToken(token);
-        Long projectId = ctx.project().getId();
-        InterviewSetting setting = ctx.setting();
-
-        // 이름+전화번호로 지원자 확인
-        Applicant applicant = applicantRepository.findByProjectIdAndNameAndPhone(projectId, request.getName(),
-                request.getPhone())
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "지원자 정보를 찾을 수 없습니다. 이름과 전화번호를 확인해주세요."));
-
-        // 기존 제출 내역 삭제 <- 처음 제출이라면 삭제X
-        slotRepository.deleteByApplicantId(applicant.getId());
+        private final InterviewContextLoader contextLoader;
+        private final InterviewerAvailabilityBlockRepository availabilityBlockRepository;
+        private final ApplicantRepository applicantRepository;
+        private final IntervieweeAvailabilitySlotRepository slotRepository;
+        private final InterviewSlotGenerator slotGenerator = new InterviewSlotGenerator(); // 도메인 서비스
 
         /**
-         * 지원자가 제출한 요청(request)을 통해 IntervieweeAvailabilitySlot 객체 리스트 생성
-         * 
-         * <pre>
-         * 예시:
-         * {
-         *   "name": "홍길동",
-         *   "phone": "010-1234-5678",
-         *   "selections": [
-         *     { "date": "2024-06-25", "startTimes": ["10:00", "14:00"] },
-         *     { "date": "2024-06-26", "startTimes": ["11:00"] }
-         *   ]
-         * }
-         * </pre>
+         * 토큰으로 면접 슬롯 목록 조회
+         * 공개 API에서 사용되며, 인증 없이 토큰만으로 접근 가능합니다.
          */
+        public InterviewSlotListResponse getSlotsByToken(String token) {
+                // 토큰으로 프로젝트와 면접 설정 조회
+                InterviewContext ctx = contextLoader.loadContextByToken(token);
+                InterviewSetting setting = ctx.setting();
 
-        // 모든 날짜에 대한 실제 생성 가능한 슬롯 목록을 한 번에 생성
-        // 날짜별로 (InterviewDay, 생성 가능한 시작 시간 Set)을 저장하는 Map
-        Map<LocalDate, DaySlotInfo> daySlotInfoMap = new HashMap<>();
-        for (InterviewDay day : setting.getDays()) {
-            LocalDate date = day.getInterviewDate();
-            Long dayId = day.getId();
+                // 면접 정보 설정 기반으로 날짜별 슬롯 생성
+                List<InterviewSlotListResponse.DaySlotSummary> summaries = setting.getDays().stream()
+                                .sorted(Comparator.comparing(InterviewDay::getInterviewDate))
+                                .map(day -> {
+                                        LocalDate date = day.getInterviewDate();
+                                        Long dayId = day.getId();
 
-            // 해당 날짜의 모든 면접관 가능 시간 블록 조회
-            List<InterviewerAvailabilityBlock> dayBlocks = availabilityBlockRepository
-                    .findByInterviewDayId(dayId);
+                                        // 해당 날짜의 모든 면접관 가능 시간 블록 조회
+                                        List<InterviewerAvailabilityBlock> dayBlocks = availabilityBlockRepository
+                                                        .findByInterviewDayId(dayId);
 
-            // 실제 생성 가능한 슬롯 목록 생성 (도메인 서비스 사용)
-            List<InterviewSlotGenerator.SlotInfo> availableSlots = slotGenerator.generateSlots(setting, dayBlocks);
+                                        // 도메인 서비스를 사용하여 슬롯 생성
+                                        List<InterviewSlotGenerator.SlotInfo> domainSlots = slotGenerator.generateSlots(
+                                                        setting,
+                                                        dayBlocks);
 
-            // 생성 가능한 슬롯의 시작 시간만 추출 (검증용)
-            Set<LocalTime> availableStartTimes = availableSlots.stream()
-                    .map(InterviewSlotGenerator.SlotInfo::startTime)
-                    .collect(Collectors.toSet());
+                                        // 도메인 DTO를 응답 DTO로 변환 (availableInterviewerCount가 0보다 큰 슬롯만 포함)
+                                        // InterviewSlotGenerator에서 이미 0인 슬롯은 생성하지 않으므로 필터링은 방어적 프로그래밍 차원에서 유지
+                                        List<InterviewSlotListResponse.SlotInfo> slots = domainSlots.stream()
+                                                        .filter(slot -> slot.availableInterviewerCount() > 0) // 면접관이 없는
+                                                                                                              // 슬롯은 제외
+                                                        .map(slot -> InterviewSlotListResponse.SlotInfo.of(
+                                                                        slot.startTime(), slot.endTime(),
+                                                                        slot.availableInterviewerCount()))
+                                                        .toList();
 
-            daySlotInfoMap.put(date, new DaySlotInfo(day, availableStartTimes));
+                                        return InterviewSlotListResponse.DaySlotSummary.of(date, slots);
+                                })
+                                .toList();
+
+                return InterviewSlotListResponse.of(summaries);
         }
 
-        // 제출된 슬롯 검증 및 생성
-        List<IntervieweeAvailabilitySlot> newSlots = request.getSelections().stream()
-                .flatMap(selection -> {
-                    LocalDate date = selection.getDate();
-                    List<LocalTime> startTimes = selection.getStartTimes();
+        /**
+         * 지원자 면접 가능 슬롯 제출
+         * 기존 제출 내역은 삭제하고 새로 제출한 슬롯으로 덮어쓰기합니다.
+         */
+        @Transactional
+        public void submitSlots(String token, SubmitSlotsRequest request) {
+                // 토큰으로 프로젝트와 면접 설정 조회
+                InterviewContext ctx = contextLoader.loadContextByToken(token);
+                Long projectId = ctx.project().getId();
+                InterviewSetting setting = ctx.setting();
 
-                    // 날짜별 슬롯 정보 조회
-                    DaySlotInfo daySlotInfo = daySlotInfoMap.get(date);
-                    if (daySlotInfo == null) {
-                        throw new IllegalArgumentException("유효하지 않은 면접 날짜입니다. date=" + date);
-                    }
+                // 이름+전화번호로 지원자 확인
+                Applicant applicant = applicantRepository.findByProjectIdAndNameAndPhone(projectId, request.getName(),
+                                request.getPhone())
+                                .orElseThrow(() -> new IllegalArgumentException(
+                                                "지원자 정보를 찾을 수 없습니다. 이름과 전화번호를 확인해주세요."));
 
-                    InterviewDay interviewDay = daySlotInfo.interviewDay();
-                    Set<LocalTime> availableStartTimes = daySlotInfo.availableStartTimes();
+                // 기존 제출 내역 삭제 <- 처음 제출이라면 삭제X
+                slotRepository.deleteByApplicantId(applicant.getId());
 
-                    // 제출된 각 시작 시간이 실제 생성 가능한 슬롯인지 검증
-                    for (LocalTime startTime : startTimes) {
-                        if (!availableStartTimes.contains(startTime)) {
-                            throw new IllegalArgumentException(
-                                    String.format("유효하지 않은 슬롯입니다. date=%s, startTime=%s", date, startTime));
-                        }
-                    }
+                /**
+                 * 지원자가 제출한 요청(request)을 통해 IntervieweeAvailabilitySlot 객체 리스트 생성
+                 * 
+                 * <pre>
+                 * 예시:
+                 * {
+                 *   "name": "홍길동",
+                 *   "phone": "010-1234-5678",
+                 *   "selections": [
+                 *     { "date": "2024-06-25", "startTimes": ["10:00", "14:00"] },
+                 *     { "date": "2024-06-26", "startTimes": ["11:00"] }
+                 *   ]
+                 * }
+                 * </pre>
+                 */
 
-                    // 각 시작 시간에 대해 슬롯 생성
-                    return startTimes.stream()
-                            .map(startTime -> IntervieweeAvailabilitySlot.create(
-                                    applicant.getId(), interviewDay.getId(), startTime));
-                })
-                .collect(Collectors.toList());
+                // 모든 날짜에 대한 실제 생성 가능한 슬롯 목록을 한 번에 생성
+                // 날짜별로 (InterviewDay, 생성 가능한 시작 시간 Set)을 저장하는 Map
+                Map<LocalDate, DaySlotInfo> daySlotInfoMap = new HashMap<>();
+                for (InterviewDay day : setting.getDays()) {
+                        LocalDate date = day.getInterviewDate();
+                        Long dayId = day.getId();
 
-        // 슬롯 저장
-        slotRepository.saveAll(newSlots);
-    }
+                        // 해당 날짜의 모든 면접관 가능 시간 블록 조회
+                        List<InterviewerAvailabilityBlock> dayBlocks = availabilityBlockRepository
+                                        .findByInterviewDayId(dayId);
 
-    /**
-     * 날짜별 슬롯 정보를 담는 내부 클래스
-     */
-    private record DaySlotInfo(InterviewDay interviewDay, Set<LocalTime> availableStartTimes) {
-    }
+                        // 실제 생성 가능한 슬롯 목록 생성 (도메인 서비스 사용)
+                        List<InterviewSlotGenerator.SlotInfo> availableSlots = slotGenerator.generateSlots(setting,
+                                        dayBlocks);
+
+                        // 생성 가능한 슬롯의 시작 시간만 추출 (검증용)
+                        Set<LocalTime> availableStartTimes = availableSlots.stream()
+                                        .map(InterviewSlotGenerator.SlotInfo::startTime)
+                                        .collect(Collectors.toSet());
+
+                        daySlotInfoMap.put(date, new DaySlotInfo(day, availableStartTimes));
+                }
+
+                // 제출된 슬롯 검증 및 생성
+                List<IntervieweeAvailabilitySlot> newSlots = request.getSelections().stream()
+                                .flatMap(selection -> {
+                                        LocalDate date = selection.getDate();
+                                        List<LocalTime> startTimes = selection.getStartTimes();
+
+                                        // 날짜별 슬롯 정보 조회
+                                        DaySlotInfo daySlotInfo = daySlotInfoMap.get(date);
+                                        if (daySlotInfo == null) {
+                                                throw new IllegalArgumentException("유효하지 않은 면접 날짜입니다. date=" + date);
+                                        }
+
+                                        InterviewDay interviewDay = daySlotInfo.interviewDay();
+                                        Set<LocalTime> availableStartTimes = daySlotInfo.availableStartTimes();
+
+                                        // 제출된 각 시작 시간이 실제 생성 가능한 슬롯인지 검증
+                                        for (LocalTime startTime : startTimes) {
+                                                if (!availableStartTimes.contains(startTime)) {
+                                                        throw new IllegalArgumentException(
+                                                                        String.format("유효하지 않은 슬롯입니다. date=%s, startTime=%s",
+                                                                                        date, startTime));
+                                                }
+                                        }
+
+                                        // 각 시작 시간에 대해 슬롯 생성
+                                        return startTimes.stream()
+                                                        .map(startTime -> IntervieweeAvailabilitySlot.create(
+                                                                        applicant.getId(), interviewDay.getId(),
+                                                                        startTime));
+                                })
+                                .collect(Collectors.toList());
+
+                // 슬롯 저장
+                slotRepository.saveAll(newSlots);
+        }
+
+        /**
+         * 날짜별 슬롯 정보를 담는 내부 클래스
+         */
+        private record DaySlotInfo(InterviewDay interviewDay, Set<LocalTime> availableStartTimes) {
+        }
 }
