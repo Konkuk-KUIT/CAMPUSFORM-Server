@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-public class MessageTemplate {
+public class MessageTemplate{
     @Id
     @Column(name = "project_id", nullable = false)
     private Long projectId;

@@ -36,7 +36,7 @@ public class SmsService {
         StageStatus stageStatus = StageStatus.valueOf(stage.toUpperCase());
         ApplicantStatus applicantStatus = request.getStatus();
         // 1. 없으면 생성, 있으면 가져오기
-        MessageTemplate template = templateRepository.findById(projectId)
+        MessageTemplate template = templateRepository.findByProjectId(projectId)
                 .orElseGet(() -> templateRepository.save(MessageTemplate.createEmpty(projectId)));
 
         // 2. 내용 업데이트 (엔티티 메서드 활용)
@@ -60,7 +60,7 @@ public class SmsService {
                 .orElseThrow(() -> new IllegalArgumentException("지원자가 없습니다."));
 
         // 3. 템플릿 조회
-        MessageTemplate templateContent = templateRepository.findById(projectId)
+        MessageTemplate templateContent = templateRepository.findByProjectId(projectId)
                 .orElse(MessageTemplate.createEmpty(projectId));
 
         //4. 메시지 생성 로직을 엔티티에게 위임 -> DDD 형태!!!

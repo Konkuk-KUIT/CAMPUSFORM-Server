@@ -15,7 +15,7 @@ import java.util.List;
  */
 @Repository
 public interface ApplicantJpaRepository extends JpaRepository<Applicant, Long> {
-    // JPA가 이름만 보고 자동으로 쿼리를 만들어줍니다.
+    // JPA가 이름만 보고 자동으로 쿼리를 만들어줌.
     long countByProjectId(Long projectId);
 
     List<Applicant> findByProjectIdAndDocumentStatus(Long projectId, ApplicantStatus documentStatus);

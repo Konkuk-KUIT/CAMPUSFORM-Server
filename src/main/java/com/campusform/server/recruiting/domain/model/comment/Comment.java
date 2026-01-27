@@ -1,6 +1,6 @@
 package com.campusform.server.recruiting.domain.model.comment;
 
-import com.campusform.server.recruiting.domain.model.applicant.Applicant;
+
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -9,7 +9,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.lang.reflect.Member;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;

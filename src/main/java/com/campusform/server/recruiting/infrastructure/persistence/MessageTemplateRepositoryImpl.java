@@ -21,7 +21,7 @@ public class MessageTemplateRepositoryImpl implements MessageTemplateRepository 
     }
 
     @Override
-    public Optional<MessageTemplate> findById(Long projectId) {
+    public Optional<MessageTemplate> findByProjectId(Long projectId) {
         return jpaRepository.findById(projectId);
     }
 }

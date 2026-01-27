@@ -24,10 +24,12 @@ public class ResultController {
     public ResponseEntity<ResultListResponse> getResultList(
             @PathVariable Long projectId,
             @RequestParam String stage,
-            @RequestParam String status //pass
+            @RequestParam ApplicantStatus status //pass
     ){
-        ApplicantStatus statusEnum = ApplicantStatus.valueOf(status.toUpperCase());
-        ResultListResponse response=resultService.getResults(projectId,stage,statusEnum);
+        if (!"DOCUMENT".equalsIgnoreCase(stage) && !"INTERVIEW".equalsIgnoreCase(stage)) {
+            throw new IllegalArgumentException("stage는 DOCUMENT 또는 INTERVIEW만 허용됩니다");
+        }
+        ResultListResponse response=resultService.getResults(projectId,stage,status);
         return ResponseEntity.ok(response);
     }
     // 문자 템플릿 저장

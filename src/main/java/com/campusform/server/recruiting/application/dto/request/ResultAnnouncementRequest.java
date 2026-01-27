@@ -9,6 +9,6 @@ public record ResultAnnouncementRequest(
         @NotNull Long projectId,
         @NotNull List<Long> applicantIds, // 처리할 지원자 ID 목록
         @NotNull ApplicantStatus status, // PASSED or FAILED
-        @NotNull String stage // "DOCUNMENT" or "INTERVIEW"
+        @NotNull String stage // "DOCUMENT" or "INTERVIEW"
 ) {
 }

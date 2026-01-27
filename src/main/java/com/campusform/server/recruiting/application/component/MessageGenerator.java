@@ -49,7 +49,7 @@ public class MessageGenerator {
      * @return
      */
     private String getTemplateContent(Long projectId, StageStatus stage, ApplicantStatus status) {
-        String dbTemplate = messageTemplateRepository.findById(projectId)
+        String dbTemplate = messageTemplateRepository.findByProjectId(projectId)
                 .map(t->t.getTemplateContent(stage, status))
                 .orElse(null);
         if (dbTemplate != null && !dbTemplate.isBlank()) {

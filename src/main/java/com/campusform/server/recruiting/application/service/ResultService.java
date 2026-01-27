@@ -50,7 +50,7 @@ public class ResultService {
 
         // 4. 저장된 템플릿 가져오기 (없으면 빈 문자열)
         //String templateContent = getTemplateContent(projectId, stage, status);
-        String templateContent=templateRepository.findById(projectId)
+        String templateContent=templateRepository.findByProjectId(projectId)
                 .map(t->t.getTemplateContent(stageStatus,status))
                 .orElse("");
 
@@ -118,7 +118,7 @@ public class ResultService {
             applicant.updateApplicantStatus(stage,request.status());
         }
 
-        //3. 저장 ( 이때 update 쿼리가 나가고 registerEvent 했던 이벤트들이 발행된다.)
+        //3. 저장 ( 이때 update 쿼리가 나가고 registerEvent 했던 이벤트들이 발행 )
         applicantRepository.saveAll(applicants);
     }
 

@@ -14,6 +14,6 @@ public interface MessageTemplateRepository{
     MessageTemplate save(MessageTemplate template);
 
     // 조회
-    Optional<MessageTemplate> findById(Long projectId);
+    Optional<MessageTemplate> findByProjectId(Long projectId);
 
 }
