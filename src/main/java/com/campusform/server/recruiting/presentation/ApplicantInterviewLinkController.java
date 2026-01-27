@@ -184,9 +184,9 @@ public class ApplicantInterviewLinkController {
     public ResponseEntity<SlotApplicantListResponse> getAllApplicantsBySlots(
             @PathVariable Long projectId,
             Authentication authentication) {
-        authService.extractUserId(authentication);
+        Long userId = authService.extractUserId(authentication);
 
-        SlotApplicantListResponse response = slotApplicantService.getAllApplicantsBySlots(projectId);
+        SlotApplicantListResponse response = slotApplicantService.getAllApplicantsBySlots(projectId, userId);
         return ResponseEntity.ok(response);
     }
 }
