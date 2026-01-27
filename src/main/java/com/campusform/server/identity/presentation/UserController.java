@@ -57,39 +57,4 @@ public class UserController {
         boolean enabled = notificationService.updateNotificationSetting(userId, request.enabled());
         return new NotificationSettingResponse(enabled);
     }
-
-    // /**
-    // * 프로필 이미지 업데이트
-    // */
-    // @PatchMapping("/profile-image")
-    // public UpdateProfileImageResponse updateProfileImage(
-    // @AuthenticationPrincipal OAuth2User oauth2User,
-    // @RequestParam("image") MultipartFile image) {
-    // Long userId = oauth2User.getAttribute("userId");
-    // String profileImageUrl = userService.updateProfileImage(userId, image);
-    // return new UpdateProfileImageResponse(profileImageUrl);
-    // }
-
-    // /**
-    // * 프로필 이미지 삭제
-    // */
-    // @DeleteMapping("/profile-image")
-    // public DeleteProfileImageResponse deleteProfileImage(
-    // @AuthenticationPrincipal OAuth2User oauth2User) {
-    // Long userId = oauth2User.getAttribute("userId");
-    // userService.deleteProfileImage(userId);
-    // return DeleteProfileImageResponse.success();
-    // }
-
-    // /**
-    // * 닉네임 수정
-    // */
-    // @PatchMapping("/nickname")
-    // public UpdateNicknameResponse updateNickname(
-    // @AuthenticationPrincipal OAuth2User oauth2User,
-    // @RequestBody UpdateNicknameRequest request) {
-    // Long userId = oauth2User.getAttribute("userId");
-    // String nickname = userService.updateNickname(userId, request.nickname());
-    // return new UpdateNicknameResponse(nickname);
-    // }
 }
