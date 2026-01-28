@@ -5,9 +5,11 @@ import com.campusform.server.recruiting.application.service.CommentService;
 import com.campusform.server.recruiting.application.dto.request.CommentRequest;
 import com.campusform.server.recruiting.application.dto.response.CommentCreateResponse;
 import com.campusform.server.recruiting.application.dto.response.CommentUpdateResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -22,9 +24,9 @@ public class CommentController {
     public ResponseEntity<CommentCreateResponse> createComment(
         @PathVariable Long projectId,
         @PathVariable Long applicantId,
-        @RequestParam(defaultValue = "document") String stage,
-        @RequestBody CommentRequest request,
-        Authentication authentication
+        @RequestParam String stage,
+        @RequestBody @Valid CommentRequest request,
+        @AuthenticationPrincipal Authentication authentication
     ){
         Long memberId = authService.extractUserId(authentication);
         CommentCreateResponse response = commentService.createComment(applicantId, memberId, request);
@@ -37,9 +39,9 @@ public class CommentController {
             @PathVariable Long projectId,
             @PathVariable Long applicantId,
             @PathVariable Long commentId,
-            @RequestParam(defaultValue = "document") String stage,
-            @RequestBody CommentRequest request,
-            Authentication authentication
+            @RequestParam String stage,
+            @RequestBody @Valid CommentRequest request,
+            @AuthenticationPrincipal Authentication authentication
     ) {
         Long memberId = authService.extractUserId(authentication);
 
@@ -53,11 +55,11 @@ public class CommentController {
     // 댓글 삭제
     @DeleteMapping("/{commentId}")
     public ResponseEntity<?> deleteComment(
-            @PathVariable Long projectId,
-            @PathVariable Long applicantId,
+//            @PathVariable Long projectId,
+//            @PathVariable Long applicantId,
             @PathVariable Long commentId,
-            @RequestParam(defaultValue = "document") String stage,
-            Authentication authentication
+            @RequestParam String stage,
+            @AuthenticationPrincipal Authentication authentication
     ) {
         Long memberId = authService.extractUserId(authentication);
 

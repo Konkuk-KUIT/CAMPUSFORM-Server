@@ -20,9 +20,9 @@ public class CommentService {
 
     // 1. 원본 댓글 작성
     public CommentCreateResponse createComment(Long applicantId, Long authorId, CommentRequest request){
-//        if (!applicantRepository.existsById(applicantId)) {
-//            throw new EntityNotFoundException("존재하지 않는 지원자입니다.");
-//        }
+        if (!applicantRepository.existsById(applicantId)) {
+            throw new EntityNotFoundException("존재하지 않는 지원자입니다.");
+        }
         Comment comment = Comment.createRoot(applicantId, authorId, request.getContent());
         commentRepository.save(comment);
 
@@ -45,6 +45,9 @@ public class CommentService {
     public CommentUpdateResponse updateComment(Long projectId, Long applicantId,Long commentId, Long authorId, CommentRequest request) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 댓글입니다."));
+        if(!comment.getApplicantId().equals(applicantId)){
+            throw new IllegalArgumentException("해당 지원자의 댓글이 아닙니다.");
+        }
 
         validateAuthor(comment, authorId); // 작성자 검증 분리
 

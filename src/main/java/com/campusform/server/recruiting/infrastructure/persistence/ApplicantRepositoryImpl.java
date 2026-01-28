@@ -67,5 +67,8 @@ public class ApplicantRepositoryImpl implements ApplicantRepository {
         return applicantJpaRepository.findByProjectIdAndInterviewStatus(projectId, status);
     }
 
-
+    @Override
+    public boolean existsById(Long applicantId) {
+        return applicantJpaRepository.existsById(applicantId);
+    }
 }

@@ -39,6 +39,9 @@ public class ResultController {
             @RequestParam String stage,
             @RequestBody SmsTemplateSaveRequest request
     ) {
+        if(!"DOCUMENT".equalsIgnoreCase(stage) && !"INTERVIEW".equalsIgnoreCase(stage)) {
+            throw new IllegalArgumentException("stage는 DOCUMENT or INTERVIEW만 허용됩니다.");
+        }
         smsService.saveTemplate(projectId, stage, request);
         return ResponseEntity.ok().build();
     }
@@ -60,14 +63,16 @@ public class ResultController {
 
     //결과 최종 통보
     @PostMapping("/announce")
-    public ResponseEntity<Void> announceResult(@RequestBody ResultAnnouncementRequest request){
+    public ResponseEntity<Void> announceResult(
+            @PathVariable Long projectId,
+            @RequestBody ResultAnnouncementRequest request){
         // 1. 만약 요청 데이터가 이상하면 여기서 컷! (Validation)
         if (request.applicantIds() == null || request.applicantIds().isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
 
         // 2. 서비스 호출
-        resultService.announceResults(request);
+        resultService.announceResults(projectId,request);
 
         // 3. 클라이언트에게 HTTP 상태 코드(200)로 응답
         return ResponseEntity.ok().build();

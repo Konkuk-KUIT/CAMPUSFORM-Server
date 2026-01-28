@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor // JSON 파싱용
 @AllArgsConstructor // 테스트 편하기위함
 public class CommentRequest {
+    @NotBlank(message = "댓글 내용은 필수입니다.")
     private String content;
 }
 

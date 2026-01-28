@@ -39,4 +39,5 @@ public interface ApplicantRepository{
     List<Applicant> findByProjectIdAndInterviewStatus(Long projectId, ApplicantStatus status);
 
 
+    boolean existsById(Long applicantId);
 }

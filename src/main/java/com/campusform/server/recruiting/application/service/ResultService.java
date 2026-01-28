@@ -108,7 +108,7 @@ public class ResultService {
 //    }
 
     @Transactional
-    public void announceResults(ResultAnnouncementRequest request){
+    public void announceResults(Long projectId, ResultAnnouncementRequest request){
         // 1. 대상 지원자 조회
         List<Applicant> applicants = applicantRepository.findAllById(request.applicantIds());
 
