@@ -3,6 +3,7 @@ package com.campusform.server.recruiting.application.service;
 import com.campusform.server.recruiting.application.dto.request.CommentRequest;
 import com.campusform.server.recruiting.application.dto.response.CommentCreateResponse;
 import com.campusform.server.recruiting.application.dto.response.CommentUpdateResponse;
+import com.campusform.server.recruiting.domain.model.applicant.value.StageStatus;
 import com.campusform.server.recruiting.domain.model.comment.Comment;
 import com.campusform.server.recruiting.domain.repository.ApplicantRepository;
 import com.campusform.server.recruiting.infrastructure.persistence.CommentRepository;

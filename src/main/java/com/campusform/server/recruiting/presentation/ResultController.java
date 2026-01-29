@@ -9,13 +9,14 @@ import com.campusform.server.recruiting.application.dto.response.ResultListRespo
 import com.campusform.server.recruiting.application.dto.response.SmsPreviewResponse;
 import com.campusform.server.recruiting.domain.model.applicant.value.ApplicantStatus;
 import com.campusform.server.recruiting.domain.model.applicant.value.StageStatus;
+import com.campusform.server.recruiting.domain.repository.ApplicantRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/projects/{projectId}")
+@RequestMapping("/api/projects/{projectId}")
 public class ResultController {
     private final ResultService resultService;
     private final SmsService smsService;
@@ -24,12 +25,9 @@ public class ResultController {
     @GetMapping("/results")
     public ResponseEntity<ResultListResponse> getResultList(
             @PathVariable Long projectId,
-            @RequestParam String stage,
+            @RequestParam StageStatus stage,
             @RequestParam ApplicantStatus status //pass
     ){
-        if (!"DOCUMENT".equalsIgnoreCase(stage) && !"INTERVIEW".equalsIgnoreCase(stage)) {
-            throw new IllegalArgumentException("stage는 DOCUMENT 또는 INTERVIEW만 허용됩니다");
-        }
         ResultListResponse response=resultService.getResults(projectId,stage,status);
         return ResponseEntity.ok(response);
     }
@@ -52,8 +50,8 @@ public class ResultController {
     public ResponseEntity<SmsPreviewResponse> getSmsPreview(
             @PathVariable Long projectId,
             @PathVariable Long applicantId,
-            @RequestParam String stage,
-            @RequestParam String status
+            @RequestParam StageStatus stage,
+            @RequestParam ApplicantStatus status
     ) {
         SmsPreviewResponse response = smsService.getPreview(projectId, applicantId,stage,status);
         return ResponseEntity.ok(response);
@@ -61,14 +59,16 @@ public class ResultController {
 
     //결과 최종 통보
     @PostMapping("/announce")
-    public ResponseEntity<Void> announceResult(@RequestBody ResultAnnouncementRequest request){
+    public ResponseEntity<Void> announceResult(
+            @PathVariable Long projectId,
+            @RequestBody ResultAnnouncementRequest request){
         // 1. 만약 요청 데이터가 이상하면 여기서 컷! (Validation)
         if (request.applicantIds() == null || request.applicantIds().isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
 
         // 2. 서비스 호출
-        resultService.announceResults(request);
+        resultService.announceResults(projectId,request);
 
         // 3. 클라이언트에게 HTTP 상태 코드(200)로 응답
         return ResponseEntity.ok().build();

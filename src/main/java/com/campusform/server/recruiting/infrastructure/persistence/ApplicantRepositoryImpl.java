@@ -1,6 +1,7 @@
 package com.campusform.server.recruiting.infrastructure.persistence;
 
 import com.campusform.server.recruiting.domain.model.applicant.value.ApplicantStatus;
+import com.campusform.server.recruiting.domain.model.applicant.value.StageStatus;
 import org.springframework.stereotype.Repository;
 
 import com.campusform.server.recruiting.domain.model.applicant.Applicant;
@@ -67,5 +68,38 @@ public class ApplicantRepositoryImpl implements ApplicantRepository {
         return applicantJpaRepository.findByProjectIdAndInterviewStatus(projectId, status);
     }
 
+    @Override
+    public boolean existsById(Long applicantId) {
+        return applicantJpaRepository.existsById(applicantId);
+    }
 
+    @Override
+    public List<Applicant> findByProjectIdOrderByBookmarkedDescIdDesc(Long projectId) {
+        return applicantJpaRepository.findByProjectIdOrderByBookmarkedDescIdDesc(projectId);
+    }
+    @Override
+    public List<Applicant> findByProjectIdOrderByNameAsc(Long projectId){
+        return applicantJpaRepository.findByProjectIdOrderByBookmarkedDescNameAsc(projectId);
+    }
+    @Override
+    public List<Applicant> findByProjectIdOrderByNameDesc(Long projectId){
+        return applicantJpaRepository.findByProjectIdOrderByNameDesc(projectId);
+    }
+    @Override
+    public List<Applicant> findByProjectIdAndStage(Long projectId, StageStatus stage){
+        return applicantJpaRepository.findByProjectIdAndStage(projectId, stage);
+    }
+
+//    public long countByProjectIdAndStatus(Long projectId, ApplicantStatus applicantStatus){
+//        return applicantJpaRepository.countByProjectIdAndStatus(projectId, applicantStatus);
+//    }
+    @Override
+    public long countByProjectIdAndDocumentStatus(Long projectId, ApplicantStatus status) {
+        return applicantJpaRepository.countByProjectIdAndDocumentStatus(projectId, status);
+    }
+
+    @Override
+    public long countByProjectIdAndInterviewStatus(Long projectId, ApplicantStatus status) {
+        return applicantJpaRepository.countByProjectIdAndInterviewStatus(projectId, status);
+    }
 }

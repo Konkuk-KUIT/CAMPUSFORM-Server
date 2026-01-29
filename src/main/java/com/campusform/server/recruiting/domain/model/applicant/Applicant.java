@@ -56,14 +56,13 @@ public class Applicant extends AbstractAggregateRoot<Applicant> {
     @Column(nullable = false)
     private String email;
     private String position;
-
+    private StageStatus stage;
     /**
      * 서류 단계 심사 상태
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "document_status", nullable = false)
     private ApplicantStatus documentStatus = ApplicantStatus.HOLD;
-
     /**
      * 면접 단계 심사 상태
      */
@@ -84,6 +83,11 @@ public class Applicant extends AbstractAggregateRoot<Applicant> {
     @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    //누르면 true <-> false 바뀜
+    public void Bookmark(){
+        this.bookmarked = !this.bookmarked;
+    }
 
     public static Applicant create(Long projectId, String name, String email, String phone, String gender,
             String school, String major, String position) {
