@@ -19,7 +19,10 @@ import lombok.NoArgsConstructor;
  */
 @Entity
 @Table(name = "interview_scheduled_slot_applicants", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_slot_applicant", columnNames = { "schedule_slot_id", "applicant_id" })
+        // 같은 슬롯에 같은 지원자가 중복으로 들어가는 것을 방지
+        @UniqueConstraint(name = "uk_slot_applicant", columnNames = { "schedule_slot_id", "applicant_id" }),
+        // 한 지원자는 전체 스케줄에서 단 1개의 슬롯에만 배정될 수 있음(중복 배정 방지)
+        @UniqueConstraint(name = "uk_applicant_single_slot", columnNames = { "applicant_id" })
 })
 // indexes = @Index(name = "idx_applicant_id", columnList = "applicant_id"))
 @Getter

@@ -15,6 +15,14 @@ public interface InterviewScheduledSlotJpaRepository extends JpaRepository<Inter
 
     List<InterviewScheduledSlot> findByProjectId(Long projectId);
 
+    /**
+     * OneToMany(LAZY)로 인한 N+1을 방지하기 위한 fetch join 전용 메서드입니다.
+     */
+    @Query("SELECT DISTINCT s FROM InterviewScheduledSlot s " +
+            "LEFT JOIN FETCH s.applicants " +
+            "WHERE s.projectId = :projectId")
+    List<InterviewScheduledSlot> findByProjectIdWithApplicants(@Param("projectId") Long projectId);
+
     @Modifying
     @Query("DELETE FROM InterviewScheduledSlot s WHERE s.projectId = :projectId")
     void deleteByProjectId(@Param("projectId") Long projectId);

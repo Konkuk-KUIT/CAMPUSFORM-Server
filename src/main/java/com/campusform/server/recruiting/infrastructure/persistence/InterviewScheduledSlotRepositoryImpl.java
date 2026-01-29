@@ -32,6 +32,11 @@ public class InterviewScheduledSlotRepositoryImpl implements InterviewScheduledS
     }
 
     @Override
+    public List<InterviewScheduledSlot> findByProjectIdWithApplicants(Long projectId) {
+        return jpaRepository.findByProjectIdWithApplicants(projectId);
+    }
+
+    @Override
     @Transactional
     public void deleteByProjectId(Long projectId) {
         jpaRepository.deleteByProjectId(projectId);

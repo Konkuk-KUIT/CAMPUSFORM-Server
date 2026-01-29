@@ -65,6 +65,13 @@ public interface ApplicantRepository{
     Optional<Applicant> findById(Long applicantId);
 
     /**
+     * 프로젝트의 전체 지원자 목록 조회
+     * 
+     * 최종 면접시간(Manual 우선 + Auto fallback) 조회 API에서 사용됩니다.
+     */
+    List<Applicant> findByProjectId(Long projectId);
+
+    /**
      * 프로젝트ID, 이름, 전화번호로 지원자 조회
      */
     Optional<Applicant> findByProjectIdAndNameAndPhone(Long projectId, String name, String phone);
