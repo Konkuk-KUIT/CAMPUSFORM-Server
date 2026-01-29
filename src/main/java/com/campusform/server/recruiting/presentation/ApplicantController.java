@@ -1,7 +1,10 @@
 package com.campusform.server.recruiting.presentation;
 
+import com.campusform.server.recruiting.application.dto.request.ApplicantStatusUpdateRequest;
+import com.campusform.server.recruiting.application.dto.response.ApplicantDetailResponse;
 import com.campusform.server.recruiting.application.dto.response.ApplicantListResponse;
 import com.campusform.server.recruiting.application.dto.response.ApplicantResponse;
+import com.campusform.server.recruiting.application.dto.response.ApplicantStatusUpdateResponse;
 import com.campusform.server.recruiting.application.service.ApplicantService;
 import com.campusform.server.recruiting.domain.model.applicant.value.StageStatus;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/projects/{projectId}/applicants") // 공통 URL
+@RequestMapping("/api/projects/{projectId}/applicants") // 공통 URL
 @RequiredArgsConstructor
 public class ApplicantController {
 
@@ -33,7 +36,24 @@ public class ApplicantController {
     }
 
     /**
-     * 2. 찜하기 버튼 클릭 (토글)
+     * 2. 지원자 상태변경 (보류/합격/불합격)
+     */
+    @PatchMapping("/{applicantId}")
+    public ResponseEntity<ApplicantStatusUpdateResponse> updateStatus(
+            @PathVariable Long applicantId,
+            @RequestParam StageStatus stage, // ?stage=DOCUMENT
+            @RequestBody ApplicantStatusUpdateRequest request // Body { "status": "PASS" }
+    ) {
+        ApplicantStatusUpdateResponse response = applicantService.updateApplicantStatus(
+                applicantId,
+                stage,
+                request.getStatus()
+        );
+
+        return ResponseEntity.ok(response);
+    }
+    /**
+     * 3. 찜하기 버튼 클릭 (토글)
      * PATCH /projects/1/applicants/{applicantId}/bookmark
      * (경로는 편한대로 설정, 보통 리소스 하위에 둠)
      */
@@ -45,5 +65,17 @@ public class ApplicantController {
         // 서비스의 토글 메서드 호출
         applicantService.Bookmark(applicantId);
         return ResponseEntity.ok().build();
+    }
+    /**
+     * 4. 지원자 상세정보
+     *
+     */
+    @GetMapping("/{applicantId}")
+    public ResponseEntity<ApplicantDetailResponse> getApplicantDetail(
+            @PathVariable Long applicantId,
+            @RequestParam StageStatus stage
+    ){
+        ApplicantDetailResponse response = applicantService.getApplicantDetail(applicantId, stage);
+        return ResponseEntity.ok(response);
     }
 }

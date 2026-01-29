@@ -1,7 +1,9 @@
 package com.campusform.server.recruiting.application.service;
 
+import com.campusform.server.recruiting.application.dto.response.ApplicantDetailResponse;
 import com.campusform.server.recruiting.application.dto.response.ApplicantListResponse;
 import com.campusform.server.recruiting.application.dto.response.ApplicantResponse;
+import com.campusform.server.recruiting.application.dto.response.ApplicantStatusUpdateResponse;
 import com.campusform.server.recruiting.domain.model.applicant.Applicant;
 import com.campusform.server.recruiting.domain.model.applicant.value.ApplicantStatus;
 import com.campusform.server.recruiting.domain.model.applicant.value.StageStatus;
@@ -10,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,8 +60,7 @@ public class ApplicantService {
                     applicants = applicantRepository.findByProjectIdOrderByNameAsc(projectId);
                     break;
             }
-        }
-        else{
+        }else{
             throw new IllegalArgumentException("서류 또는 면접 단계를 반드시 선택해야 합니다.");
         }
         // DTO로 변환하기
@@ -85,11 +87,65 @@ public class ApplicantService {
                 .applicants(applicantDtos)
                 .build();
     }
+    @Transactional
+    public ApplicantStatusUpdateResponse updateApplicantStatus(Long applicantId, StageStatus stage, ApplicantStatus status) {
+        // 1. 지원자 찾기
+        Applicant applicant = applicantRepository.findById(applicantId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 지원자입니다."));
+        // 2. 상태 변경 (도메인 로직 호출)
+        applicant.updateApplicantStatus(stage, status);
+        // 3. 변경된 결과 응답 생성 , 현재 상태 확인!
+        ApplicantStatus updatedStatus = (stage == StageStatus.DOCUMENT)
+                ? applicant.getDocumentStatus()
+                : applicant.getInterviewStatus();
+
+        return ApplicantStatusUpdateResponse.builder()
+                .applicantId(applicant.getId())
+                .currentStatus(updatedStatus.name())
+                .updateAt(LocalDateTime.now()) // 혹은 applicant.getUpdatedAt()
+                .build();
+    }
     // 찜하기 토글
     @Transactional
     public void Bookmark(Long applicantId) {
         Applicant applicant = applicantRepository.findById(applicantId)
                 .orElseThrow(() -> new IllegalArgumentException("지원자가 존재하지 않습니다."));
         applicant.Bookmark();
+    }
+
+    @Transactional(readOnly = true)
+    public ApplicantDetailResponse getApplicantDetail(Long applicantId, StageStatus stage) {
+        // 1. 지원자 조회 (없으면 예외 발생)
+        Applicant applicant = applicantRepository.findById(applicantId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 지원자입니다."));
+
+        // 2. 현재 단계(Stage)에 맞는 합격 상태(Status) 가져오기
+        ApplicantStatus currentStatus = (stage == StageStatus.DOCUMENT)
+                ? applicant.getDocumentStatus()
+                : applicant.getInterviewStatus();
+
+        // 3. [수정] 답변 리스트 변환 로직을 Service 내부로 가져옴
+        // (DTO의 from 메서드 대신 여기서 직접 Builder로 변환)
+        List<ApplicantDetailResponse.AnswerDto> answerDtos = applicant.getExtraAnswers().stream()
+                .map(answer -> ApplicantDetailResponse.AnswerDto.builder()
+                        .question(answer.getQuestionText())
+                        .answer(answer.getAnswerText())
+                        .build())
+                .toList();
+
+        // 4. 응답 DTO 빌드
+        return ApplicantDetailResponse.builder()
+                .applicantId(applicant.getId())
+                .name(applicant.getName())
+                .gender(applicant.getGender())
+                .school(applicant.getSchool())
+                .major(applicant.getMajor())
+                .position(applicant.getPosition())
+                .phoneNumber(applicant.getPhone())
+                .email(applicant.getEmail())
+                .status(currentStatus.name())
+                .isFavorite(applicant.getBookmarked())
+                .answers(answerDtos) // 위에서 만든 리스트를 넣어줌
+                .build();
     }
 }
