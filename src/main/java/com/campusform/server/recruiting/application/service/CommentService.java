@@ -3,6 +3,7 @@ package com.campusform.server.recruiting.application.service;
 import com.campusform.server.recruiting.application.dto.request.CommentRequest;
 import com.campusform.server.recruiting.application.dto.response.CommentCreateResponse;
 import com.campusform.server.recruiting.application.dto.response.CommentUpdateResponse;
+import com.campusform.server.recruiting.domain.model.applicant.value.StageStatus;
 import com.campusform.server.recruiting.domain.model.comment.Comment;
 import com.campusform.server.recruiting.domain.repository.ApplicantRepository;
 import com.campusform.server.recruiting.infrastructure.persistence.CommentRepository;
@@ -33,6 +34,9 @@ public class CommentService {
     public CommentCreateResponse createReply(Long parentId, Long applicantId, Long authorId, CommentRequest request){
         Comment parent = commentRepository.findById(parentId)
                 .orElseThrow(() -> new EntityNotFoundException(" 부모 댓글이 없습니다. "));
+        if (!parent.getApplicantId().equals(applicantId)) {
+            throw new IllegalArgumentException("대댓글은 같은 지원자의 댓글에만 작성 가능합니다.");
+        }
 
         // Factory Method가 대댓글 깊이 제한(depth check)을 내부적으로 수행합니다.
         Comment reply = Comment.createReply(parent, applicantId, authorId, request.getContent());
@@ -42,9 +46,10 @@ public class CommentService {
     }
 
     // 3. 댓글 수정
-    public CommentUpdateResponse updateComment(Long projectId, Long applicantId,Long commentId, Long authorId, CommentRequest request) {
+    public CommentUpdateResponse updateComment(Long applicantId,Long commentId, Long authorId, CommentRequest request) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 댓글입니다."));
+
         if(!comment.getApplicantId().equals(applicantId)){
             throw new IllegalArgumentException("해당 지원자의 댓글이 아닙니다.");
         }

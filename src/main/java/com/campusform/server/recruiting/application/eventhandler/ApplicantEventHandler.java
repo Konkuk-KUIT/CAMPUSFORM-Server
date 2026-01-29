@@ -30,7 +30,7 @@ public class ApplicantEventHandler {
             // 메시지 생성 위임 (복잡한 if문 사라짐)
             // DB 템플릿 우선 사용
             String message = messageGenerator.generateMessage(
-                    event.applicantId(),
+                    event.projectId(),
                     event.stage(),
                     event.status(),
                     event.applicantName(),

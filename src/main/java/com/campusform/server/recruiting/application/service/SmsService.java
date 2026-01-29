@@ -32,15 +32,14 @@ public class SmsService {
      * @param request   수정사항 문자열을 Enum으로 변환하여 Type Safety를 확보함
      */
     @Transactional
-    public void saveTemplate(Long projectId, String stage, SmsTemplateSaveRequest request) {
-        StageStatus stageStatus = StageStatus.valueOf(stage.toUpperCase());
+    public void saveTemplate(Long projectId, StageStatus stage, SmsTemplateSaveRequest request) {
         ApplicantStatus applicantStatus = request.getStatus();
         // 1. 없으면 생성, 있으면 가져오기
         MessageTemplate template = templateRepository.findByProjectId(projectId)
                 .orElseGet(() -> templateRepository.save(MessageTemplate.createEmpty(projectId)));
 
         // 2. 내용 업데이트 (엔티티 메서드 활용)
-        template.updateTemplate(stageStatus, applicantStatus, request.getContent());
+        template.updateTemplate(stage, applicantStatus, request.getContent());
         // Dirty Checking으로 자동 저장됨
     }
 
@@ -60,8 +59,8 @@ public class SmsService {
                 .orElseThrow(() -> new IllegalArgumentException("지원자가 없습니다."));
 
         // 3. 템플릿 조회
-        MessageTemplate templateContent = templateRepository.findByProjectId(projectId)
-                .orElse(MessageTemplate.createEmpty(projectId));
+//        MessageTemplate templateContent = templateRepository.findByProjectId(projectId)
+//                .orElse(MessageTemplate.createEmpty(projectId));
 
         //4. 메시지 생성 로직을 엔티티에게 위임 -> DDD 형태!!!
         // 변수 바꾸기를 엔티티에서 알아서 할거임

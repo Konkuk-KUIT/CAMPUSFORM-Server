@@ -28,7 +28,7 @@ public class MessageGenerator {
      */
     public String generateMessage(Long projectId,StageStatus stage, ApplicantStatus status, String applicantName, String positionName) {
         // 1. 템플릿 내용 가져오기
-        String template = getTemplateContent(projectId,stage, status);
+        String template = getTemplateContent(projectId, stage, status);
 
         // 2. 템플릿이 없거나 비어있으면 null 반환 (발송 안함)
         if (template == null || template.isBlank()) {

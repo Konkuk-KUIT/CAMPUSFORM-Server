@@ -11,7 +11,7 @@ public class SmsSenderImpl implements SmsSender {
 
     @Override
     public void sendSms(String phoneNumber, String content) {
-        // 1. 실제 외부 API 연동 코드 (예: CoolSMS, Twilio)
+        // 1. 실제 외부 API 연동 코드
         /*
         Message coolsms = new Message(apiKey, apiSecret);
         HashMap<String, String> params = new HashMap<>();

@@ -58,9 +58,10 @@ public class SecurityConfig {
                                                 "/api/auth/**",
                                                 "/swagger-ui/**",
                                                 "/v3/api-docs/**",
-                                                "/h2-console/**",
-                                                "/projects/**/comments/**")
+                                                "/h2-console/**")
+
                                 .permitAll()
+
                                 // 나머지 요청은 인증 필요
                                 .anyRequest().authenticated())
 

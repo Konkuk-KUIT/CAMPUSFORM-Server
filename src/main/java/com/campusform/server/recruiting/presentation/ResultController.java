@@ -8,6 +8,7 @@ import com.campusform.server.recruiting.application.dto.request.SmsTemplateSaveR
 import com.campusform.server.recruiting.application.dto.response.ResultListResponse;
 import com.campusform.server.recruiting.application.dto.response.SmsPreviewResponse;
 import com.campusform.server.recruiting.domain.model.applicant.value.ApplicantStatus;
+import com.campusform.server.recruiting.domain.model.applicant.value.StageStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,12 +37,9 @@ public class ResultController {
     @PostMapping("/sms/templates")
     public ResponseEntity<Void> saveSmsTemplate(
             @PathVariable Long projectId,
-            @RequestParam String stage,
+            @RequestParam StageStatus stage,
             @RequestBody SmsTemplateSaveRequest request
     ) {
-        if(!"DOCUMENT".equalsIgnoreCase(stage) && !"INTERVIEW".equalsIgnoreCase(stage)) {
-            throw new IllegalArgumentException("stage는 DOCUMENT or INTERVIEW만 허용됩니다.");
-        }
         smsService.saveTemplate(projectId, stage, request);
         return ResponseEntity.ok().build();
     }
