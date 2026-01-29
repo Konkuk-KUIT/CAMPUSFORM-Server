@@ -31,7 +31,7 @@ public class CommentController {
         if (oauth2User == null) {
             throw new IllegalArgumentException("로그인이 필요합니다.");
         }
-        Long memberId = oauth2User.getAttribute("memberId");
+        Long memberId = oauth2User.getAttribute("userId");
         CommentCreateResponse response = commentService.createComment(applicantId, memberId, request);
         return ResponseEntity.ok(response);
     }
