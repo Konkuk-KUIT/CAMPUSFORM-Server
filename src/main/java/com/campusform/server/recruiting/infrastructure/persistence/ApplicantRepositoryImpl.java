@@ -1,15 +1,16 @@
 package com.campusform.server.recruiting.infrastructure.persistence;
 
-import com.campusform.server.recruiting.domain.model.applicant.value.ApplicantStatus;
-import com.campusform.server.recruiting.domain.model.applicant.value.StageStatus;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.stereotype.Repository;
 
 import com.campusform.server.recruiting.domain.model.applicant.Applicant;
 import com.campusform.server.recruiting.domain.repository.ApplicantRepository;
+import com.campusform.server.recruiting.domain.model.applicant.value.ApplicantStatus;
+import com.campusform.server.recruiting.domain.model.applicant.value.StageStatus;
 
 import lombok.RequiredArgsConstructor;
-
-import java.util.List;
 
 /**
  * ApplicantRepository 구현체
@@ -101,5 +102,15 @@ public class ApplicantRepositoryImpl implements ApplicantRepository {
     @Override
     public long countByProjectIdAndInterviewStatus(Long projectId, ApplicantStatus status) {
         return applicantJpaRepository.countByProjectIdAndInterviewStatus(projectId, status);
+    }
+
+    @Override
+    public Optional<Applicant> findByProjectIdAndNameAndPhone(Long projectId, String name, String phone) {
+        return applicantJpaRepository.findByProjectIdAndNameAndPhone(projectId, name, phone);
+    }
+
+    @Override
+    public List<Applicant> findByIds(List<Long> applicantIds) {
+        return applicantJpaRepository.findByIdIn(applicantIds);
     }
 }
