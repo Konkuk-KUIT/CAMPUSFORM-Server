@@ -1,4 +1,4 @@
-spring:
+ spring:
   profiles:
     active: temporary
   
@@ -35,7 +35,7 @@ spring:
             scope:
               - email
               - profile
-
+---
 # OAuth2 리다이렉트 URL 설정
 app:
   oauth2:

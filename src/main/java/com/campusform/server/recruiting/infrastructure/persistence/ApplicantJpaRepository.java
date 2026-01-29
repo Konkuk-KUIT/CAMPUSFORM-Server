@@ -1,6 +1,7 @@
 package com.campusform.server.recruiting.infrastructure.persistence;
 
 import com.campusform.server.recruiting.domain.model.applicant.value.ApplicantStatus;
+import com.campusform.server.recruiting.domain.model.applicant.value.StageStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -17,8 +18,17 @@ import java.util.List;
 public interface ApplicantJpaRepository extends JpaRepository<Applicant, Long> {
     // JPA가 이름만 보고 자동으로 쿼리를 만들어줌.
     long countByProjectId(Long projectId);
+    //long countByProjectIdAndStatus(Long projectId, ApplicantStatus applicantStatus);
+    List<Applicant> findByProjectIdOrderByBookmarkedDescIdDesc(Long projectId);
+    List<Applicant> findByProjectIdOrderByBookmarkedDescNameAsc(Long projectId);
+    List<Applicant> findByProjectIdOrderByNameDesc(Long projectId);
 
     List<Applicant> findByProjectIdAndDocumentStatus(Long projectId, ApplicantStatus documentStatus);
-
     List<Applicant> findByProjectIdAndInterviewStatus(Long projectId, ApplicantStatus interviewStatus);
+
+    // JPA가 알아서 쿼리를 만들어줍니다.
+    long countByProjectIdAndDocumentStatus(Long projectId, ApplicantStatus status);
+    long countByProjectIdAndInterviewStatus(Long projectId, ApplicantStatus status);
+
+    List<Applicant> findByProjectIdAndStage(Long projectId, StageStatus stage);
 }

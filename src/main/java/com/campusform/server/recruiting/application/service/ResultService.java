@@ -22,14 +22,13 @@ public class ResultService {
     private final MessageTemplateRepository templateRepository;
 
     // 합,불 명단/ 통계 조회
-    public ResultListResponse getResults(Long projectId, String stage, ApplicantStatus status){
+    public ResultListResponse getResults(Long projectId, StageStatus stage, ApplicantStatus status){
 
         //1. Enum으로 변환
-        StageStatus stageStatus = StageStatus.valueOf(stage.toUpperCase());
         List<Applicant> applicants;
 
         // 2. 단계(Stage)에 따라 데이터 조회 분기 처리
-        if (stageStatus==StageStatus.DOCUMENT) {
+        if (stage==StageStatus.DOCUMENT) {
             applicants = applicantRepository.findByProjectIdAndDocumentStatus(projectId, status);
         } else {
             // INTERVIEW
@@ -51,7 +50,7 @@ public class ResultService {
         // 4. 저장된 템플릿 가져오기 (없으면 빈 문자열)
         //String templateContent = getTemplateContent(projectId, stage, status);
         String templateContent=templateRepository.findByProjectId(projectId)
-                .map(t->t.getTemplateContent(stageStatus,status))
+                .map(t->t.getTemplateContent(stage,status))
                 .orElse("");
 
         // 5. DTO 변환 및 반환

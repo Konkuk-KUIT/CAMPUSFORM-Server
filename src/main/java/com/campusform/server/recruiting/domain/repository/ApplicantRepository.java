@@ -2,6 +2,7 @@ package com.campusform.server.recruiting.domain.repository;
 
 import com.campusform.server.recruiting.domain.model.applicant.Applicant;
 import com.campusform.server.recruiting.domain.model.applicant.value.ApplicantStatus;
+import com.campusform.server.recruiting.domain.model.applicant.value.StageStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -32,12 +33,28 @@ public interface ApplicantRepository{
     // 프로젝트의 전체 지원자 수 (통계용)
     long countByProjectId(Long projectId);
 
-    // 1. 서류 단계 상태로 조회
+    // 서류 단계 상태로 조회
     List<Applicant> findByProjectIdAndDocumentStatus(Long projectId, ApplicantStatus status);
 
-    // 2. 면접 단계 상태로 조회
+    // 면접 단계 상태로 조회
     List<Applicant> findByProjectIdAndInterviewStatus(Long projectId, ApplicantStatus status);
 
+    // 서류(Document) 카운트
+    long countByProjectIdAndDocumentStatus(Long projectId, ApplicantStatus status);
+
+    // 면접(Interview) 카운트
+    long countByProjectIdAndInterviewStatus(Long projectId, ApplicantStatus status);
 
     boolean existsById(Long applicantId);
+
+    // 1. 이름 오름차순
+    List<Applicant> findByProjectIdOrderByNameAsc(Long projectId);
+    // 2. 이름 내림차순
+    List<Applicant> findByProjectIdOrderByNameDesc(Long projectId);
+    // 3. 찜한 순
+    List<Applicant> findByProjectIdOrderByBookmarkedDescIdDesc(Long projectId);
+
+    List<Applicant> findByProjectIdAndStage(Long projectId, StageStatus stage);
+
+
 }

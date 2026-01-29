@@ -48,10 +48,7 @@ public class SmsService {
      * stage와 status를 입력받아 동적으로 템플릿 선택, 변수 치환 로직을 엔티티에 위임한다.
      */
     @Transactional(readOnly = true)
-    public SmsPreviewResponse getPreview(Long projectId, Long applicantId, String stageStr, String statusStr) {
-        // 1. Enum 변환
-        StageStatus stageStatus = StageStatus.valueOf(stageStr.toUpperCase());
-        ApplicantStatus applicantStatus = ApplicantStatus.valueOf(statusStr.toUpperCase());
+    public SmsPreviewResponse getPreview(Long projectId, Long applicantId, StageStatus stageStr, ApplicantStatus statusStr) {
 
         // 2. 지원자 조회
         Applicant applicant = applicantRepository.findById(applicantId)
@@ -66,8 +63,8 @@ public class SmsService {
         // 변수 바꾸기를 엔티티에서 알아서 할거임
         String finalContent = messageGenerator.generateMessage(
                 projectId,
-                stageStatus,
-                applicantStatus,
+                stageStr,
+                statusStr,
                 applicant.getName(),
                 applicant.getPosition() != null ? applicant.getPosition() : "-"
         );

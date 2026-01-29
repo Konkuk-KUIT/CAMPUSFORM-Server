@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class SmsSenderImpl implements SmsSender {
+public class  SmsSenderImpl implements SmsSender {
     // @Value("${coolsms.api.key}") ... API 키 주입
 
     @Override
