@@ -114,15 +114,15 @@ public class Applicant extends AbstractAggregateRoot<Applicant> {
             if (this.documentStatus == status) {
                 return;
             }
-
+            this.documentStatus = status;
         }else{
             if(stage==StageStatus.INTERVIEW) {
                 if (this.interviewStatus == status) {
                     return;
                 }
+                this.interviewStatus = status;
             }
         }
-        this.documentStatus = status;
 
         this.registerEvent(new ApplicantUpdated(
                 this.id,

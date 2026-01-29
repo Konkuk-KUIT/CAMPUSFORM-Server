@@ -112,6 +112,13 @@ public class ResultService {
         // 1. 대상 지원자 조회
         List<Applicant> applicants = applicantRepository.findAllById(request.applicantIds());
 
+        // 프로젝트 소속 검증
+        boolean allBelongToProject = applicants.stream()
+                .allMatch(a -> projectId.equals(a.getProjectId()));
+        if (!allBelongToProject) {
+            throw new IllegalArgumentException("해당 프로젝트에 속하지 않는 지원자가 포함되어 있습니다.");
+        }
+
         StageStatus stage = StageStatus.valueOf(request.stage().toUpperCase());
         //2. 상태 변경 (도메인 로직 실행)
         for (Applicant applicant : applicants){

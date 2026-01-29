@@ -1,6 +1,5 @@
 package com.campusform.server.recruiting.domain.model.comment;
 
-
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -75,7 +74,7 @@ public class Comment {
     private LocalDateTime updatedAt;
 
     // 1. Private 생성자 : 외부에서 new Content() 금지
-    public Comment(Long applicantId, Long authorId, String content, Comment parent) {
+    private Comment(Long applicantId, Long authorId, String content, Comment parent) {
         if(content == null || content.isBlank()){
             throw new IllegalArgumentException("Content cannot be null or blank");
         }

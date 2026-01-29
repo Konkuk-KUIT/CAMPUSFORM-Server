@@ -103,8 +103,8 @@ public class MessageTemplate{
                     : templateDocumentFail;
         }else if(stage==StageStatus.INTERVIEW){
             return status == ApplicantStatus.PASS
-                    ? templateDocumentPass
-                    : templateDocumentFail;
+                    ? templateInterviewPass
+                    : templateInterviewFail;
         }
         return "";
     }

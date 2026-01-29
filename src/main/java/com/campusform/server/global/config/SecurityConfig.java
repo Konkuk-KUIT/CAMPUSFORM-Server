@@ -5,6 +5,7 @@ import java.util.Arrays;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -24,6 +25,7 @@ import lombok.RequiredArgsConstructor;
  *
  * OAuth2 로그인 및 세션 기반 인증 설정
  */
+@Profile("!temporary") // API 테스트 환경에서는 스프링 시큐리티 비활성화
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -57,7 +59,9 @@ public class SecurityConfig {
                                                 "/swagger-ui/**",
                                                 "/v3/api-docs/**",
                                                 "/h2-console/**")
+
                                 .permitAll()
+
                                 // 나머지 요청은 인증 필요
                                 .anyRequest().authenticated())
 
