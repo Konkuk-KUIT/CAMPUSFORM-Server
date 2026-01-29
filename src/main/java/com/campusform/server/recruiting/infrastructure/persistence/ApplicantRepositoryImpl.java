@@ -105,6 +105,11 @@ public class ApplicantRepositoryImpl implements ApplicantRepository {
     }
 
     @Override
+    public Optional<Applicant> findById(Long applicantId) {
+        return applicantJpaRepository.findById(applicantId);
+    }
+
+    @Override
     public Optional<Applicant> findByProjectIdAndNameAndPhone(Long projectId, String name, String phone) {
         return applicantJpaRepository.findByProjectIdAndNameAndPhone(projectId, name, phone);
     }

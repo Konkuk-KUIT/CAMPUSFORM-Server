@@ -60,6 +60,11 @@ public interface ApplicantRepository{
     List<Applicant> findByProjectIdAndStage(Long projectId, StageStatus stage);
 
     /**
+     * ID로 지원자 조회
+     */
+    Optional<Applicant> findById(Long applicantId);
+
+    /**
      * 프로젝트ID, 이름, 전화번호로 지원자 조회
      */
     Optional<Applicant> findByProjectIdAndNameAndPhone(Long projectId, String name, String phone);

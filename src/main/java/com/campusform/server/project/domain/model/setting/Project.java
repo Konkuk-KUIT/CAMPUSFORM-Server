@@ -109,7 +109,7 @@ public class Project {
 
         if (!isAdmin) {
             throw new IllegalArgumentException(
-                    "해당 사용자는 프로젝트 관리자가 아닙니다. userId=" + userId + ", projectId=" + this.id);
+                    "해당 사용자는 프로젝트의 관리자가 아니거나 접근할 권한이 없습니다. userId=" + userId + ", projectId=" + this.id);
         }
     }
 
