@@ -56,6 +56,7 @@ public class Applicant extends AbstractAggregateRoot<Applicant> {
     @Column(nullable = false)
     private String email;
     private String position;
+    @Enumerated(EnumType.STRING)
     private StageStatus stage;
     /**
      * 서류 단계 심사 상태
