@@ -43,7 +43,6 @@ GET http://localhost:8080/api/projects/google-oauth/authorize-url
 }
 ```
 
-
 ### 3단계: 브라우저에서 Google Sheets 권한 승인
 
 1. 2단계에서 받은 `authorizeUrl` 값을 복사

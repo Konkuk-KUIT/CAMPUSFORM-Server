@@ -197,9 +197,6 @@ public class GoogleOAuthTokenService {
 
     /**
      * 토큰 존재 여부 및 만료 시간 검증
-     * 
-     * @param ownerId 토큰 소유자 ID
-     * @return 토큰이 존재하고 유효하면 true, 없거나 만료되었으면 false
      */
     public boolean hasValidToken(Long ownerId) {
         Optional<GoogleOAuthToken> tokenOpt = tokenRepository.findByOwnerId(ownerId);
@@ -220,12 +217,9 @@ public class GoogleOAuthTokenService {
     }
 
     /**
-     * 유효한 토큰 조회 (만료 시 자동 갱신)
+     * 유효한 토큰 조회
+     * 토큰이 만료되었지만 Refresh Token이 있으면 자동으로 갱신
      * 
-     * 토큰이 만료되었지만 Refresh Token이 있으면 자동으로 갱신합니다.
-     * 
-     * @param ownerId 토큰 소유자 ID
-     * @return 유효한 토큰 (갱신된 경우 포함)
      * @throws TokenNotFoundException 토큰이 없을 때
      * @throws TokenExpiredException  Refresh Token도 만료되었거나 없을 때
      */
@@ -262,11 +256,8 @@ public class GoogleOAuthTokenService {
 
     /**
      * Refresh Token을 사용하여 Access Token 갱신
+     * Google Token Endpoint에 POST 요청하여 새로운 Access Token을 발급
      * 
-     * Google Token Endpoint에 POST 요청하여 새로운 Access Token을 발급받습니다.
-     * 
-     * @param ownerId 토큰 소유자 ID
-     * @return 갱신된 Access Token
      * @throws TokenNotFoundException 토큰이 없을 때
      * @throws TokenExpiredException  Refresh Token이 없거나 갱신 실패 시
      */
@@ -286,11 +277,10 @@ public class GoogleOAuthTokenService {
         // 구글 토큰 엔드포인트 URL
         String tokenUrl = "https://oauth2.googleapis.com/token";
 
-        // 요청 헤더 설정
+        // 요청 헤더 설정 및 바디 설정
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        // 요청 바디 설정
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("client_id", clientId);
         body.add("client_secret", clientSecret);

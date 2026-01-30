@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 
 /**
  * 프로젝트 응답 DTO
- * 클라이언트에게 반환할 프로젝트 정보를 담는 객체입니다.
  */
 @Getter
 @NoArgsConstructor
@@ -25,18 +24,13 @@ public class ProjectResponse {
     private Long ownerId;
     private String state;
     private String sheetUrl;
+    private String sheetSyncStatus;
+    private LocalDateTime lastSyncedAt; 
     private LocalDate startAt;
     private LocalDate endAt;
     private List<Long> admins;
     private LocalDateTime createdAt;
 
-    /**
-     * Project 엔티티를 ProjectResponse로 변환
-     * 엔티티를 직접 노출하지 않고 DTO로 변환하여 반환합니다.
-     * 
-     * @param project Project 엔티티
-     * @return ProjectResponse DTO
-     */
     public static ProjectResponse from(Project project) {
         return new ProjectResponse(
                 project.getId(),
@@ -44,6 +38,8 @@ public class ProjectResponse {
                 project.getOwnerId(),
                 project.getState().name(),
                 project.getSheetUrl(),
+                project.getLastSyncStatus().name(), 
+                project.getLastSyncedAt(), 
                 project.getStartAt(),
                 project.getEndAt(),
                 project.getAdmins().stream().map(i -> i.getAdminId()).collect(Collectors.toList()),

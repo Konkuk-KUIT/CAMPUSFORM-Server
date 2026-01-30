@@ -47,6 +47,11 @@ public interface ApplicantJpaRepository extends JpaRepository<Applicant, Long> {
     Optional<Applicant> findByProjectIdAndNameAndPhone(Long projectId, String name, String phone);
 
     /**
+     * 프로젝트ID, 이름, 이메일로 지원자 조회
+     */
+    Optional<Applicant> findByProjectIdAndNameAndEmail(Long projectId, String name, String email);
+
+    /**
      * 여러 ID로 지원자 목록 조회
      */
     List<Applicant> findByIdIn(List<Long> applicantIds);
