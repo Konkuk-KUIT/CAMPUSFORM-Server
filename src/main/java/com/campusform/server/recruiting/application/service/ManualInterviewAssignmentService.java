@@ -39,9 +39,9 @@ public class ManualInterviewAssignmentService {
         // 지원자 존재 확인 및 프로젝트 소속
         validateApplicantInProject(projectId, applicantId);
 
-        // 기존 수동 배정이 있는지 확인
+        // 기존 수동 배정이 있는지 확인 (프로젝트 범위로 제한)
         Optional<ManualInterviewAssignment> existingAssignment = manualAssignmentRepository
-                .findByApplicantId(applicantId);
+                .findByProjectIdAndApplicantId(projectId, applicantId);
 
         ManualInterviewAssignment assignment;
         if (existingAssignment.isPresent()) {
@@ -75,10 +75,13 @@ public class ManualInterviewAssignmentService {
         InterviewContext context = contextLoader.loadContext(projectId);
         context.project().validateAdminAccess(userId);
 
+        // 지원자가 해당 프로젝트에 속하는지 검증
+        validateApplicantInProject(projectId, applicantId);
+
         ManualInterviewAssignment assignment = manualAssignmentRepository
-                .findByApplicantId(applicantId)
+                .findByProjectIdAndApplicantId(projectId, applicantId)
                 .orElseThrow(() -> new IllegalArgumentException(
-                        "수동 배정을 찾을 수 없습니다. applicantId=" + applicantId));
+                        "수동 배정을 찾을 수 없습니다. projectId=" + projectId + ", applicantId=" + applicantId));
 
         manualAssignmentRepository.delete(assignment);
     }
@@ -91,8 +94,11 @@ public class ManualInterviewAssignmentService {
         InterviewContext context = contextLoader.loadContext(projectId);
         context.project().validateAdminAccess(userId);
 
+        // 지원자가 해당 프로젝트에 속하는지 검증
+        validateApplicantInProject(projectId, applicantId);
+
         Optional<ManualInterviewAssignment> assignment = manualAssignmentRepository
-                .findByApplicantId(applicantId);
+                .findByProjectIdAndApplicantId(projectId, applicantId);
 
         return assignment;
     }

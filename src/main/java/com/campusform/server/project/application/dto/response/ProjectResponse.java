@@ -25,21 +25,26 @@ public class ProjectResponse {
     private String state;
     private String sheetUrl;
     private String sheetSyncStatus;
-    private LocalDateTime lastSyncedAt; 
+    private LocalDateTime lastSyncedAt;
     private LocalDate startAt;
     private LocalDate endAt;
     private List<Long> admins;
     private LocalDateTime createdAt;
 
     public static ProjectResponse from(Project project) {
+        // lastSyncStatus가 null일 수 있으므로 안전하게 처리
+        String syncStatus = project.getLastSyncStatus() != null
+                ? project.getLastSyncStatus().name()
+                : "NOT_SYNCED";
+
         return new ProjectResponse(
                 project.getId(),
                 project.getTitle(),
                 project.getOwnerId(),
                 project.getState().name(),
                 project.getSheetUrl(),
-                project.getLastSyncStatus().name(), 
-                project.getLastSyncedAt(), 
+                syncStatus,
+                project.getLastSyncedAt(),
                 project.getStartAt(),
                 project.getEndAt(),
                 project.getAdmins().stream().map(i -> i.getAdminId()).collect(Collectors.toList()),

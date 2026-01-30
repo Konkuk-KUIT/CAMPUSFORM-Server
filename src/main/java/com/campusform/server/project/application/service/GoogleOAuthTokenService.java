@@ -38,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 public class GoogleOAuthTokenService {
 
     private final GoogleOAuthTokenRepository tokenRepository;
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
 
     @Value("${spring.security.oauth2.client.registration.google.client-id}")
     private String clientId;
