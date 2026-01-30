@@ -3,7 +3,6 @@ package com.campusform.server.recruiting.domain.repository;
 import com.campusform.server.recruiting.domain.model.applicant.Applicant;
 import com.campusform.server.recruiting.domain.model.applicant.value.ApplicantStatus;
 import com.campusform.server.recruiting.domain.model.applicant.value.StageStatus;
-import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -50,9 +49,9 @@ public interface ApplicantRepository{
     // 1. 이름 오름차순
     List<Applicant> findByProjectIdOrderByNameAsc(Long projectId);
     // 2. 이름 내림차순
-    List<Applicant> findByProjectIdOrderByNameDesc(Long projectId);
+    //List<Applicant> findByProjectIdOrderByNameDesc(Long projectId);
     // 3. 찜한 순
-    List<Applicant> findByProjectIdOrderByBookmarkedDescIdDesc(Long projectId);
+    //List<Applicant> findByProjectIdOrderByBookmarkedDescIdDesc(Long projectId);
 
     List<Applicant> findByProjectIdAndStage(Long projectId, StageStatus stage);
 

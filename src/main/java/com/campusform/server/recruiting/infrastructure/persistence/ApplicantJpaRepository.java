@@ -20,7 +20,7 @@ public interface ApplicantJpaRepository extends JpaRepository<Applicant, Long> {
     long countByProjectId(Long projectId);
     //long countByProjectIdAndStatus(Long projectId, ApplicantStatus applicantStatus);
     List<Applicant> findByProjectIdOrderByBookmarkedDescIdDesc(Long projectId);
-    List<Applicant> findByProjectIdOrderByBookmarkedDescNameAsc(Long projectId);
+    //List<Applicant> findByProjectIdOrderByBookmarkedDescNameAsc(Long projectId);
     List<Applicant> findByProjectIdOrderByNameDesc(Long projectId);
 
     List<Applicant> findByProjectIdAndDocumentStatus(Long projectId, ApplicantStatus documentStatus);

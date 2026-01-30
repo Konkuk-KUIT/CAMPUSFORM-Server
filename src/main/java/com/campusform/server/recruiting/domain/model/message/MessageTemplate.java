@@ -64,6 +64,7 @@ public class MessageTemplate{
     }
 
     // 업데이트 로직
+    //메시지 보내는거는 합.불 사람에게만 보낼건데 굳이 보류 상태를 만들필요가 있을까???
     public void updateTemplate(StageStatus stage, ApplicantStatus status, String content) {
         if (content == null) content = "";
 

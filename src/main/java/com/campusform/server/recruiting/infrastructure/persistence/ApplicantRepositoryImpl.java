@@ -73,18 +73,18 @@ public class ApplicantRepositoryImpl implements ApplicantRepository {
         return applicantJpaRepository.existsById(applicantId);
     }
 
-    @Override
-    public List<Applicant> findByProjectIdOrderByBookmarkedDescIdDesc(Long projectId) {
-        return applicantJpaRepository.findByProjectIdOrderByBookmarkedDescIdDesc(projectId);
-    }
+//    @Override
+//    public List<Applicant> findByProjectIdOrderByBookmarkedDescIdDesc(Long projectId) {
+//        return applicantJpaRepository.findByProjectIdOrderByBookmarkedDescIdDesc(projectId);
+//    }
     @Override
     public List<Applicant> findByProjectIdOrderByNameAsc(Long projectId){
-        return applicantJpaRepository.findByProjectIdOrderByBookmarkedDescNameAsc(projectId);
-    }
-    @Override
-    public List<Applicant> findByProjectIdOrderByNameDesc(Long projectId){
         return applicantJpaRepository.findByProjectIdOrderByNameDesc(projectId);
     }
+//    @Override
+//    public List<Applicant> findByProjectIdOrderByBookmarkedDescNameAsc(Long projectId){
+//        return applicantJpaRepository.findByProjectIdOrderByBookmarkedDescNameAsc(projectId);
+//    }
     @Override
     public List<Applicant> findByProjectIdAndStage(Long projectId, StageStatus stage){
         return applicantJpaRepository.findByProjectIdAndStage(projectId, stage);

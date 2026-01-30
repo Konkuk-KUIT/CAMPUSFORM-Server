@@ -58,12 +58,12 @@ public class ApplicantController {
      * (경로는 편한대로 설정, 보통 리소스 하위에 둠)
      */
     @PatchMapping("/{applicantId}/bookmark") // 또는 POST
-    public ResponseEntity<Void> Bookmark(
+    public ResponseEntity<Void> bookmark(
             //@PathVariable Long projectId, // URL 구조상 받을 수도 있고 안 쓸 수도 있음
             @PathVariable Long applicantId
     ) {
         // 서비스의 토글 메서드 호출
-        applicantService.Bookmark(applicantId);
+        applicantService.bookmark(applicantId);
         return ResponseEntity.ok().build();
     }
     /**

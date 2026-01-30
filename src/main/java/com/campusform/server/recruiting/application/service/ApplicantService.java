@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -51,10 +52,17 @@ public class ApplicantService {
             applicants = applicantRepository.findByProjectIdAndStage(projectId, stage);
             switch (sort) {
                 case "name_desc": // 2. 이름 내림차순 (하파타순)
-                    applicants = applicantRepository.findByProjectIdOrderByNameDesc(projectId);
+                    applicants = applicants.stream()
+                            .sorted(Comparator.comparing(Applicant::getName).reversed())
+                            .toList();
                     break;
                 case "bookmark": // 3. 찜한 순 (찜한거 위로, 나머지는 최신순)
-                    applicants = applicantRepository.findByProjectIdOrderByBookmarkedDescIdDesc(projectId);
+                    applicants = applicants.stream()
+                            .sorted(
+                                    Comparator.comparing(Applicant::getBookmarked).reversed()
+                                            .thenComparing(Comparator.comparing(Applicant::getId).reversed())
+                            )
+                            .toList();
                     break;
                 default: // 1. 이름 오름차순 (가나다순)
                     applicants = applicantRepository.findByProjectIdOrderByNameAsc(projectId);
@@ -102,12 +110,12 @@ public class ApplicantService {
         return ApplicantStatusUpdateResponse.builder()
                 .applicantId(applicant.getId())
                 .currentStatus(updatedStatus.name())
-                .updateAt(LocalDateTime.now()) // 혹은 applicant.getUpdatedAt()
+                .updatedAt(LocalDateTime.now()) // 혹은 applicant.getUpdatedAt()
                 .build();
     }
     // 찜하기 토글
     @Transactional
-    public void Bookmark(Long applicantId) {
+    public void bookmark(Long applicantId) {
         Applicant applicant = applicantRepository.findById(applicantId)
                 .orElseThrow(() -> new IllegalArgumentException("지원자가 존재하지 않습니다."));
         applicant.Bookmark();

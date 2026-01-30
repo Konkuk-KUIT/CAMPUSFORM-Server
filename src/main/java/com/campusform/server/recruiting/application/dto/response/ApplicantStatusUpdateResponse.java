@@ -10,5 +10,5 @@ import java.time.LocalDateTime;
 public class ApplicantStatusUpdateResponse {
     private Long applicantId;
     private String currentStatus;
-    private LocalDateTime updateAt;
+    private LocalDateTime updatedAt;
 }

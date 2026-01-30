@@ -111,8 +111,11 @@ public class Applicant extends AbstractAggregateRoot<Applicant> {
      * [비즈니스 로직] 서류 심사 결과 업데이트 및 이벤트 발행
      */
     public void updateApplicantStatus(StageStatus stage, ApplicantStatus status) {
+        if(stage==null){
+            throw new IllegalArgumentException("stage must not be null.");
+        }
         if (status == null) {
-            throw new IllegalArgumentException("newStatus must not be null");
+            throw new IllegalArgumentException("status must not be null");
         }
         if(stage==StageStatus.DOCUMENT) {
             if (this.documentStatus == status) {

@@ -11,7 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -109,8 +111,14 @@ public class ResultService {
     @Transactional
     public void announceResults(Long projectId, ResultAnnouncementRequest request){
         // 1. 대상 지원자 조회
+        List<Long> requestedIds = request.applicantIds();
         List<Applicant> applicants = applicantRepository.findAllById(request.applicantIds());
-
+        Set<Long> foundIds = applicants.stream()
+                .map(Applicant::getId)
+                .collect(Collectors.toSet());
+        if(!foundIds.containsAll(new HashSet<>(requestedIds))){
+            throw new IllegalArgumentException("존재하지 않는 지원자가 포함되어 있습니다.");
+        }
         // 프로젝트 소속 검증
         boolean allBelongToProject = applicants.stream()
                 .allMatch(a -> projectId.equals(a.getProjectId()));
@@ -118,7 +126,7 @@ public class ResultService {
             throw new IllegalArgumentException("해당 프로젝트에 속하지 않는 지원자가 포함되어 있습니다.");
         }
 
-        StageStatus stage = StageStatus.valueOf(request.stage().toUpperCase());
+        StageStatus stage = request.stage();
         //2. 상태 변경 (도메인 로직 실행)
         for (Applicant applicant : applicants){
             applicant.updateApplicantStatus(stage,request.status());

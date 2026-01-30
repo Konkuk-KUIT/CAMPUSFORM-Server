@@ -38,7 +38,7 @@ public class ApplicantEventHandler {
             );
 
             // 메시지가 생성된 경우에만 전송 (null이면 해당 단계/상태에 맞는 템플릿이 없다는 뜻)
-            if (message != null && event.applicantPhone() != null) {
+            if (message != null && event.applicantPhone() != null && !event.applicantPhone().isBlank()) {
                 smsSender.sendSms(event.applicantPhone(), message);
                 log.info("문자 발송 완료: 지원자 ID={}", event.applicantId());
             }

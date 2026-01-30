@@ -10,6 +10,7 @@ import com.campusform.server.recruiting.application.dto.response.SmsPreviewRespo
 import com.campusform.server.recruiting.domain.model.applicant.value.ApplicantStatus;
 import com.campusform.server.recruiting.domain.model.applicant.value.StageStatus;
 import com.campusform.server.recruiting.domain.repository.ApplicantRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,8 +37,11 @@ public class ResultController {
     public ResponseEntity<Void> saveSmsTemplate(
             @PathVariable Long projectId,
             @RequestParam StageStatus stage,
-            @RequestBody SmsTemplateSaveRequest request
+            @Valid @RequestBody SmsTemplateSaveRequest request
     ) {
+        if (request.getStage() != null && request.getStage() != stage) {
+            return ResponseEntity.badRequest().build();
+        }
         smsService.saveTemplate(projectId, stage, request);
         return ResponseEntity.ok().build();
     }
@@ -61,7 +65,7 @@ public class ResultController {
     @PostMapping("/announce")
     public ResponseEntity<Void> announceResult(
             @PathVariable Long projectId,
-            @RequestBody ResultAnnouncementRequest request){
+            @Valid @RequestBody ResultAnnouncementRequest request){
         // 1. 만약 요청 데이터가 이상하면 여기서 컷! (Validation)
         if (request.applicantIds() == null || request.applicantIds().isEmpty()) {
             return ResponseEntity.badRequest().build();

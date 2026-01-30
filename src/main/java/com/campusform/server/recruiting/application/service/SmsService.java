@@ -33,6 +33,9 @@ public class SmsService {
      */
     @Transactional
     public void saveTemplate(Long projectId, StageStatus stage, SmsTemplateSaveRequest request) {
+        if (request.getStage() != null && request.getStage() != stage) {
+            throw new IllegalArgumentException("stage 값이 일치하지 않습니다.");
+        }
         ApplicantStatus applicantStatus = request.getStatus();
         // 1. 없으면 생성, 있으면 가져오기
         MessageTemplate template = templateRepository.findByProjectId(projectId)
@@ -49,7 +52,6 @@ public class SmsService {
      */
     @Transactional(readOnly = true)
     public SmsPreviewResponse getPreview(Long projectId, Long applicantId, StageStatus stageStr, ApplicantStatus statusStr) {
-
         // 2. 지원자 조회
         Applicant applicant = applicantRepository.findById(applicantId)
                 .filter(a -> a.getProjectId().equals(projectId))
