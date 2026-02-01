@@ -9,11 +9,13 @@ import java.util.List;
  * Notification Context에서 이 이벤트를 수신하여 관리자들에게 알림을 생성합니다.
  *
  * @param projectId     프로젝트 ID
+ * @param projectTitle  프로젝트 제목 (알림 메시지용)
  * @param adminIds      알림 수신자 목록 (OWNER + ADMIN)
  * @param applicantName 지원자 이름
  */
 public record NewApplicantEvent(
         Long projectId,
+        String projectTitle,
         List<Long> adminIds,
         String applicantName
 ) {}

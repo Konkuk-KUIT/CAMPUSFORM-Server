@@ -8,6 +8,7 @@ import java.util.Set;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
+import com.campusform.server.global.event.NewApplicantEvent;
 import com.campusform.server.global.event.SheetSyncCompletedEvent;
 import com.campusform.server.project.application.dto.SpreadsheetColumnResponse;
 import com.campusform.server.project.domain.model.setting.Project;
@@ -95,6 +96,8 @@ public class SpreadsheetService {
                         .findByProjectIdAndNameAndEmail(project.getId(), name, email)
                         .orElse(null);
 
+                boolean isNewApplicant = (applicant == null);
+
                 if (applicant != null) {
                     // 기존 지원자 업데이트 (심사 상태와 즐겨찾기는 유지)
                     applicant.updateFromSheet(phone, gender, school, major, position);
@@ -115,13 +118,24 @@ public class SpreadsheetService {
                 }
 
                 applicantRepository.save(applicant);
+
+                // 새 지원자인 경우에만 알림 이벤트 발행
+                if (isNewApplicant) {
+                    eventPublisher.publishEvent(new NewApplicantEvent(
+                            project.getId(),
+                            project.getTitle(),
+                            project.getAdminIds(),
+                            name
+                    ));
+                }
+
                 syncedCount++;
             }
 
             // 시트 동기화 완료 이벤트 발행
             List<Long> adminIds = project.getAdminIds();
             eventPublisher.publishEvent(new SheetSyncCompletedEvent(
-                    project.getId(), adminIds, syncedCount, true));
+                    project.getId(), project.getTitle(), adminIds, syncedCount, true));
 
             // 프로젝트 동기화 상태 업데이트 (성공)
             project.updateSyncStatus(SyncStatus.OK);

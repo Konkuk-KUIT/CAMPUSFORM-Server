@@ -123,10 +123,10 @@ public class NotificationEventHandler {
 
     // ============ Payload Records ============
 
-    private record SheetSyncPayload(String message, int syncedCount) {}
-    private record AdminAddedPayload(String message, String projectTitle) {}
-    private record NewApplicantPayload(String message, String applicantName) {}
-    private record CommentCreatedPayload(String title, String message, Long applicantId, Long commenterId) {}
+    private record SheetSyncPayload(String projectTitle, String message, int syncedCount) {}
+    private record AdminAddedPayload(String projectTitle, String message) {}
+    private record NewApplicantPayload(String projectTitle, String message, String applicantName) {}
+    private record CommentCreatedPayload(String projectTitle, String applicantName, String message, Long applicantId, Long commenterId) {}
 
     // ============ Payload Creation Methods ============
 
@@ -134,28 +134,29 @@ public class NotificationEventHandler {
         SheetSyncPayload payload;
         if (event.success()) {
             String message = String.format("스프레드시트 동기화가 완료되었습니다. %d명의 지원자가 동기화되었습니다.", event.syncedCount());
-            payload = new SheetSyncPayload(message, event.syncedCount());
+            payload = new SheetSyncPayload(event.projectTitle(), message, event.syncedCount());
         } else {
-            payload = new SheetSyncPayload("스프레드시트 동기화에 실패했습니다. 시트 URL을 확인해주세요.", 0);
+            payload = new SheetSyncPayload(event.projectTitle(), "스프레드시트 동기화에 실패했습니다. 시트 URL을 확인해주세요.", 0);
         }
         return toJson(payload);
     }
 
     private String createAdminAddedPayload(AdminAddedEvent event) {
-        String message = String.format("'%s' 프로젝트의 관리자로 추가되었습니다.", event.projectTitle());
-        return toJson(new AdminAddedPayload(message, event.projectTitle()));
+        String message = "프로젝트의 관리자로 추가되었습니다.";
+        return toJson(new AdminAddedPayload(event.projectTitle(), message));
     }
 
     private String createNewApplicantPayload(NewApplicantEvent event) {
-        String message = String.format("새로운 지원자 '%s'님이 지원했습니다.", event.applicantName());
-        return toJson(new NewApplicantPayload(message, event.applicantName()));
+        String message = String.format("%s님이 새롭게 지원했어요.", event.applicantName());
+        return toJson(new NewApplicantPayload(event.projectTitle(), message, event.applicantName()));
     }
 
     private String createCommentPayload(CommentCreatedEvent event) {
-        String title = String.format("%s님의 지원서", event.applicantName());
-        String message = String.format("%s님이 댓글을 작성했습니다.", event.commenterName());
+        String applicantNameWithSuffix = String.format("%s 님의 지원서", event.applicantName());
+        String message = String.format("%s 님이 댓글을 작성했어요.", event.commenterName());
         return toJson(new CommentCreatedPayload(
-                title,
+                event.projectTitle(),
+                applicantNameWithSuffix,
                 message,
                 event.applicantId(),
                 event.commenterId()
