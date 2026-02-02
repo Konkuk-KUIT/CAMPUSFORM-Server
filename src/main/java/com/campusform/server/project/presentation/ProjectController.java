@@ -17,6 +17,7 @@ import com.campusform.server.identity.application.service.AuthService;
 import com.campusform.server.project.application.dto.request.AddAdminRequest;
 import com.campusform.server.project.application.dto.request.CreateProjectRequest;
 import com.campusform.server.project.application.dto.response.AddAdminResponse;
+import com.campusform.server.project.application.dto.response.AdminListResponse;
 import com.campusform.server.project.application.dto.response.ProjectResponse;
 import com.campusform.server.project.application.service.GoogleOAuthTokenService;
 import com.campusform.server.project.application.service.ProjectService;
@@ -80,6 +81,19 @@ public class ProjectController {
     }
 
     /**
+     * 관리자 목록 조회 (관리자만 가능)
+     */
+    @Operation(summary = "관리자 목록 조회", description = "프로젝트의 관리자(ADMIN) 목록을 조회합니다. OWNER와 ADMIN 모두 조회 가능하며, OWNER는 제외하고 ADMIN만 반환합니다.")
+    @GetMapping("/{projectId}/admins")
+    public ResponseEntity<AdminListResponse> getAdmins(
+            @Parameter(description = "프로젝트 ID", required = true) @PathVariable Long projectId,
+            Authentication authentication) {
+        Long userId = authService.extractUserId(authentication);
+        AdminListResponse response = projectService.getAdmins(projectId, userId);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
      * 관리자 추가 (OWNER만 가능)
      */
     @Operation(summary = "관리자 추가", description = "프로젝트에 새로운 관리자를 추가합니다. OWNER만 추가 가능하며, 이메일로 가입된 사용자만 추가할 수 있습니다.")
@@ -91,5 +105,19 @@ public class ProjectController {
         Long ownerId = authService.extractUserId(authentication);
         AddAdminResponse response = projectService.addAdmin(projectId, ownerId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    /**
+     * 관리자 제거 (OWNER만 가능)
+     */
+    @Operation(summary = "관리자 제거", description = "프로젝트에서 관리자를 제거합니다. OWNER만 제거 가능하며, OWNER 자신은 제거할 수 없습니다.")
+    @DeleteMapping("/{projectId}/admins/{adminId}")
+    public ResponseEntity<Void> removeAdmin(
+            @Parameter(description = "프로젝트 ID", required = true) @PathVariable Long projectId,
+            @Parameter(description = "제거할 관리자 ID", required = true) @PathVariable Long adminId,
+            Authentication authentication) {
+        Long ownerId = authService.extractUserId(authentication);
+        projectService.removeAdmin(projectId, ownerId, adminId);
+        return ResponseEntity.noContent().build();
     }
 }
