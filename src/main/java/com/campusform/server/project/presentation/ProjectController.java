@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,7 +15,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.campusform.server.identity.application.service.AuthService;
+import com.campusform.server.project.application.dto.request.AddAdminRequest;
 import com.campusform.server.project.application.dto.request.CreateProjectRequest;
+import com.campusform.server.project.application.dto.response.AddAdminResponse;
 import com.campusform.server.project.application.dto.response.ProjectResponse;
 import com.campusform.server.project.application.service.GoogleOAuthTokenService;
 import com.campusform.server.project.application.service.ProjectService;
@@ -72,5 +75,20 @@ public class ProjectController {
             @Parameter(description = "사용자 ID (테스트용)", required = true) @RequestParam Long userId) {
         projectService.deleteProject(projectId, userId);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * 관리자 추가 (OWNER만 가능)
+     */
+    @Operation(summary = "관리자 추가", description = "프로젝트에 새로운 관리자를 추가합니다. OWNER만 추가 가능하며, 이메일로 가입된 사용자만 추가할 수 있습니다.")
+    @PostMapping("/{projectId}/admins")
+    public ResponseEntity<AddAdminResponse> addAdmin(
+            @Parameter(description = "프로젝트 ID", required = true) @PathVariable Long projectId,
+            @Valid @RequestBody AddAdminRequest request,
+            Authentication authentication) {
+
+        Long ownerId = authService.extractUserId(authentication);
+        AddAdminResponse response = projectService.addAdmin(projectId, ownerId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }
