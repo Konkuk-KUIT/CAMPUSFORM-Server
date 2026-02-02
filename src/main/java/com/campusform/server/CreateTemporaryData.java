@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * 테스트용 데이터를 삽입
  */
-@Profile("temporary1")
+@Profile("temporary")
 @Slf4j
 @Component
 @RequiredArgsConstructor

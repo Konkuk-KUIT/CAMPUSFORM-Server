@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * 댓글(면접 코멘트) Entity
  * 지원자별 댓글과 답글을 관리합니다.
- * 최초 댓글에 대한 답글만 허용하며, 답글에 대한 대댓글은 지원하지 않습니다.
+ * 댓글에 대한 대댓글을 무제한으로 작성할 수 있습니다.
  */
 @Entity
 @Table(name = "comments",
@@ -61,6 +61,9 @@ public class Comment {
     /**
      * 답글 목록 (self-referencing 관계)
      * OneToMany 이므로 DB에 테이블 생성 안됨
+     * 
+     * cascade = CascadeType.ALL: 부모 댓글 삭제 시 모든 대댓글(무한 깊이)이 자동으로 삭제됨
+     * orphanRemoval = true: 부모와의 관계가 끊어진 대댓글도 자동으로 삭제됨
      */
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> replies = new ArrayList<>();
@@ -72,4 +75,84 @@ public class Comment {
     @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+<<<<<<< Updated upstream
+=======
+
+    // 1. Private 생성자 : 외부에서 new Content() 금지
+    private Comment(Long applicantId, Long authorId, String content, Comment parent) {
+        if(content == null || content.isBlank()){
+            throw new IllegalArgumentException("Content cannot be null or blank");
+        }
+        this.applicantId = applicantId;
+        this.authorId = authorId;
+        this.content = content;
+        this.parent = parent;
+    }
+
+    // 2. 생성 로직
+
+    /**
+     * 최초 댓글 생성 : 부모가 없는 루트 댓글 작성
+     */
+    public static Comment createRoot(Long applicantId, Long authorId, String content) {
+        return new Comment(applicantId, authorId, content, null);
+    }
+
+    /**
+     * 답글(대댓글) 작성 : 특정 댓글에 대한 댓글을 생성한다.
+     * 깊이 제한 없이 무제한으로 대댓글을 작성할 수 있습니다.
+     */
+    public static Comment createReply(Comment parent, Long applicantId, Long authorId, String content) {
+        if(parent == null){
+            throw new IllegalArgumentException("Parent comment cannot be null");
+        }
+        // parent 객체를 직접 설정하여 parent_comment_id가 제대로 저장되도록 함
+        Comment reply = new Comment(applicantId, authorId, content, parent);
+        // 양방향 관계 설정 (parent의 replies 리스트에 추가)
+        parent.addReply(reply);
+        return reply;
+    }
+
+    // 3. 비즈니스 로직 (수정, 연관관계 등)
+
+    /**
+     * 답글 내용 수정
+     */
+    public void updateContent(String newContent) {
+        if(newContent == null || newContent.isBlank()){
+            throw new IllegalArgumentException("Content cannot be null or blank");
+        }
+        this.content = newContent;
+    }
+    /**
+     * 연관관계 편의 메서드 (답글 추가 시 양방향 관계 설정)
+     */
+    private void addReply(Comment reply) {
+        this.replies.add(reply);
+    }
+
+    /**
+     * 작성자 본인 확인
+     */
+    public boolean isWrittenBy(Long currentMemberId) {
+        return this.authorId.equals(currentMemberId);
+    }
+
+    /**
+     * 부모 댓글 변경 (대댓글 삭제 시 하위 댓글들의 부모를 재설정하기 위해 사용)
+     */
+    public void changeParent(Comment newParent) {
+        // 기존 부모에서 이 댓글을 replies 리스트에서 제거
+        if (this.parent != null) {
+            this.parent.replies.remove(this);
+        }
+        // 새로운 부모 설정
+        this.parent = newParent;
+        // 새로운 부모의 replies 리스트에 추가
+        if (newParent != null) {
+            newParent.replies.add(this);
+        }
+    }
+
+>>>>>>> Stashed changes
 }

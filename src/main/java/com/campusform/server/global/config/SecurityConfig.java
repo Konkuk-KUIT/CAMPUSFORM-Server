@@ -22,6 +22,10 @@ import lombok.RequiredArgsConstructor;
 /**
  * Spring Security 설정
  */
+<<<<<<< Updated upstream
+=======
+@Profile("temporary") // API 테스트 환경에서는 스프링 시큐리티 비활성화
+>>>>>>> Stashed changes
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
