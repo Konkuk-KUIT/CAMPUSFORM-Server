@@ -46,8 +46,11 @@ public class ApplicantExtraAnswer {
 
     /**
      * 시트 헤더의 순서(인덱스)를 저장하여 질문-답변 매칭 순서 보장
+     * 
+     * 기존 데이터 호환성을 위해 nullable로 설정.
+     * null인 경우는 기존 데이터로 간주하여 정렬 시 맨 뒤로 배치됩니다.
      */
-    @Column(name = "order_index", nullable = false)
+    @Column(name = "order_index")
     private Integer orderIndex;
 
     @CreatedDate

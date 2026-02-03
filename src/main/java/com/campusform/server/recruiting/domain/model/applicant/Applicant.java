@@ -75,7 +75,6 @@ public class Applicant extends AbstractAggregateRoot<Applicant> {
     private Boolean bookmarked = false;
 
     @OneToMany(mappedBy = "applicant", cascade = CascadeType.ALL, orphanRemoval = true)
-    @jakarta.persistence.OrderBy("orderIndex ASC")
     private List<ApplicantExtraAnswer> extraAnswers = new ArrayList<>();
 
     @CreatedDate
