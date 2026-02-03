@@ -40,7 +40,7 @@ spring:
 app:
   oauth2:
     # 사용자 로그인 성공 후 프론트엔드로 리다이렉트
-    login-redirect-uri: ${FRONTEND_URL:http://localhost:3000}
+    login-redirect-uri: ${FRONTEND_URL:http://localhost:3000/auth/callback}
     # Google Sheets 권한 요청 후 프론트엔드 콜백으로 리다이렉트
     sheets-redirect-uri: ${FRONTEND_URL:http://localhost:3000}/oauth/google/callback
 
@@ -92,6 +92,6 @@ spring:
 app:
   oauth2:
     # 사용자 로그인 성공 후 프론트엔드로 리다이렉트
-    login-redirect-uri: ${FRONTEND_URL:http://localhost:3000}
+    login-redirect-uri: ${FRONTEND_URL:http://localhost:3000/auth/callback}
     # Google Sheets 권한 요청 후 프론트엔드 콜백으로 리다이렉트
     sheets-redirect-uri: ${FRONTEND_URL:http://localhost:3000}/oauth/google/callback
