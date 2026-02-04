@@ -104,8 +104,8 @@ public class Applicant extends AbstractAggregateRoot<Applicant> {
         return applicant;
     }
 
-    public void addExtraAnswer(String questionText, String answerText) {
-        extraAnswers.add(ApplicantExtraAnswer.create(this, questionText, answerText));
+    public void addExtraAnswer(String questionText, String answerText, Integer orderIndex) {
+        extraAnswers.add(ApplicantExtraAnswer.create(this, questionText, answerText, orderIndex));
     }
 
     /**
