@@ -11,6 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 public class CommentResponse {
     private Long commentId;
+    private Long applicantId;
     private Long authorId;
     private Long parentId;
     private String content;
@@ -18,9 +19,10 @@ public class CommentResponse {
     private LocalDateTime updatedAt;
     private List<CommentResponse> replies;
 
-    public CommentResponse(Long commentId, Long authorId, Long parentId, String content, 
+    public CommentResponse(Long commentId, Long applicantId, Long authorId, Long parentId, String content, 
                         LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.commentId = commentId;
+        this.applicantId = applicantId;
         this.authorId = authorId;
         this.parentId = parentId;
         this.content = content;

@@ -2,13 +2,8 @@ package com.campusform.server.recruiting.application.service;
 
 import com.campusform.server.recruiting.application.dto.request.CommentRequest;
 import com.campusform.server.recruiting.application.dto.response.CommentCreateResponse;
-<<<<<<< HEAD
 import com.campusform.server.recruiting.application.dto.response.CommentResponse;
 import com.campusform.server.recruiting.application.dto.response.CommentUpdateResponse;
-=======
-import com.campusform.server.recruiting.application.dto.response.CommentUpdateResponse;
-import com.campusform.server.recruiting.domain.model.applicant.value.StageStatus;
->>>>>>> 4e847b64815eecf19c0c35459dfbf2b688bd9bf3
 import com.campusform.server.recruiting.domain.model.comment.Comment;
 import com.campusform.server.recruiting.domain.repository.ApplicantRepository;
 import com.campusform.server.recruiting.infrastructure.persistence.CommentRepository;
@@ -17,15 +12,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-<<<<<<< HEAD
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-=======
->>>>>>> 4e847b64815eecf19c0c35459dfbf2b688bd9bf3
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -33,16 +25,11 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final ApplicantRepository applicantRepository;
 
-<<<<<<< HEAD
     // 1. 댓글 작성 (parentId가 있으면 대댓글, 없으면 루트 댓글)
-=======
-    // 1. 원본 댓글 작성
->>>>>>> 4e847b64815eecf19c0c35459dfbf2b688bd9bf3
     public CommentCreateResponse createComment(Long applicantId, Long authorId, CommentRequest request){
         if (!applicantRepository.existsById(applicantId)) {
             throw new EntityNotFoundException("존재하지 않는 지원자입니다.");
         }
-<<<<<<< HEAD
 
         Comment comment;
         
@@ -72,27 +59,6 @@ public class CommentService {
         // 저장 후 반환 (parent_comment_id는 JPA가 자동으로 저장)
         Comment savedComment = commentRepository.save(comment);
         return new CommentCreateResponse(savedComment.getId(), savedComment.getParent() != null ? savedComment.getParent().getId() : null);
-=======
-        Comment comment = Comment.createRoot(applicantId, authorId, request.getContent());
-        commentRepository.save(comment);
-
-        return new CommentCreateResponse(comment.getId());
-    }
-
-    // 2. 댓글(대댓글) 작성
-    public CommentCreateResponse createReply(Long parentId, Long applicantId, Long authorId, CommentRequest request){
-        Comment parent = commentRepository.findById(parentId)
-                .orElseThrow(() -> new EntityNotFoundException(" 부모 댓글이 없습니다. "));
-        if (!parent.getApplicantId().equals(applicantId)) {
-            throw new IllegalArgumentException("대댓글은 같은 지원자의 댓글에만 작성 가능합니다.");
-        }
-
-        // Factory Method가 대댓글 깊이 제한(depth check)을 내부적으로 수행합니다.
-        Comment reply = Comment.createReply(parent, applicantId, authorId, request.getContent());
-        commentRepository.save(reply);
-
-        return new CommentCreateResponse(reply.getId());
->>>>>>> 4e847b64815eecf19c0c35459dfbf2b688bd9bf3
     }
 
     // 3. 댓글 수정
@@ -113,16 +79,15 @@ public class CommentService {
     }
 
     // 3. 댓글 삭제
-<<<<<<< HEAD
-    // - 루트 댓글 삭제 시: 모든 대댓글(무한 깊이)이 자동으로 삭제됨 (cascade = CascadeType.ALL, orphanRemoval = true)
+    // - 루트 댓글 삭제 시: 모든 대댓글(무한 깊이)이 자동으로 삭제됨 (cascade = CascadeType.ALL)
     // - 대댓글 삭제 시: 하위 댓글들은 살려두고 부모를 재설정한 후 해당 대댓글만 삭제
-=======
->>>>>>> 4e847b64815eecf19c0c35459dfbf2b688bd9bf3
+    // 
+    // orphanRemoval은 제거되어 있으므로, changeParent 호출 시 안전하게 부모를 재설정할 수 있음
+    // (orphanRemoval이 있으면 changeParent에서 기존 부모의 replies에서 제거하는 순간 고아로 표시되어 삭제될 수 있음)
     public void deleteComment(Long commentId, Long authorId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 댓글입니다."));
 
-<<<<<<< HEAD
         // 작성자 본인 확인
         validateAuthor(comment, authorId);
 
@@ -133,10 +98,11 @@ public class CommentService {
             // replies 리스트를 복사하여 순회 (원본 리스트를 수정하면서 순회하면 문제 발생 가능)
             List<Comment> childReplies = new ArrayList<>(comment.getReplies());
             for (Comment childReply : childReplies) {
+                // changeParent는 orphanRemoval이 없으므로 안전하게 부모를 재설정할 수 있음
                 childReply.changeParent(newParent);
             }
         }
-        // 루트 댓글인 경우: cascade 설정으로 인해 모든 대댓글이 자동으로 삭제됨
+        // 루트 댓글인 경우: cascade = CascadeType.ALL 설정으로 인해 모든 대댓글이 자동으로 삭제됨
         // 대댓글인 경우: 하위 댓글들의 부모를 재설정했으므로 해당 대댓글만 삭제됨
         commentRepository.delete(comment);
     }
@@ -163,6 +129,7 @@ public class CommentService {
                         Comment::getId,
                         comment -> new CommentResponse(
                                 comment.getId(),
+                                comment.getApplicantId(),
                                 comment.getAuthorId(),
                                 comment.getParent() != null ? comment.getParent().getId() : null,
                                 comment.getContent(),
@@ -206,14 +173,6 @@ public class CommentService {
         }
     }
 
-=======
-        // 작성자 본인 확인 로직 필요
-        validateAuthor(comment, authorId);
-
-        commentRepository.delete(comment);
-    }
-
->>>>>>> 4e847b64815eecf19c0c35459dfbf2b688bd9bf3
     // 공통: 작성자 검증 로직
     private void validateAuthor(Comment comment, Long authorId) {
         if (!comment.isWrittenBy(authorId)) {

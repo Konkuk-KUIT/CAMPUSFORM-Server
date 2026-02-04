@@ -63,9 +63,11 @@ public class Comment {
      * OneToMany 이므로 DB에 테이블 생성 안됨
      * 
      * cascade = CascadeType.ALL: 부모 댓글 삭제 시 모든 대댓글(무한 깊이)이 자동으로 삭제됨
-     * orphanRemoval = true: 부모와의 관계가 끊어진 대댓글도 자동으로 삭제됨
+     * 
+     * orphanRemoval은 제거: 수동 부모 재설정 로직(changeParent)과 충돌을 방지하기 위해
+     * 대댓글 삭제 시 하위 댓글들의 부모를 재설정하는 로직은 CommentService에서 명시적으로 처리
      */
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
     private List<Comment> replies = new ArrayList<>();
 
     @CreatedDate
@@ -75,11 +77,7 @@ public class Comment {
     @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-=======
-=======
->>>>>>> 4e847b64815eecf19c0c35459dfbf2b688bd9bf3
+
 
     // 1. Private 생성자 : 외부에서 new Content() 금지
     private Comment(Long applicantId, Long authorId, String content, Comment parent) {
@@ -103,22 +101,24 @@ public class Comment {
 
     /**
      * 답글(대댓글) 작성 : 특정 댓글에 대한 댓글을 생성한다.
-<<<<<<< HEAD
      * 깊이 제한 없이 무제한으로 대댓글을 작성할 수 있습니다.
-=======
->>>>>>> 4e847b64815eecf19c0c35459dfbf2b688bd9bf3
+     * 
+     * @throws IllegalArgumentException 부모 댓글이 null이거나, 부모 댓글의 applicantId와 일치하지 않는 경우
      */
     public static Comment createReply(Comment parent, Long applicantId, Long authorId, String content) {
         if(parent == null){
             throw new IllegalArgumentException("Parent comment cannot be null");
         }
-<<<<<<< HEAD
+        // 부모 댓글과 applicantId 일치 검증 (데이터 무결성 보장)
+        if(!parent.getApplicantId().equals(applicantId)){
+            throw new IllegalArgumentException(
+                String.format("대댓글은 같은 지원자의 댓글에만 작성 가능합니다. 부모 댓글의 applicantId: %d, 요청한 applicantId: %d", 
+                    parent.getApplicantId(), applicantId)
+            );
+        }
         // parent 객체를 직접 설정하여 parent_comment_id가 제대로 저장되도록 함
         Comment reply = new Comment(applicantId, authorId, content, parent);
         // 양방향 관계 설정 (parent의 replies 리스트에 추가)
-=======
-        Comment reply = new Comment(applicantId, authorId, content, parent);
->>>>>>> 4e847b64815eecf19c0c35459dfbf2b688bd9bf3
         parent.addReply(reply);
         return reply;
     }
@@ -148,11 +148,20 @@ public class Comment {
         return this.authorId.equals(currentMemberId);
     }
 
-<<<<<<< HEAD
+
     /**
      * 부모 댓글 변경 (대댓글 삭제 시 하위 댓글들의 부모를 재설정하기 위해 사용)
+     * 
+     * @throws IllegalArgumentException 새로운 부모 댓글의 applicantId와 현재 댓글의 applicantId가 일치하지 않는 경우
      */
     public void changeParent(Comment newParent) {
+        // 새로운 부모가 있는 경우 applicantId 일치 검증 (데이터 무결성 보장)
+        if (newParent != null && !newParent.getApplicantId().equals(this.applicantId)) {
+            throw new IllegalArgumentException(
+                String.format("부모 댓글 변경 시 applicantId가 일치해야 합니다. 현재 댓글의 applicantId: %d, 새로운 부모의 applicantId: %d", 
+                    this.applicantId, newParent.getApplicantId())
+            );
+        }
         // 기존 부모에서 이 댓글을 replies 리스트에서 제거
         if (this.parent != null) {
             this.parent.replies.remove(this);
@@ -165,8 +174,4 @@ public class Comment {
         }
     }
 
->>>>>>> Stashed changes
-=======
-
->>>>>>> 4e847b64815eecf19c0c35459dfbf2b688bd9bf3
 }
