@@ -107,7 +107,7 @@ public class CommentService {
         commentRepository.delete(comment);
     }
 
-    // 4. 댓글 목록 조회 (계층 구조 포함)
+    // 4. 지원자별 댓글 목록 조회 (계층 구조 포함)
     @Transactional(readOnly = true)
     public List<CommentResponse> getComments(Long applicantId) {
         if (!applicantRepository.existsById(applicantId)) {
@@ -117,6 +117,20 @@ public class CommentService {
         // 모든 댓글 조회 (루트 + 대댓글)
         List<Comment> allComments = commentRepository.findAllByApplicantIdOrderByCreatedAtAsc(applicantId);
 
+        return buildCommentHierarchy(allComments);
+    }
+
+    // 5. 프로젝트 전체 댓글 목록 조회 (계층 구조 포함)
+    @Transactional(readOnly = true)
+    public List<CommentResponse> getCommentsByProjectId(Long projectId) {
+        // 프로젝트의 모든 지원자에 대한 댓글 조회
+        List<Comment> allComments = commentRepository.findAllByProjectIdOrderByCreatedAtAsc(projectId);
+
+        return buildCommentHierarchy(allComments);
+    }
+
+    // 공통: 댓글 계층 구조 구성 메서드
+    private List<CommentResponse> buildCommentHierarchy(List<Comment> allComments) {
         // 루트 댓글만 필터링
         List<Comment> rootComments = allComments.stream()
                 .filter(comment -> comment.getParent() == null)
@@ -129,7 +143,6 @@ public class CommentService {
                         Comment::getId,
                         comment -> new CommentResponse(
                                 comment.getId(),
-                                comment.getApplicantId(),
                                 comment.getAuthorId(),
                                 comment.getParent() != null ? comment.getParent().getId() : null,
                                 comment.getContent(),

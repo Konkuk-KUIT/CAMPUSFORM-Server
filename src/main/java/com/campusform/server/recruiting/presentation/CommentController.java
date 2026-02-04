@@ -22,8 +22,17 @@ public class CommentController {
     private final CommentService commentService;
     private final AuthService authService;
 
-    // 댓글 목록 조회 (계층 구조 포함)
+    // 프로젝트 전체 댓글 목록 조회 (계층 구조 포함)
     @GetMapping("/comments")
+    public ResponseEntity<List<CommentResponse>> getCommentsByProject(
+            @PathVariable Long projectId
+    ) {
+        List<CommentResponse> comments = commentService.getCommentsByProjectId(projectId);
+        return ResponseEntity.ok(comments);
+    }
+
+    // 지원자별 댓글 목록 조회 (계층 구조 포함)
+    @GetMapping("/applicants/{applicantId}/comments")
     public ResponseEntity<List<CommentResponse>> getComments(
             @PathVariable Long applicantId
     ) {
