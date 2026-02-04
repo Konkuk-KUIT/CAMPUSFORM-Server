@@ -2,6 +2,7 @@ package com.campusform.server.recruiting.infrastructure.persistence;
 
 import com.campusform.server.recruiting.domain.model.comment.Comment;
 import org.springframework.data.jpa.repository.JpaRepository;
+<<<<<<< HEAD
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -20,4 +21,10 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
      * 생성일시 오름차순 정렬
      */
     List<Comment> findAllByApplicantIdOrderByCreatedAtAsc(Long applicantId);
+=======
+
+public interface CommentRepository extends JpaRepository<Comment, Long> {
+    // 필요한 경우 특정 지원자의 댓글 목록 조회 메서드 추가
+    // List<Comment> findAllByApplicantIdOrderByCreatedAtAsc(Long applicantId);
+>>>>>>> 4e847b64815eecf19c0c35459dfbf2b688bd9bf3
 }

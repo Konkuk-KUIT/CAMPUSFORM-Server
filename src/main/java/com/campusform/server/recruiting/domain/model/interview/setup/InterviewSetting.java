@@ -35,7 +35,8 @@ import lombok.NoArgsConstructor;
  * 면접 관련 규칙 및 정책을 관리합니다.
  */
 @Entity
-@Table(name = "interview_settings", indexes = @Index(name = "idx_project_id", columnList = "project_id", unique = true))
+@Table(name = "interview_settings",
+       indexes = @Index(name = "idx_project_id", columnList = "project_id", unique = true))
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
@@ -45,34 +46,50 @@ public class InterviewSetting {
     @GeneratedValue
     private Long id;
 
+    // 다른 어그리거트 -> 참조 아닌 연관으로 관계 설정
     @Column(name = "project_id", nullable = false, unique = true)
     private Long projectId;
 
-    // 면접 시작 시간
+    /**
+     * 면접 시작 시간
+     */
     @Column(name = "start_time", nullable = false)
     private LocalTime startTime;
 
-    // 면접 종료 시간
+    /**
+     * 면접 종료 시간
+     */
     @Column(name = "end_time", nullable = false)
     private LocalTime endTime;
 
-    // 슬롯 내 면접 시간간
+    /**
+     * 슬롯 길이 (분 단위)
+     * 슬롯 = duration + break
+     */
     @Column(name = "slot_duration_min", nullable = false)
     private Integer slotDurationMin;
 
-    // 슬롯 간 휴식 시간
+    /**
+     * 슬롯 간 휴식 시간 (분 단위)
+     */
     @Column(name = "slot_break_min", nullable = false)
     private Integer slotBreakMin = 0;
 
-    // 슬롯당 최대 지원자 수
+    /**
+     * 슬롯당 최대 지원자 수
+     */
     @Column(name = "max_applicants_per_slot", nullable = false)
     private Integer maxApplicantsPerSlot;
 
-    // 슬롯당 최소 면접관 수
+    /**
+     * 슬롯당 최소 면접관 수
+     */
     @Column(name = "min_interviewers_per_slot", nullable = false)
     private Integer minInterviewersPerSlot;
 
-    // 슬롯당 최대 면접관 수
+    /**
+     * 슬롯당 최대 면접관 수
+     */
     @Column(name = "max_interviewers_per_slot", nullable = false)
     private Integer maxInterviewersPerSlot;
 
@@ -96,10 +113,10 @@ public class InterviewSetting {
      * 생성 시점에 검증하여 불완전한 상황 방지
      */
     public static InterviewSetting create(
-            Long projectId,
-            TimeRange timeRange,
-            SlotConfiguration slotConfig,
-            DateRange dateRange) {
+        Long projectId,
+        TimeRange timeRange,
+        SlotConfiguration slotConfig,
+        DateRange dateRange) {
         InterviewSetting setting = new InterviewSetting();
         setting.projectId = projectId;
         setting.startTime = timeRange.getStartTime();
@@ -146,8 +163,8 @@ public class InterviewSetting {
      */
     public SlotConfiguration getSlotConfiguration() {
         return SlotConfiguration.of(
-                slotDurationMin, slotBreakMin, maxApplicantsPerSlot,
-                minInterviewersPerSlot, maxInterviewersPerSlot);
+            slotDurationMin, slotBreakMin, maxApplicantsPerSlot,
+            minInterviewersPerSlot, maxInterviewersPerSlot);
     }
 
     /**
@@ -174,7 +191,7 @@ public class InterviewSetting {
 
     /**
      * 블록 시작 시간 검증
-     * 
+     *
      * @param blockStartTime 검증할 블록 시작 시간
      * @throws IllegalArgumentException 블록 시작 시간이 유효하지 않은 경우 (xx:00 또는 xx:30이 아닌 경우)
      */
@@ -187,15 +204,15 @@ public class InterviewSetting {
     /**
      * 블록이 면접 설정의 시간 범위와 겹치는지 검증
      * 블록의 일부라도 시간 범위와 겹치면 유효한 것으로 판단
-     * 
+     *
      * @param blockStartTime 검증할 블록 시작 시간
      * @throws IllegalArgumentException 블록이 면접 시간 범위를 벗어난 경우
      */
     public void validateBlockWithinTimeRange(LocalTime blockStartTime) {
         if (!overlapsWithTimeBlock(blockStartTime)) {
             throw new IllegalArgumentException(
-                    "면접 정보 시간 범위를 벗어났습니다. startTime=" + blockStartTime +
-                            ", 범위=" + getStartTime() + "~" + getEndTime());
+                "면접 정보 시간 범위를 벗어났습니다. startTime=" + blockStartTime +
+                    ", 범위=" + getStartTime() + "~" + getEndTime());
         }
     }
 
@@ -212,24 +229,24 @@ public class InterviewSetting {
 
         // 중복 제거
         Set<LocalDate> newDates = interviewDates.stream()
-                .distinct()
-                .collect(Collectors.toSet());
+            .distinct()
+            .collect(Collectors.toSet());
 
         // 기존 날짜와 새 날짜 비교
         Set<LocalDate> existingDates = this.days.stream()
-                .map(InterviewDay::getInterviewDate)
-                .collect(Collectors.toSet());
+            .map(InterviewDay::getInterviewDate)
+            .collect(Collectors.toSet());
 
         // 새 목록에 없는 기존 날짜 삭제
         List<InterviewDay> toRemove = this.days.stream()
-                .filter(day -> !newDates.contains(day.getInterviewDate()))
-                .collect(Collectors.toList());
+            .filter(day -> !newDates.contains(day.getInterviewDate()))
+            .collect(Collectors.toList());
         this.days.removeAll(toRemove);
 
         // 새 목록에 있는 날짜 추가
         Set<LocalDate> toAdd = newDates.stream()
-                .filter(date -> !existingDates.contains(date))
-                .collect(Collectors.toSet());
+            .filter(date -> !existingDates.contains(date))
+            .collect(Collectors.toSet());
         toAdd.forEach(date -> this.days.add(InterviewDay.create(this, date)));
     }
 
@@ -243,24 +260,24 @@ public class InterviewSetting {
 
         // 중복 제거
         Set<Long> newAdminIds = adminIds.stream()
-                .distinct()
-                .collect(Collectors.toSet());
+            .distinct()
+            .collect(Collectors.toSet());
 
         // 기존 면접관 ID와 새 면접관 ID 비교
         Set<Long> existingAdminIds = this.requiredInterviewers.stream()
-                .map(InterviewRequiredInterviewer::getAdminId)
-                .collect(Collectors.toSet());
+            .map(InterviewRequiredInterviewer::getAdminId)
+            .collect(Collectors.toSet());
 
         // 새 목록에 없는 기존 면접관 삭제
         List<InterviewRequiredInterviewer> toRemove = this.requiredInterviewers.stream()
-                .filter(required -> !newAdminIds.contains(required.getAdminId()))
-                .collect(Collectors.toList());
+            .filter(required -> !newAdminIds.contains(required.getAdminId()))
+            .collect(Collectors.toList());
         this.requiredInterviewers.removeAll(toRemove);
 
         // 새 목록에 있는 면접관 추가
         Set<Long> toAdd = newAdminIds.stream()
-                .filter(adminId -> !existingAdminIds.contains(adminId))
-                .collect(Collectors.toSet());
+            .filter(adminId -> !existingAdminIds.contains(adminId))
+            .collect(Collectors.toSet());
         toAdd.forEach(adminId -> this.requiredInterviewers.add(InterviewRequiredInterviewer.create(this, adminId)));
     }
 
@@ -269,8 +286,8 @@ public class InterviewSetting {
      */
     public List<Long> getRequiredInterviewerIds() {
         return this.requiredInterviewers.stream()
-                .map(InterviewRequiredInterviewer::getAdminId)
-                .toList();
+            .map(InterviewRequiredInterviewer::getAdminId)
+            .toList();
     }
 
     /**
@@ -279,7 +296,7 @@ public class InterviewSetting {
     public void setRequiredInterviewer(Long adminId, boolean required) {
         if (required) {
             boolean alreadyExists = this.requiredInterviewers.stream()
-                    .anyMatch(requiredInterviewer -> requiredInterviewer.getAdminId().equals(adminId));
+                .anyMatch(requiredInterviewer -> requiredInterviewer.getAdminId().equals(adminId));
             if (!alreadyExists) {
                 this.requiredInterviewers.add(InterviewRequiredInterviewer.create(this, adminId));
             }

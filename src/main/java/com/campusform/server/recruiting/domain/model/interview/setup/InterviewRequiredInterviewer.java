@@ -18,18 +18,18 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-
+import lombok.NoArgsConstructor;  
+         
 /**
  * 필수 면접관 Entity
  * 필수 면접관 관리를 담당합니다.
  */
 @Entity
-@Table(name = "interview_required_interviewers", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_setting_admin", columnNames = { "interview_setting_id", "admin_id" })
-})
-// indexes = @Index(name = "idx_setting_id", columnList =
-// "interview_setting_id"))
+@Table(name = "interview_required_interviewers",
+       uniqueConstraints = {
+           @UniqueConstraint(name = "uk_setting_admin", columnNames = {"interview_setting_id", "admin_id"})
+       })
+       // indexes = @Index(name = "idx_setting_id", columnList = "interview_setting_id"))
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
@@ -45,6 +45,9 @@ public class InterviewRequiredInterviewer {
 
     @Column(name = "admin_id", nullable = false)
     private Long adminId;
+
+    @Column(nullable = false)
+    private Boolean required = false;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)

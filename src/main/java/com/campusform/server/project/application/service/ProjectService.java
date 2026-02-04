@@ -1,6 +1,7 @@
 package com.campusform.server.project.application.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -10,10 +11,13 @@ import com.campusform.server.global.event.AdminAddedEvent;
 import com.campusform.server.identity.domain.repository.UserRepository;
 import com.campusform.server.project.application.dto.request.CreateProjectRequest;
 import com.campusform.server.project.application.dto.response.ProjectResponse;
+import com.campusform.server.project.domain.exception.TokenNotFoundException;
 import com.campusform.server.project.domain.model.setting.Project;
 import com.campusform.server.project.domain.repository.ProjectRepository;
+import com.campusform.server.recruiting.infrastructure.persistence.ApplicantJpaRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 프로젝트 관련 비즈니스 로직을 처리하는 서비스
@@ -22,13 +26,16 @@ import lombok.RequiredArgsConstructor;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProjectService {
 
     private final SpreadsheetService spreadsheetService;
+    private final GoogleOAuthTokenService tokenService;
     private final ApplicationEventPublisher eventPublisher;
 
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
+    private final ApplicantJpaRepository applicantJpaRepository;
 
     /**
      * 프로젝트 생성
@@ -57,18 +64,57 @@ public class ProjectService {
         projectRepository.save(project);
 
         // 관리자 추가 알림 이벤트 발행 (중복 제거)
-        adminIds.stream().distinct().forEach(adminId ->
-            eventPublisher.publishEvent(new AdminAddedEvent(
-                    project.getId(), adminId, project.getTitle()
-            ))
-        );
+        adminIds.stream().distinct().forEach(adminId -> eventPublisher.publishEvent(new AdminAddedEvent(
+                project.getId(), adminId, project.getTitle())));
+
+        // Google OAuth 토큰 확인 (프로젝트 생성 시 필수)
+        // getValidToken은 토큰이 만료되었을 때 자동으로 refresh_token으로 갱신함
+        if (tokenService.getValidToken(ownerId).isEmpty()) {
+            throw new TokenNotFoundException(
+                    "Google Sheets 권한이 필요합니다. OAuth 인증을 먼저 진행해주세요. ownerId=" + ownerId);
+        }
 
         // 스프레드시트 초기 동기화 (지원자 데이터 가져오기)
-        spreadsheetService.syncInitialApplicants(request.getSheetUrl());
-
-        // TODO: google_oauth_tokens에 토큰 저장 또는 가입 시 토큰 저장
+        // 시트 연동 실패 시 프로젝트 생성도 실패하도록 예외 전파
+        spreadsheetService.syncSheet(project.getId());
 
         return ProjectResponse.from(project);
+    }
+
+    /**
+     * 사용자가 속한 프로젝트 목록 조회 (지원자 수 포함)
+     *
+     * @param userId 사용자 ID (Owner이거나 Admin인 프로젝트만 조회)
+     * @return 프로젝트 목록
+     */
+    @Transactional(readOnly = true)
+    public List<ProjectResponse> getProjectsByUserId(Long userId) {
+        List<Project> projects = projectRepository.findByUserId(userId);
+
+        return projects.stream()
+                .map(project -> {
+                    long applicantCount = applicantJpaRepository.countByProjectId(project.getId());
+                    return ProjectResponse.from(project, applicantCount);
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 프로젝트 삭제 (OWNER만 가능)
+     *
+     * @param projectId 프로젝트 ID
+     * @param userId 사용자 ID (OWNER 권한 확인)
+     */
+    @Transactional
+    public void deleteProject(Long projectId, Long userId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new IllegalArgumentException("프로젝트를 찾을 수 없습니다. projectId=" + projectId));
+
+        // OWNER 권한 검증
+        project.validateOwnerAccess(userId);
+
+        // 프로젝트 삭제 (CASCADE로 관련된 ProjectAdmin도 자동 삭제됨)
+        projectRepository.delete(project);
     }
 
     private void validateCreateProjectRequest(CreateProjectRequest request) {

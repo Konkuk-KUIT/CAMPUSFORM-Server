@@ -21,10 +21,11 @@ import lombok.NoArgsConstructor;
  * 면접 일자 복수 관리를 담당합니다.
  */
 @Entity
-@Table(name = "interview_days", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_setting_interview_date", columnNames = { "interview_setting_id",
-                "interview_date" })
-}, indexes = @Index(name = "idx_setting_id", columnList = "interview_setting_id"))
+@Table(name = "interview_days",
+       uniqueConstraints = {
+           @UniqueConstraint(name = "uk_setting_interview_date", columnNames = {"interview_setting_id", "interview_date"})
+       },
+       indexes = @Index(name = "idx_setting_id", columnList = "interview_setting_id"))
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class InterviewDay {
@@ -33,6 +34,9 @@ public class InterviewDay {
     @GeneratedValue
     private Long id;
 
+    /**
+     * 면접 설정 (부모 Aggregate Root)
+     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "interview_setting_id", nullable = false)
     private InterviewSetting setting;

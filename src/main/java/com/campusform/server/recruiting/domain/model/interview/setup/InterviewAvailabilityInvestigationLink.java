@@ -26,7 +26,8 @@ import lombok.NoArgsConstructor;
  * 지원자 면접 가능 시간 모집을 위한 공개 링크를 관리합니다.
  */
 @Entity
-@Table(name = "interview_availability_investigation_links", indexes = @Index(name = "idx_setting_id", columnList = "interview_setting_id", unique = true))
+@Table(name = "interview_availability_investigation_links",
+       indexes = @Index(name = "idx_setting_id", columnList = "interview_setting_id", unique = true))
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)

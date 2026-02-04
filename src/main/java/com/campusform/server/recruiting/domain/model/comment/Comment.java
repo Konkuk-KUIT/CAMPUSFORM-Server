@@ -75,8 +75,11 @@ public class Comment {
     @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 =======
+=======
+>>>>>>> 4e847b64815eecf19c0c35459dfbf2b688bd9bf3
 
     // 1. Private 생성자 : 외부에서 new Content() 금지
     private Comment(Long applicantId, Long authorId, String content, Comment parent) {
@@ -100,15 +103,22 @@ public class Comment {
 
     /**
      * 답글(대댓글) 작성 : 특정 댓글에 대한 댓글을 생성한다.
+<<<<<<< HEAD
      * 깊이 제한 없이 무제한으로 대댓글을 작성할 수 있습니다.
+=======
+>>>>>>> 4e847b64815eecf19c0c35459dfbf2b688bd9bf3
      */
     public static Comment createReply(Comment parent, Long applicantId, Long authorId, String content) {
         if(parent == null){
             throw new IllegalArgumentException("Parent comment cannot be null");
         }
+<<<<<<< HEAD
         // parent 객체를 직접 설정하여 parent_comment_id가 제대로 저장되도록 함
         Comment reply = new Comment(applicantId, authorId, content, parent);
         // 양방향 관계 설정 (parent의 replies 리스트에 추가)
+=======
+        Comment reply = new Comment(applicantId, authorId, content, parent);
+>>>>>>> 4e847b64815eecf19c0c35459dfbf2b688bd9bf3
         parent.addReply(reply);
         return reply;
     }
@@ -138,6 +148,7 @@ public class Comment {
         return this.authorId.equals(currentMemberId);
     }
 
+<<<<<<< HEAD
     /**
      * 부모 댓글 변경 (대댓글 삭제 시 하위 댓글들의 부모를 재설정하기 위해 사용)
      */
@@ -155,4 +166,7 @@ public class Comment {
     }
 
 >>>>>>> Stashed changes
+=======
+
+>>>>>>> 4e847b64815eecf19c0c35459dfbf2b688bd9bf3
 }
