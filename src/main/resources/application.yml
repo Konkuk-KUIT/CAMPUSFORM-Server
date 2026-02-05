@@ -21,6 +21,15 @@ spring:
               - email
               - profile
 
+server:
+  forward-headers-strategy: framework
+  tomcat:
+    remote-ip-header: x-forwarded-for
+    protocol-header: x-forwarded-proto
+  servlet:
+    session:
+      tracking-modes: cookie
+
 # AWS S3
 aws:
   s3:
@@ -59,7 +68,6 @@ server:
       cookie:
         same-site: none
         secure: true
-      tracking-modes: cookie
 
 ---
 # 운영용
@@ -86,5 +94,3 @@ server:
         same-site: lax
         secure: true
         http-only: true
-      tracking-modes: cookie
-  forward-headers-strategy: framework
