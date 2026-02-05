@@ -152,6 +152,9 @@ public class Comment {
     /**
      * 부모 댓글 변경 (대댓글 삭제 시 하위 댓글들의 부모를 재설정하기 위해 사용)
      * 
+     * DB에는 parent_comment_id FK만 저장되므로, parent 필드만 변경하면 됩니다.
+     * replies 리스트는 조회 시 mappedBy로 자동으로 채워집니다.
+     * 
      * @throws IllegalArgumentException 새로운 부모 댓글의 applicantId와 현재 댓글의 applicantId가 일치하지 않는 경우
      */
     public void changeParent(Comment newParent) {
@@ -162,16 +165,9 @@ public class Comment {
                     this.applicantId, newParent.getApplicantId())
             );
         }
-        // 기존 부모에서 이 댓글을 replies 리스트에서 제거
-        if (this.parent != null) {
-            this.parent.replies.remove(this);
-        }
-        // 새로운 부모 설정
+        // parent 필드만 변경 (DB의 parent_comment_id FK가 업데이트됨)
+        // replies 리스트는 조회 시 자동으로 채워지므로 수동 관리 불필요
         this.parent = newParent;
-        // 새로운 부모의 replies 리스트에 추가
-        if (newParent != null) {
-            newParent.replies.add(this);
-        }
     }
 
 }
