@@ -90,7 +90,7 @@ server:
   servlet:
     session:
       cookie:
-        domain: .campus-form-server.kro.kr
+        domain: campus-form-server.kro.kr
         same-site: lax
         secure: true
         http-only: true
