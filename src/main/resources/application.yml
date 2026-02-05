@@ -82,7 +82,7 @@ server:
     session:
       cookie:
         domain: .campus-form-server.kro.kr
-        same-site: lax
+        same-site: none
         secure: true
         http-only: true
   forward-headers-strategy: native
