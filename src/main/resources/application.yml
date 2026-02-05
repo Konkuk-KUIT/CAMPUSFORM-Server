@@ -59,6 +59,7 @@ server:
       cookie:
         same-site: none
         secure: true
+      tracking-modes: cookie
 
 ---
 # 운영용
@@ -85,4 +86,5 @@ server:
         same-site: lax
         secure: true
         http-only: true
+      tracking-modes: cookie
   forward-headers-strategy: framework
