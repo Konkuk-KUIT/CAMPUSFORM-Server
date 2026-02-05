@@ -115,14 +115,14 @@ public class ResultService {
         long maleCount = applicants.stream()
                 .filter(a -> {
                     String gender = a.getGender();
-                    return gender != null && ("남".equals(gender) || "Male".equalsIgnoreCase(gender)|| "남자".equals(gender));
+                    return gender != null && ("남".equals(gender) || "Male".equalsIgnoreCase(gender)|| "남자".equals(gender)|| "남성".equals(gender));
                 })
                 .count();
 
         long femaleCount = applicants.stream()
                 .filter(a -> {
                     String gender = a.getGender();
-                    return gender != null && ("여".equals(gender) || "Female".equalsIgnoreCase(gender) || "여성".equals(gender));
+                    return gender != null && ("여".equals(gender) || "Female".equalsIgnoreCase(gender) || "여성".equals(gender)|| "여자".equals(gender));
                 })
                 .count();
 
@@ -138,19 +138,6 @@ public class ResultService {
                 .otherPercent(otherPercent)
                 .build();
     }
-
-    // 템플릿 내용 조회 헬퍼 메서드
-//    private String getTemplateContent(Long projectId, String stage, ApplicantStatus status) {
-//        return templateRepository.findById(projectId)
-//                .map(t -> {
-//                    if ("DOCUMENT".equalsIgnoreCase(stage)) {
-//                        return status == ApplicantStatus.PASS ? t.getTemplateDocumentPass() : t.getTemplateDocumentFail();
-//                    } else {
-//                        return status == ApplicantStatus.PASS ? t.getTemplateInterviewPass() : t.getTemplateInterviewFail();
-//                    }
-//                })
-//                .orElse("");
-//    }
 
     @Transactional
     public void announceResults(Long projectId, ResultAnnouncementRequest request){
