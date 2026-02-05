@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -80,10 +79,8 @@ public class CommentService {
 
     // 3. 댓글 삭제
     // - 루트 댓글 삭제 시: 모든 대댓글(무한 깊이)이 자동으로 삭제됨 (cascade = CascadeType.ALL)
-    // - 대댓글 삭제 시: 하위 댓글들은 살려두고 부모를 재설정한 후 해당 대댓글만 삭제
-    // 
-    // orphanRemoval은 제거되어 있으므로, changeParent 호출 시 안전하게 부모를 재설정할 수 있음
-    // (orphanRemoval이 있으면 changeParent에서 기존 부모의 replies에서 제거하는 순간 고아로 표시되어 삭제될 수 있음)
+    // - 대댓글 삭제 시: 하위 댓글들은 모두 루트 댓글의 직접 자식이므로 해당 대댓글만 삭제하면 됨
+    //   (시나리오 2: 모든 대댓글이 루트의 직접 자식이므로 changeParent 불필요)
     public void deleteComment(Long commentId, Long authorId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 댓글입니다."));
@@ -91,19 +88,7 @@ public class CommentService {
         // 작성자 본인 확인
         validateAuthor(comment, authorId);
 
-        // 대댓글인 경우: 하위 댓글들의 부모를 재설정
-        if (comment.getParent() != null) {
-            // 하위 댓글들을 삭제할 댓글의 부모(할아버지)로 재설정
-            Comment newParent = comment.getParent();
-            // replies 리스트를 복사하여 순회 (원본 리스트를 수정하면서 순회하면 문제 발생 가능)
-            List<Comment> childReplies = new ArrayList<>(comment.getReplies());
-            for (Comment childReply : childReplies) {
-                // changeParent는 orphanRemoval이 없으므로 안전하게 부모를 재설정할 수 있음
-                childReply.changeParent(newParent);
-            }
-        }
-        // 루트 댓글인 경우: cascade = CascadeType.ALL 설정으로 인해 모든 대댓글이 자동으로 삭제됨
-        // 대댓글인 경우: 하위 댓글들의 부모를 재설정했으므로 해당 대댓글만 삭제됨
+        // 댓글 삭제 (cascade로 하위 댓글도 자동 삭제되거나, 모든 대댓글이 루트의 직접 자식이므로 문제없음)
         commentRepository.delete(comment);
     }
 
@@ -116,15 +101,6 @@ public class CommentService {
 
         // 모든 댓글 조회 (루트 + 대댓글)
         List<Comment> allComments = commentRepository.findAllByApplicantIdOrderByCreatedAtAsc(applicantId);
-
-        return buildCommentHierarchy(allComments);
-    }
-
-    // 5. 프로젝트 전체 댓글 목록 조회 (계층 구조 포함)
-    @Transactional(readOnly = true)
-    public List<CommentResponse> getCommentsByProjectId(Long projectId) {
-        // 프로젝트의 모든 지원자에 대한 댓글 조회
-        List<Comment> allComments = commentRepository.findAllByProjectIdOrderByCreatedAtAsc(projectId);
 
         return buildCommentHierarchy(allComments);
     }

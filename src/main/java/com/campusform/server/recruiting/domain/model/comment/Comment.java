@@ -64,8 +64,7 @@ public class Comment {
      * 
      * cascade = CascadeType.ALL: 부모 댓글 삭제 시 모든 대댓글(무한 깊이)이 자동으로 삭제됨
      * 
-     * orphanRemoval은 제거: 수동 부모 재설정 로직(changeParent)과 충돌을 방지하기 위해
-     * 대댓글 삭제 시 하위 댓글들의 부모를 재설정하는 로직은 CommentService에서 명시적으로 처리
+     * 시나리오 2: 모든 대댓글이 루트 댓글의 직접 자식이므로 부모 재설정 로직 불필요
      */
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
     private List<Comment> replies = new ArrayList<>();
@@ -146,28 +145,6 @@ public class Comment {
      */
     public boolean isWrittenBy(Long currentMemberId) {
         return this.authorId.equals(currentMemberId);
-    }
-
-
-    /**
-     * 부모 댓글 변경 (대댓글 삭제 시 하위 댓글들의 부모를 재설정하기 위해 사용)
-     * 
-     * DB에는 parent_comment_id FK만 저장되므로, parent 필드만 변경하면 됩니다.
-     * replies 리스트는 조회 시 mappedBy로 자동으로 채워집니다.
-     * 
-     * @throws IllegalArgumentException 새로운 부모 댓글의 applicantId와 현재 댓글의 applicantId가 일치하지 않는 경우
-     */
-    public void changeParent(Comment newParent) {
-        // 새로운 부모가 있는 경우 applicantId 일치 검증 (데이터 무결성 보장)
-        if (newParent != null && !newParent.getApplicantId().equals(this.applicantId)) {
-            throw new IllegalArgumentException(
-                String.format("부모 댓글 변경 시 applicantId가 일치해야 합니다. 현재 댓글의 applicantId: %d, 새로운 부모의 applicantId: %d", 
-                    this.applicantId, newParent.getApplicantId())
-            );
-        }
-        // parent 필드만 변경 (DB의 parent_comment_id FK가 업데이트됨)
-        // replies 리스트는 조회 시 자동으로 채워지므로 수동 관리 불필요
-        this.parent = newParent;
     }
 
 }
