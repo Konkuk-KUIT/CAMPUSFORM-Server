@@ -123,7 +123,7 @@ public class SpreadsheetService {
                                 continue;
                             String questionText = headers.get(i).getName();
                             String answerText = getColumnValue(columns, i);
-                            applicant.addExtraAnswer(questionText, answerText);
+                            applicant.addExtraAnswer(questionText, answerText, i);
                         }
 
                         applicantRepository.save(applicant); // Upsert로 동작
@@ -148,15 +148,15 @@ public class SpreadsheetService {
                     applicant = Applicant.create(
                             project.getId(), name, email, phone, gender, school, major, position);
 
-                // 매핑되지 않은 컬럼을 추가 질문으로 저장 (시트 헤더 순서 기준)
-                for (int i = 0; i < columns.length && i < headers.size(); i++) {
-                    if (requiredIndices.contains(i))
-                        continue;
-                    String questionText = headers.get(i).getName();
-                    String answerText = getColumnValue(columns, i);
-                    // 시트 헤더의 인덱스를 순서로 저장하여 질문-답변 매칭 보장
-                    applicant.addExtraAnswer(questionText, answerText, i);
-                }
+                    // 매핑되지 않은 컬럼을 추가 질문으로 저장 (시트 헤더 순서 기준)
+                    for (int i = 0; i < columns.length && i < headers.size(); i++) {
+                        if (requiredIndices.contains(i))
+                            continue;
+                        String questionText = headers.get(i).getName();
+                        String answerText = getColumnValue(columns, i);
+                        // 시트 헤더의 인덱스를 순서로 저장하여 질문-답변 매칭 보장
+                        applicant.addExtraAnswer(questionText, answerText, i);
+                    }
 
                     // 변경사항 기록 (이벤트용)
                     eventChanges.add(new SheetSyncChangeInfo(

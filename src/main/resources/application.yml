@@ -21,6 +21,15 @@ spring:
               - email
               - profile
 
+server:
+  forward-headers-strategy: framework
+  tomcat:
+    remote-ip-header: x-forwarded-for
+    protocol-header: x-forwarded-proto
+  servlet:
+    session:
+      tracking-modes: cookie
+
 # AWS S3
 aws:
   s3:
@@ -78,11 +87,16 @@ spring:
       ddl-auto: update
 
 server:
+  forward-headers-strategy: framework
+  tomcat:
+    internal-proxies: ".*"
+    remote-ip-header: x-forwarded-for
+    protocol-header: x-forwarded-proto
+
   servlet:
     session:
       cookie:
-        domain: .campus-form-server.kro.kr
+        domain: campus-form-server.kro.kr
         same-site: none
         secure: true
         http-only: true
-  forward-headers-strategy: native
