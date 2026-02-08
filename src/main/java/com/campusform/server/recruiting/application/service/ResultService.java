@@ -5,7 +5,7 @@ import com.campusform.server.recruiting.application.dto.request.ResultAnnounceme
 import com.campusform.server.recruiting.application.dto.response.ResultListResponse;
 import com.campusform.server.recruiting.domain.model.applicant.Applicant;
 import com.campusform.server.recruiting.domain.model.applicant.value.ApplicantStatus;
-import com.campusform.server.recruiting.domain.model.applicant.value.StageStatus;
+import com.campusform.server.recruiting.domain.model.applicant.value.RecruitmentStage;
 import com.campusform.server.recruiting.domain.repository.ApplicantRepository;
 import com.campusform.server.recruiting.domain.repository.MessageTemplateRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,13 +24,13 @@ public class ResultService {
     private final MessageGenerator messageGenerator;
 
     // 합,불 명단/ 통계 조회
-    public ResultListResponse getResults(Long projectId, StageStatus stage, ApplicantStatus status){
+    public ResultListResponse getResults(Long projectId, RecruitmentStage stage, ApplicantStatus status){
 
         //1. Enum으로 변환
         List<Applicant> applicants;
 
         // 2. 단계(Stage)에 따라 데이터 조회 분기 처리
-        if (stage==StageStatus.DOCUMENT) {
+        if (stage==RecruitmentStage.DOCUMENT) {
             applicants = applicantRepository.findByProjectIdAndDocumentStatus(projectId, status);
         } else {
             // INTERVIEW
@@ -39,7 +39,7 @@ public class ResultService {
 
         // 3. 통계 데이터 계산
         long totalCount;
-        if (stage == StageStatus.DOCUMENT) {
+        if (stage == RecruitmentStage.DOCUMENT) {
             // 서류 단계: 전체 지원자 수
             totalCount = applicantRepository.countByProjectId(projectId);
         } else {
@@ -151,7 +151,7 @@ public class ResultService {
             throw new IllegalArgumentException("해당 프로젝트에 속하지 않는 지원자가 포함되어 있습니다.");
         }
 
-        StageStatus stage = StageStatus.valueOf(request.stage().toUpperCase());
+        RecruitmentStage stage = RecruitmentStage.valueOf(request.stage().toUpperCase());
         //2. 상태 변경 (도메인 로직 실행)
         for (Applicant applicant : applicants){
             applicant.updateApplicantStatus(stage,request.status());

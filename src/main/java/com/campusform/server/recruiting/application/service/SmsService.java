@@ -5,7 +5,7 @@ import com.campusform.server.recruiting.application.dto.request.SmsTemplateSaveR
 import com.campusform.server.recruiting.application.dto.response.SmsPreviewResponse;
 import com.campusform.server.recruiting.domain.model.applicant.Applicant;
 import com.campusform.server.recruiting.domain.model.applicant.value.ApplicantStatus;
-import com.campusform.server.recruiting.domain.model.applicant.value.StageStatus;
+import com.campusform.server.recruiting.domain.model.applicant.value.RecruitmentStage;
 import com.campusform.server.recruiting.domain.model.message.MessageTemplate;
 import com.campusform.server.recruiting.domain.repository.ApplicantRepository;
 import com.campusform.server.recruiting.domain.repository.MessageTemplateRepository;
@@ -32,7 +32,7 @@ public class SmsService {
      * @param request   수정사항 문자열을 Enum으로 변환하여 Type Safety를 확보함
      */
     @Transactional
-    public void saveTemplate(Long projectId, StageStatus stage, SmsTemplateSaveRequest request) {
+    public void saveTemplate(Long projectId, RecruitmentStage stage, SmsTemplateSaveRequest request) {
         ApplicantStatus applicantStatus = request.getStatus();
         // 1. 없으면 생성, 있으면 가져오기
         MessageTemplate template = templateRepository.findByProjectId(projectId)
@@ -48,14 +48,14 @@ public class SmsService {
      * 지원자의 현재 상태를 DB에서 조회하여 해당 템플릿을 사용합니다.
      */
     @Transactional(readOnly = true)
-    public SmsPreviewResponse getPreview(Long projectId, Long applicantId, StageStatus stage) {
+    public SmsPreviewResponse getPreview(Long projectId, Long applicantId, RecruitmentStage stage) {
         // 1. 지원자 조회
         Applicant applicant = applicantRepository.findById(applicantId)
                 .filter(a -> a.getProjectId().equals(projectId))
                 .orElseThrow(() -> new IllegalArgumentException("지원자가 없습니다."));
 
         // 2. 지원자의 현재 상태 조회 (DB에서 가져옴)
-        ApplicantStatus currentStatus = (stage == StageStatus.DOCUMENT)
+        ApplicantStatus currentStatus = (stage == RecruitmentStage.DOCUMENT)
                 ? applicant.getDocumentStatus()
                 : applicant.getInterviewStatus();
 
@@ -91,7 +91,7 @@ public class SmsService {
      * @return 템플릿 내용 (없으면 빈 문자열)
      */
     @Transactional(readOnly = true)
-    public String getTemplate(Long projectId, StageStatus stage, ApplicantStatus status) {
+    public String getTemplate(Long projectId, RecruitmentStage stage, ApplicantStatus status) {
         return templateRepository.findByProjectId(projectId)
                 .map(t -> t.getTemplateContent(stage, status))
                 .orElse("");
