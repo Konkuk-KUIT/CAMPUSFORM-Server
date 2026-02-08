@@ -25,7 +25,7 @@ import lombok.RequiredArgsConstructor;
  * 프로젝트 상태를 직접 설정할 수 있는 테스트용 API를 제공합니다.
  * 프로덕션 환경에서는 비활성화하거나 삭제해야 합니다.
  */
-@Profile("temporary") // API 테스트 환경에서만 활성화
+@Profile("local") // API 테스트 환경에서만 활성화
 @Tag(name = "테스트", description = "개발 및 테스트용 API")
 @RestController
 @RequestMapping("/api/test/projects")

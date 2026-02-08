@@ -89,6 +89,10 @@ public class Project {
     @OneToOne(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private ProjectRequiredMapping mapping = new ProjectRequiredMapping();
 
+    /** 값 치환 규칙. 동기화 시 적용됨 */
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProjectValueMapping> valueMappings = new ArrayList<>();
+
     /**
      * 사용자가 프로젝트의 Owner인지 검증
      */
@@ -164,6 +168,13 @@ public class Project {
     /** 필수 필드 매핑 정보 설정 연관관계 편의메서드 */
     public void addMapping(RequiredFieldMapping mappingValue) {
         this.mapping = ProjectRequiredMapping.create(this, mappingValue);
+    }
+
+    /**
+     * 포지션 값 치환 규칙 추가
+     */
+    public void addValueMapping(String fromValue, String toValue) {
+        valueMappings.add(ProjectValueMapping.create(this, fromValue, toValue));
     }
 
     /**

@@ -64,7 +64,13 @@ public class ProjectService {
             project.addMapping(request.getRequiredMappings().toDomainValue());
         }
 
-        // 부모 엔티티로 한 번에 저장
+        // 포지션 값 치환 규칙 (선택): 시트 원시값 → 저장용 값
+        if (request.getValueMappings() != null) {
+            request.getValueMappings().forEach(
+                    item -> project.addValueMapping(item.getFromValue(), item.getToValue()));
+        }
+
+        // 부모 엔티티로 한 번에 저장 (valueMappings는 cascade로 함께 persist)
         projectRepository.save(project);
 
         // 관리자 추가 알림 이벤트 발행 (중복 제거)

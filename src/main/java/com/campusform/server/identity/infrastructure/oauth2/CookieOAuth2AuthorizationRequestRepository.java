@@ -34,6 +34,9 @@ public class CookieOAuth2AuthorizationRequestRepository
     @Value("${COOKIE_DOMAIN:campus-form-server.kro.kr}")
     private String cookieDomain;
 
+    @Value("${COOKIE_SECURE:true}")
+    private boolean cookieSecure;
+
     /**
      * 쿠키에서 OAuth2 인증 요청 로드
      */
@@ -91,10 +94,8 @@ public class CookieOAuth2AuthorizationRequestRepository
         cookie.setPath("/");
         cookie.setHttpOnly(true);
         cookie.setMaxAge(maxAge);
-        cookie.setSecure(true); // HTTPS 필수
-        cookie.setAttribute("SameSite", "none");
-        // 쿠키 도메인 설정: 서브도메인 간 공유를 위해 점(.)으로 시작
-        // api.campus-form-server.kro.kr와 web.campus-form-server.kro.kr 간 공유
+        cookie.setSecure(cookieSecure);
+        cookie.setAttribute("SameSite", cookieSecure ? "none" : "Lax");
         if (cookieDomain != null && !cookieDomain.isEmpty()) {
             cookie.setDomain(cookieDomain);
         }
@@ -114,9 +115,8 @@ public class CookieOAuth2AuthorizationRequestRepository
                     cookie.setPath("/");
                     cookie.setMaxAge(0);
                     cookie.setHttpOnly(true);
-                    cookie.setSecure(true);
-                    cookie.setAttribute("SameSite", "none");
-                    // 도메인도 일치시켜야 삭제됨
+                    cookie.setSecure(cookieSecure);
+                    cookie.setAttribute("SameSite", cookieSecure ? "none" : "Lax");
                     if (cookieDomain != null && !cookieDomain.isEmpty()) {
                         cookie.setDomain(cookieDomain);
                     }
