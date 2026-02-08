@@ -22,9 +22,13 @@ import com.campusform.server.recruiting.application.dto.response.CommentUpdateRe
 import com.campusform.server.recruiting.application.service.CommentService;
 import com.campusform.server.recruiting.domain.model.applicant.value.RecruitmentStage;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+@Tag(name = "댓글", description = "지원자별 댓글·대댓글 조회, 작성, 수정, 삭제 API (서류/면접 단계별 구분)")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/projects/{projectId}")
@@ -32,25 +36,20 @@ public class CommentController {
     private final CommentService commentService;
     private final AuthService authService;
 
-    /**
-     * 특정 단계의 지원자에 달린 댓글 조회
-     */
+    @Operation(summary = "지원자 댓글 조회", description = "특정 모집 단계(DOCUMENT/INTERVIEW)의 지원자에 달린 댓글을 계층 구조로 조회합니다.")
     @GetMapping("/applicants/{applicantId}/comments")
     public ResponseEntity<List<CommentResponse>> getComments(
-            @PathVariable Long applicantId,
-            @RequestParam RecruitmentStage stage) {
+            @Parameter(description = "지원자 ID") @PathVariable Long applicantId,
+            @Parameter(description = "조회할 모집 단계 (DOCUMENT 또는 INTERVIEW)", required = true) @RequestParam RecruitmentStage stage) {
         List<CommentResponse> comments = commentService.getComments(applicantId, stage);
         return ResponseEntity.ok(comments);
     }
 
-    /**
-     * 댓글 작성
-     * parentId가 있으면 대댓글, 없으면 루트 댓글
-     */
+    @Operation(summary = "댓글 작성", description = "루트 댓글 또는 대댓글을 작성합니다. 요청 본문의 parentId가 있으면 해당 댓글의 대댓글, 없으면 루트 댓글입니다.")
     @PostMapping("/applicants/{applicantId}/comments")
     public ResponseEntity<CommentCreateResponse> createComment(
-            @PathVariable Long applicantId,
-            @RequestParam RecruitmentStage stage,
+            @Parameter(description = "지원자 ID") @PathVariable Long applicantId,
+            @Parameter(description = "모집 단계 (DOCUMENT 또는 INTERVIEW)", required = true) @RequestParam RecruitmentStage stage,
             @RequestBody @Valid CommentRequest requestCommentRequest,
             Authentication authentication) {
         Long memberId = authService.extractUserId(authentication);
@@ -59,12 +58,12 @@ public class CommentController {
         return ResponseEntity.ok(response);
     }
 
-    /** 댓글 수정 (작성자 본인만 가능) */
+    @Operation(summary = "댓글 수정", description = "댓글 내용을 수정합니다. 작성자 본인만 가능합니다.")
     @PatchMapping("/applicants/{applicantId}/comments/{commentId}")
     public ResponseEntity<CommentUpdateResponse> updateComment(
-            @PathVariable Long applicantId,
-            @PathVariable Long commentId,
-            @RequestParam RecruitmentStage stage,
+            @Parameter(description = "지원자 ID") @PathVariable Long applicantId,
+            @Parameter(description = "댓글 ID") @PathVariable Long commentId,
+            @Parameter(description = "모집 단계 (DOCUMENT 또는 INTERVIEW)", required = true) @RequestParam RecruitmentStage stage,
             @RequestBody @Valid CommentRequest request,
             Authentication authentication) {
         Long memberId = authService.extractUserId(authentication);
@@ -73,11 +72,11 @@ public class CommentController {
         return ResponseEntity.ok(response);
     }
 
-    /** 댓글 삭제 (작성자 본인만 가능) */
+    @Operation(summary = "댓글 삭제", description = "댓글을 삭제합니다. 작성자 본인만 가능하며, 루트 댓글 삭제 시 대댓글도 함께 삭제됩니다.")
     @DeleteMapping("/applicants/{applicantId}/comments/{commentId}")
     public ResponseEntity<?> deleteComment(
-            @PathVariable Long commentId,
-            @RequestParam RecruitmentStage stage,
+            @Parameter(description = "댓글 ID") @PathVariable Long commentId,
+            @Parameter(description = "모집 단계 (DOCUMENT 또는 INTERVIEW)", required = true) @RequestParam RecruitmentStage stage,
             Authentication authentication) {
         Long memberId = authService.extractUserId(authentication);
         commentService.deleteComment(commentId, memberId, stage);
