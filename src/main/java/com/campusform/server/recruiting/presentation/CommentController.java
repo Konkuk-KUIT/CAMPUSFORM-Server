@@ -3,8 +3,7 @@ package com.campusform.server.recruiting.presentation;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -12,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.campusform.server.identity.application.service.AuthService;
@@ -20,6 +20,7 @@ import com.campusform.server.recruiting.application.dto.response.CommentCreateRe
 import com.campusform.server.recruiting.application.dto.response.CommentResponse;
 import com.campusform.server.recruiting.application.dto.response.CommentUpdateResponse;
 import com.campusform.server.recruiting.application.service.CommentService;
+import com.campusform.server.recruiting.domain.model.applicant.value.RecruitmentStage;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,69 +32,55 @@ public class CommentController {
     private final CommentService commentService;
     private final AuthService authService;
 
-    // 프로젝트 전체 댓글 목록 조회 (계층 구조 포함)
-    @GetMapping("/comments")
-    public ResponseEntity<List<CommentResponse>> getCommentsByProject(
-            @PathVariable Long projectId) {
-        List<CommentResponse> comments = commentService.getCommentsByProjectId(projectId);
-        return ResponseEntity.ok(comments);
-    }
-
-    // 지원자별 댓글 목록 조회 (계층 구조 포함)
+    /**
+     * 특정 단계의 지원자에 달린 댓글 조회
+     */
     @GetMapping("/applicants/{applicantId}/comments")
     public ResponseEntity<List<CommentResponse>> getComments(
-            @PathVariable Long applicantId) {
-        List<CommentResponse> comments = commentService.getComments(applicantId);
+            @PathVariable Long applicantId,
+            @RequestParam RecruitmentStage stage) {
+        List<CommentResponse> comments = commentService.getComments(applicantId, stage);
         return ResponseEntity.ok(comments);
     }
 
-    // 댓글 작성 (parentId가 있으면 대댓글, 없으면 루트 댓글)
+    /**
+     * 댓글 작성
+     * parentId가 있으면 대댓글, 없으면 루트 댓글
+     */
     @PostMapping("/applicants/{applicantId}/comments")
     public ResponseEntity<CommentCreateResponse> createComment(
             @PathVariable Long applicantId,
-            @RequestBody @Valid CommentRequest request,
-            @AuthenticationPrincipal OAuth2User oauth2User) {
-        if (oauth2User == null) {
-            throw new IllegalArgumentException("로그인이 필요합니다.");
-        }
-        Long memberId = oauth2User.getAttribute("userId");
-        CommentCreateResponse response = commentService.createComment(applicantId, memberId, request);
+            @RequestParam RecruitmentStage stage,
+            @RequestBody @Valid CommentRequest requestCommentRequest,
+            Authentication authentication) {
+        Long memberId = authService.extractUserId(authentication);
+        CommentCreateResponse response = commentService.createComment(applicantId, memberId, stage,
+                requestCommentRequest);
         return ResponseEntity.ok(response);
     }
 
-    // 댓글 수정
+    /** 댓글 수정 (작성자 본인만 가능) */
     @PatchMapping("/applicants/{applicantId}/comments/{commentId}")
     public ResponseEntity<CommentUpdateResponse> updateComment(
-            // @PathVariable Long projectId,
             @PathVariable Long applicantId,
             @PathVariable Long commentId,
-            // @RequestParam StageStatus stage,
+            @RequestParam RecruitmentStage stage,
             @RequestBody @Valid CommentRequest request,
-            @AuthenticationPrincipal OAuth2User oauth2User) {
-        if (oauth2User == null) {
-            throw new IllegalArgumentException("로그인이 필요합니다.");
-        }
-        Long memberId = oauth2User.getAttribute("userId");
+            Authentication authentication) {
+        Long memberId = authService.extractUserId(authentication);
         CommentUpdateResponse response = commentService.updateComment(
-                applicantId, commentId, memberId, request);
-
+                applicantId, commentId, memberId, stage, request);
         return ResponseEntity.ok(response);
     }
 
-    // 댓글 삭제
+    /** 댓글 삭제 (작성자 본인만 가능) */
     @DeleteMapping("/applicants/{applicantId}/comments/{commentId}")
     public ResponseEntity<?> deleteComment(
-            // @PathVariable Long projectId,
-            // @PathVariable Long applicantId,
             @PathVariable Long commentId,
-            // @RequestParam StageStatus stage,
-            @AuthenticationPrincipal OAuth2User oauth2User) {
-        if (oauth2User == null) {
-            throw new IllegalArgumentException("로그인이 필요합니다.");
-        }
-        Long memberId = oauth2User.getAttribute("userId");
-        commentService.deleteComment(commentId, memberId);
-
+            @RequestParam RecruitmentStage stage,
+            Authentication authentication) {
+        Long memberId = authService.extractUserId(authentication);
+        commentService.deleteComment(commentId, memberId, stage);
         return ResponseEntity.ok().build();
     }
 }

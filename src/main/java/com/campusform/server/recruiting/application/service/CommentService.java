@@ -8,10 +8,12 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.campusform.server.project.domain.repository.ProjectRepository;
 import com.campusform.server.recruiting.application.dto.request.CommentRequest;
 import com.campusform.server.recruiting.application.dto.response.CommentCreateResponse;
 import com.campusform.server.recruiting.application.dto.response.CommentResponse;
 import com.campusform.server.recruiting.application.dto.response.CommentUpdateResponse;
+import com.campusform.server.recruiting.domain.model.applicant.value.RecruitmentStage;
 import com.campusform.server.recruiting.domain.model.comment.Comment;
 import com.campusform.server.recruiting.domain.repository.ApplicantRepository;
 import com.campusform.server.recruiting.infrastructure.persistence.CommentRepository;
@@ -25,9 +27,13 @@ import lombok.RequiredArgsConstructor;
 public class CommentService {
     private final CommentRepository commentRepository;
     private final ApplicantRepository applicantRepository;
+    private final ProjectRepository projectRepository;
 
-    // 1. 댓글 작성 (parentId가 있으면 대댓글, 없으면 루트 댓글)
-    public CommentCreateResponse createComment(Long applicantId, Long authorId, CommentRequest request) {
+    /**
+     * 댓글 작성 (parentId가 있으면 대댓글, 없으면 루트 댓글)
+     */
+    public CommentCreateResponse createComment(Long applicantId, Long authorId, RecruitmentStage stage,
+            CommentRequest request) {
         if (!applicantRepository.existsById(applicantId)) {
             throw new EntityNotFoundException("존재하지 않는 지원자입니다.");
         }
@@ -46,7 +52,8 @@ public class CommentService {
 
             // 깊이 제한 없이 무제한으로 대댓글 작성 가능
             // parent 객체를 직접 전달하여 parent_comment_id가 제대로 저장되도록 함
-            comment = Comment.createReply(parent, applicantId, authorId, request.getContent());
+            // createReply 내부에서 stage 일치 검증도 수행됨
+            comment = Comment.createReply(parent, applicantId, authorId, stage, request.getContent());
 
             // parent가 제대로 설정되었는지 확인
             if (comment.getParent() == null || !comment.getParent().getId().equals(request.getParentId())) {
@@ -54,7 +61,7 @@ public class CommentService {
             }
         } else {
             // 루트 댓글 작성
-            comment = Comment.createRoot(applicantId, authorId, request.getContent());
+            comment = Comment.createRoot(applicantId, authorId, stage, request.getContent());
         }
 
         // 저장 후 반환 (parent_comment_id는 JPA가 자동으로 저장)
@@ -65,12 +72,19 @@ public class CommentService {
 
     // 3. 댓글 수정
     public CommentUpdateResponse updateComment(Long applicantId, Long commentId, Long authorId,
-            CommentRequest request) {
+            RecruitmentStage stage, CommentRequest request) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 댓글입니다."));
 
         if (!comment.getApplicantId().equals(applicantId)) {
             throw new IllegalArgumentException("해당 지원자의 댓글이 아닙니다.");
+        }
+
+        // stage 일치 검증 (DOCUMENT와 INTERVIEW 댓글 구분)
+        if (!comment.getStage().equals(stage)) {
+            throw new IllegalArgumentException(
+                    String.format("해당 모집 단계의 댓글이 아닙니다. 댓글의 stage: %s, 요청한 stage: %s",
+                            comment.getStage(), stage));
         }
 
         validateAuthor(comment, authorId); // 작성자 검증 분리
@@ -85,9 +99,16 @@ public class CommentService {
     // - 루트 댓글 삭제 시: 모든 대댓글(무한 깊이)이 자동으로 삭제됨 (cascade = CascadeType.ALL)
     // - 대댓글 삭제 시: 하위 댓글들은 모두 루트 댓글의 직접 자식이므로 해당 대댓글만 삭제하면 됨
     // (시나리오 2: 모든 대댓글이 루트의 직접 자식이므로 changeParent 불필요)
-    public void deleteComment(Long commentId, Long authorId) {
+    public void deleteComment(Long commentId, Long authorId, RecruitmentStage stage) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 댓글입니다."));
+
+        // stage 일치 검증 (DOCUMENT와 INTERVIEW 댓글 구분)
+        if (!comment.getStage().equals(stage)) {
+            throw new IllegalArgumentException(
+                    String.format("해당 모집 단계의 댓글이 아닙니다. 댓글의 stage: %s, 요청한 stage: %s",
+                            comment.getStage(), stage));
+        }
 
         // 작성자 본인 확인
         validateAuthor(comment, authorId);
@@ -96,22 +117,18 @@ public class CommentService {
         commentRepository.delete(comment);
     }
 
-    // 프로젝트 전체 댓글 목록 조회 (해당 프로젝트의 모든 지원자 댓글, 계층 구조 포함)
+    /**
+     * 특정 단계의 지원자에 달린 댓글 조회
+     */
     @Transactional(readOnly = true)
-    public List<CommentResponse> getCommentsByProjectId(Long projectId) {
-        List<Comment> allComments = commentRepository.findAllByProjectIdOrderByCreatedAtAsc(projectId);
-        return buildCommentHierarchy(allComments);
-    }
-
-    // 4. 지원자별 댓글 목록 조회 (계층 구조 포함)
-    @Transactional(readOnly = true)
-    public List<CommentResponse> getComments(Long applicantId) {
+    public List<CommentResponse> getComments(Long applicantId, RecruitmentStage stage) {
         if (!applicantRepository.existsById(applicantId)) {
             throw new EntityNotFoundException("존재하지 않는 지원자입니다.");
         }
 
-        // 모든 댓글 조회 (루트 + 대댓글)
-        List<Comment> allComments = commentRepository.findAllByApplicantIdOrderByCreatedAtAsc(applicantId);
+        // 특정 단계의 모든 댓글 조회 (루트 + 대댓글)
+        List<Comment> allComments = commentRepository.findAllByApplicantIdAndStageOrderByCreatedAtAsc(applicantId,
+                stage);
 
         return buildCommentHierarchy(allComments);
     }
