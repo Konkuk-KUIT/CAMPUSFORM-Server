@@ -48,7 +48,7 @@ public class ApplicantController {
     /**
      * 지원자 상태변경 (보류/합격/불합격)
      */
-    @Operation(summary = "지원자 상태 변경", description = "특정 지원자의 서류/면접 전형 상태를 변경합니다. (예: 보류, 서류 합격, 최종 합격 등)")
+    @Operation(summary = "지원자 상태 변경", description = "특정 지원자의 서류/면접 전형 상태를 변경합니다. (예: 보류, 합격, 불합격)")
     @PatchMapping("/{applicantId}")
     public ResponseEntity<ApplicantStatusUpdateResponse> updateStatus(
             @Parameter(description = "지원자 ID") @PathVariable Long applicantId,

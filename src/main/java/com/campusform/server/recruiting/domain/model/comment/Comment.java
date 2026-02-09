@@ -69,13 +69,10 @@ public class Comment {
 
     /**
      * 답글 목록 (self-referencing 관계)
-     * OneToMany 이므로 DB에 테이블 생성 안됨
-     * 
-     * cascade = CascadeType.ALL: 부모 댓글 삭제 시 모든 대댓글(무한 깊이)이 자동으로 삭제됨
-     * 
-     * 시나리오 2: 모든 대댓글이 루트 댓글의 직접 자식이므로 부모 재설정 로직 불필요
+     * cascade = CascadeType.ALL: 부모 댓글 삭제 시 연산이 대댓글에 전파됨
+     * orphanRemoval = true: 부모 삭제 시 대댓글을 모두 삭제 (고아 엔티티 제거)
      */
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> replies = new ArrayList<>();
 
     @CreatedDate

@@ -95,10 +95,10 @@ public class CommentService {
         return new CommentUpdateResponse(comment.getId(), comment.getUpdatedAt());
     }
 
-    // 3. 댓글 삭제
-    // - 루트 댓글 삭제 시: 모든 대댓글(무한 깊이)이 자동으로 삭제됨 (cascade = CascadeType.ALL)
-    // - 대댓글 삭제 시: 하위 댓글들은 모두 루트 댓글의 직접 자식이므로 해당 대댓글만 삭제하면 됨
-    // (시나리오 2: 모든 대댓글이 루트의 직접 자식이므로 changeParent 불필요)
+    /**
+     * 댓글 삭제 (작성자 본인만 가능).
+     * 부모 댓글 삭제 시 해당 댓글의 모든 대댓글(직접·간접)은 엔티티의 cascade = ALL + orphanRemoval = true 로 DB에서 함께 삭제된다.
+     */
     public void deleteComment(Long commentId, Long authorId, RecruitmentStage stage) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 댓글입니다."));
@@ -110,10 +110,9 @@ public class CommentService {
                             comment.getStage(), stage));
         }
 
-        // 작성자 본인 확인
         validateAuthor(comment, authorId);
 
-        // 댓글 삭제 (cascade로 하위 댓글도 자동 삭제되거나, 모든 대댓글이 루트의 직접 자식이므로 문제없음)
+        // 부모 삭제 시 JPA가 replies 컬렉션에 대해 cascade REMOVE + orphanRemoval 로 대댓글을 모두 삭제
         commentRepository.delete(comment);
     }
 
