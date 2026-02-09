@@ -1,5 +1,7 @@
 package com.campusform.server.recruiting.application.service;
 
+import com.campusform.server.project.domain.model.setting.Project;
+import com.campusform.server.project.domain.repository.ProjectRepository;
 import com.campusform.server.recruiting.application.component.MessageGenerator;
 import com.campusform.server.recruiting.application.dto.request.SmsTemplateSaveRequest;
 import com.campusform.server.recruiting.application.dto.response.SmsPreviewResponse;
@@ -22,6 +24,7 @@ public class SmsService {
     private final ApplicantRepository applicantRepository;
     private final MessageTemplateRepository templateRepository;
     private final MessageGenerator messageGenerator;
+    private final ProjectRepository projectRepository;
 
     /**
      * 문자 관련 로직만
@@ -33,6 +36,11 @@ public class SmsService {
      */
     @Transactional
     public void saveTemplate(Long projectId, RecruitmentStage stage, SmsTemplateSaveRequest request) {
+        // 프로젝트 상태 검증: 해당 단계가 활성 상태인지 확인
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new IllegalArgumentException("프로젝트를 찾을 수 없습니다. projectId=" + projectId));
+        validateStageActive(project, stage);
+
         ApplicantStatus applicantStatus = request.getStatus();
         // 1. 없으면 생성, 있으면 가져오기
         MessageTemplate template = templateRepository.findByProjectId(projectId)
@@ -104,5 +112,16 @@ public class SmsService {
                 applicant.getMajor() != null ? applicant.getMajor() : "-",
                 applicant.getPosition() != null ? applicant.getPosition() : "-"
         );
+    }
+
+    /**
+     * 요청한 모집 단계(stage)에 해당하는 프로젝트 상태인지 검증
+     */
+    private void validateStageActive(Project project, RecruitmentStage stage) {
+        if (stage == RecruitmentStage.DOCUMENT) {
+            project.validateDocumentStage();
+        } else if (stage == RecruitmentStage.INTERVIEW) {
+            project.validateInterviewStage();
+        }
     }
 }

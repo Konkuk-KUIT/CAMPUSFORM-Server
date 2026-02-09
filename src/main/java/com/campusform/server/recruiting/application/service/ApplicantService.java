@@ -6,6 +6,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.campusform.server.project.domain.model.setting.Project;
+import com.campusform.server.project.domain.repository.ProjectRepository;
 import com.campusform.server.recruiting.application.dto.response.ApplicantDetailResponse;
 import com.campusform.server.recruiting.application.dto.response.ApplicantListResponse;
 import com.campusform.server.recruiting.application.dto.response.ApplicantResponse;
@@ -22,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 public class ApplicantService {
     private final ApplicantRepository applicantRepository;
+    private final ProjectRepository projectRepository;
 
     public ApplicantListResponse getApplicants(Long projectId, String sort, RecruitmentStage stage) {
         long total = applicantRepository.countByProjectId(projectId);
@@ -89,7 +92,13 @@ public class ApplicantService {
         // 1. 지원자 찾기
         Applicant applicant = applicantRepository.findById(applicantId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 지원자입니다."));
-        // 2. 상태 변경 (도메인 로직 호출)
+
+        // 2. 프로젝트 상태 검증: 해당 단계가 활성 상태인지 확인
+        Project project = projectRepository.findById(applicant.getProjectId())
+                .orElseThrow(() -> new IllegalStateException("지원자가 속한 프로젝트를 찾을 수 없습니다."));
+        validateStageActive(project, stage);
+
+        // 3. 상태 변경 (도메인 로직 호출)
         applicant.updateApplicantStatus(stage, status);
         // 3. 변경된 결과 응답 생성 , 현재 상태 확인!
         ApplicantStatus updatedStatus = (stage == RecruitmentStage.DOCUMENT)
@@ -152,5 +161,18 @@ public class ApplicantService {
                 .isFavorite(applicant.getBookmarked())
                 .answers(answerDtos)
                 .build();
+    }
+
+    /**
+     * 요청한 모집 단계(stage)에 해당하는 프로젝트 상태인지 검증
+     * - DOCUMENT: DOCUMENT 상태여야 함
+     * - INTERVIEW: INTERVIEW 상태여야 함
+     */
+    private void validateStageActive(Project project, RecruitmentStage stage) {
+        if (stage == RecruitmentStage.DOCUMENT) {
+            project.validateDocumentStage();
+        } else if (stage == RecruitmentStage.INTERVIEW) {
+            project.validateInterviewStage();
+        }
     }
 }

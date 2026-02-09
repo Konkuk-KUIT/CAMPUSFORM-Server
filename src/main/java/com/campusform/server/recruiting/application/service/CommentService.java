@@ -38,6 +38,9 @@ public class CommentService {
             throw new EntityNotFoundException("존재하지 않는 지원자입니다.");
         }
 
+        // 종료된 프로젝트에는 댓글을 작성할 수 없음
+        validateProjectNotCompleted(applicantId);
+
         Comment comment;
 
         // parentId가 있으면 대댓글, 없으면 루트 댓글
@@ -73,6 +76,9 @@ public class CommentService {
     // 3. 댓글 수정
     public CommentUpdateResponse updateComment(Long applicantId, Long commentId, Long authorId,
             RecruitmentStage stage, CommentRequest request) {
+        // 종료된 프로젝트에서는 댓글을 수정할 수 없음
+        validateProjectNotCompleted(applicantId);
+
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 댓글입니다."));
 
@@ -102,6 +108,9 @@ public class CommentService {
     public void deleteComment(Long commentId, Long authorId, RecruitmentStage stage) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 댓글입니다."));
+
+        // 종료된 프로젝트에서는 댓글을 삭제할 수 없음
+        validateProjectNotCompleted(comment.getApplicantId());
 
         // stage 일치 검증 (DOCUMENT와 INTERVIEW 댓글 구분)
         if (!comment.getStage().equals(stage)) {
@@ -193,5 +202,18 @@ public class CommentService {
             // 예외 처리는 프로젝트 정책에 맞는 Exception으로 변경하세요 (예: AccessDeniedException)
             throw new IllegalArgumentException("작성자만 수정/삭제할 수 있습니다.");
         }
+    }
+
+    /**
+     * 지원자가 속한 프로젝트가 종료 상태가 아닌지 검증
+     */
+    private void validateProjectNotCompleted(Long applicantId) {
+        Long projectId = applicantRepository.findById(applicantId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 지원자입니다."))
+                .getProjectId();
+
+        projectRepository.findById(projectId)
+                .orElseThrow(() -> new IllegalStateException("지원자가 속한 프로젝트를 찾을 수 없습니다."))
+                .validateNotCompleted();
     }
 }

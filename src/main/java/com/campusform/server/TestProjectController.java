@@ -40,15 +40,13 @@ public class TestProjectController {
      * 프로젝트 ID와 상태를 입력받아 프로젝트 상태를 직접 설정합니다.
      * 
      * 사용 가능한 상태:
-     * - DOCUMENT_OPEN: 프로젝트 생성 완료, 서류 단계
-     * - DOCUMENT_LOCKED: 서류 마감
-     * - DOCUMENT_DONE: 서류 완료 및 프로젝트 종료
-     * - INTERVIEW_OPEN: 면접 진행
-     * - INTERVIEW_LOCKED: 면접 마감
-     * - ALL_COMPLETE: 면접 종료 및 프로젝트 종료
+     * - DOCUMENT: 서류 심사 진행 중
+     * - INTERVIEW: 면접 진행 중
+     * - DOCUMENT_COMPLETE: 서류 심사 완료 (면접 없이 종료)
+     * - INTERVIEW_COMPLETE: 면접 완료 (전체 종료)
      * 
      * 예시 요청 메시지:
-     * PATCH /api/test/projects/1/state?state=INTERVIEW_LOCKED
+     * PATCH /api/test/projects/1/state?state=INTERVIEW
      */
     @Transactional
     @Operation(summary = "프로젝트 상태 강제 변경 (테스트)", description = "특정 프로젝트의 진행 상태를 강제로 변경합니다. `temporary` 프로필에서만 활성화됩니다.", security = {})
