@@ -17,14 +17,6 @@ public class InterviewAssignedTimeResponse {
 
     @Schema(description = "지원자 ID", example = "1")
     private final Long applicantId;
-    @Schema(description = "지원자 이름", example = "홍길동")
-    private final String name;
-    @Schema(description = "지원자 학교", example = "캠퍼스대학교")
-    private final String school;
-    @Schema(description = "지원자 전공", example = "컴퓨터공학과")
-    private final String major;
-    @Schema(description = "지원 포지션", example = "백엔드")
-    private final String position;
 
     @Schema(description = "배정된 면접 날짜", example = "2024-07-01")
     private final LocalDate interviewDate;
@@ -37,19 +29,11 @@ public class InterviewAssignedTimeResponse {
 
     public static InterviewAssignedTimeResponse of(
             Long applicantId,
-            String name,
-            String school,
-            String major,
-            String position,
             LocalDate interviewDate,
             LocalTime startTime,
             InterviewTimeSource source) {
         return new InterviewAssignedTimeResponse(
                 applicantId,
-                name,
-                school,
-                major,
-                position,
                 interviewDate,
                 startTime,
                 source);
