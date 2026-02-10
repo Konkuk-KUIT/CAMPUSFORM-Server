@@ -1,6 +1,7 @@
 package com.campusform.server.recruiting.presentation;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,10 +39,16 @@ public class ApplicantController {
     @GetMapping
     public ResponseEntity<ApplicantListResponse> getApplicants(
             @Parameter(description = "프로젝트 ID") @PathVariable Long projectId,
-            @Parameter(description = "정렬 기준 (name: 이름순, latest: 최신순(기본값))", example = "latest") @RequestParam(required = false, defaultValue = "latest") String sort,
-            @Parameter(description = "조회할 모집 단계") @RequestParam RecruitmentStage stage) {
+            @Parameter(description = "정렬 기준\n" +
+                    "name: 이름 오름차순\n" +
+                    "name_desc: 이름 내림차순\n" +
+                    "latest: 최신순(등록순, 기본값)\n" +
+                    "bookmark: 찜한 순(찜 여부 → 이름 오름차순)", example = "latest") @RequestParam(required = false, defaultValue = "latest") String sort,
+            @Parameter(description = "조회할 모집 단계") @RequestParam RecruitmentStage stage,
+            Authentication authentication) {
 
-        ApplicantListResponse response = applicantService.getApplicants(projectId, sort, stage);
+        Long userId = authService.extractUserId(authentication);
+        ApplicantListResponse response = applicantService.getApplicants(projectId, sort, stage, userId);
         return ResponseEntity.ok(response);
     }
 
@@ -70,9 +77,10 @@ public class ApplicantController {
     @PatchMapping("/{applicantId}/bookmark") // 또는 POST
     public ResponseEntity<Void> Bookmark(
             @Parameter(description = "프로젝트 ID") @PathVariable Long projectId,
-            @Parameter(description = "찜할 지원자 ID") @PathVariable Long applicantId) {
+            @Parameter(description = "찜할 지원자 ID") @PathVariable Long applicantId,
+            @Parameter(description = "즐겨찾기를 토글할 모집 단계 (DOCUMENT: 서류, INTERVIEW: 면접)") @RequestParam RecruitmentStage stage) {
         // 서비스의 토글 메서드 호출
-        applicantService.Bookmark(applicantId);
+        applicantService.Bookmark(applicantId, stage);
         return ResponseEntity.ok().build();
     }
 

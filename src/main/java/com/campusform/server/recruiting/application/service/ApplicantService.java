@@ -1,7 +1,12 @@
 package com.campusform.server.recruiting.application.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,10 +17,14 @@ import com.campusform.server.recruiting.application.dto.response.ApplicantDetail
 import com.campusform.server.recruiting.application.dto.response.ApplicantListResponse;
 import com.campusform.server.recruiting.application.dto.response.ApplicantResponse;
 import com.campusform.server.recruiting.application.dto.response.ApplicantStatusUpdateResponse;
+import com.campusform.server.recruiting.application.dto.response.InterviewAssignedTimeResponse;
+import com.campusform.server.recruiting.application.dto.response.InterviewTimeSource;
 import com.campusform.server.recruiting.domain.model.applicant.Applicant;
-import com.campusform.server.recruiting.domain.model.applicant.value.ApplicantStatus;
 import com.campusform.server.recruiting.domain.model.applicant.value.RecruitmentStage;
+import com.campusform.server.recruiting.domain.model.applicant.value.ScreeningResult;
+import com.campusform.server.recruiting.domain.model.comment.Comment;
 import com.campusform.server.recruiting.domain.repository.ApplicantRepository;
+import com.campusform.server.recruiting.infrastructure.persistence.CommentRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,58 +34,139 @@ import lombok.RequiredArgsConstructor;
 public class ApplicantService {
     private final ApplicantRepository applicantRepository;
     private final ProjectRepository projectRepository;
+    private final CommentRepository commentRepository;
+    private final InterviewAssignmentQueryService interviewAssignmentQueryService;
 
-    public ApplicantListResponse getApplicants(Long projectId, String sort, RecruitmentStage stage) {
-        long total = applicantRepository.countByProjectId(projectId);
-        long pending = 0;
-        long pass = 0;
-        long fail = 0;
-        // 2. 단계(Stage)에 따라 "누구의 합격 상태"를 셀지 결정 (if문 분기)
+    public ApplicantListResponse getApplicants(Long projectId, String sort, RecruitmentStage stage, Long userId) {
+        long total;
+        long pending;
+        long pass;
+        long fail;
+        // 2. 단계(Stage)에 따라 대상 범위·집계 기준 결정 (면접 탭은 서류 PASS만 대상)
         if (stage == RecruitmentStage.DOCUMENT) {
-            // [서류 탭] -> documentStatus 기준 카운트
-            pending = applicantRepository.countByProjectIdAndDocumentStatus(projectId, ApplicantStatus.HOLD);
-            pass = applicantRepository.countByProjectIdAndDocumentStatus(projectId, ApplicantStatus.PASS);
-            fail = applicantRepository.countByProjectIdAndDocumentStatus(projectId, ApplicantStatus.FAIL);
+            // [서류 탭] 전체 지원자 기준, documentStatus로 카운트
+            total = applicantRepository.countByProjectId(projectId);
+            pending = applicantRepository.countByProjectIdAndDocumentStatus(projectId,
+                    ScreeningResult.HOLD);
+            pass = applicantRepository.countByProjectIdAndDocumentStatus(projectId, ScreeningResult.PASS);
+            fail = applicantRepository.countByProjectIdAndDocumentStatus(projectId, ScreeningResult.FAIL);
         } else if (stage == RecruitmentStage.INTERVIEW) {
-            // [면접 탭] -> interviewStatus 기준 카운트
-            pending = applicantRepository.countByProjectIdAndInterviewStatus(projectId, ApplicantStatus.HOLD);
-            pass = applicantRepository.countByProjectIdAndInterviewStatus(projectId, ApplicantStatus.PASS);
-            fail = applicantRepository.countByProjectIdAndInterviewStatus(projectId, ApplicantStatus.FAIL);
+            // [면접 탭] 서류 합격자만 대상, documentStatus=PASS + interviewStatus로 카운트
+            total = applicantRepository.countByProjectIdAndDocumentStatus(projectId, ScreeningResult.PASS);
+            pending = applicantRepository.countByProjectIdAndDocumentStatusAndInterviewStatus(projectId,
+                    ScreeningResult.PASS, ScreeningResult.HOLD);
+            pass = applicantRepository.countByProjectIdAndDocumentStatusAndInterviewStatus(projectId,
+                    ScreeningResult.PASS, ScreeningResult.PASS);
+            fail = applicantRepository.countByProjectIdAndDocumentStatusAndInterviewStatus(projectId,
+                    ScreeningResult.PASS, ScreeningResult.FAIL);
         } else {
-            // 예외 처리: 단계가 없으면 통계를 낼 수 없음
             throw new IllegalArgumentException("서류 또는 면접 단계 중 하나를 선택해야 합니다.");
         }
 
+        // 3. 단계별 목록 조회 전략
         List<Applicant> applicants;
-
-        applicants = applicantRepository.findByProjectIdAndStage(projectId, stage);
-        switch (sort) {
-            case "name_desc": // 2. 이름 내림차순 (하파타순)
-                applicants = applicantRepository.findByProjectIdOrderByNameDesc(projectId);
-                break;
-            case "bookmark": // 3. 찜한 순 (찜한거 위로, 나머지는 가나다순)
-                applicants = applicantRepository.findByProjectIdOrderByBookmarkedDescNameAsc(projectId);
-                break;
-            default: // 1. 이름 오름차순 (가나다순)
-                applicants = applicantRepository.findByProjectIdOrderByNameAsc(projectId);
-                break;
+        if (stage == RecruitmentStage.DOCUMENT) {
+            // 서류 탭: 프로젝트의 모든 지원자
+            applicants = applicantRepository.findByProjectId(projectId);
+        } else if (stage == RecruitmentStage.INTERVIEW) {
+            // 면접 탭: 서류 단계에서 합격(PASS)한 지원자만
+            applicants = applicantRepository.findByProjectIdAndDocumentStatus(projectId,
+                    ScreeningResult.PASS);
+        } else {
+            // 위에서 이미 예외 처리했지만, 방어적 코드
+            throw new IllegalArgumentException("지원자 목록을 조회할 수 없는 단계입니다: " + stage);
         }
-        // DTO로 변환하기
+
+        // 4. 정렬 기준 적용 (in-memory)
+        applicants = switch (sort) {
+            case "name_desc" -> // 이름 내림차순
+                applicants.stream()
+                        .sorted(Comparator.comparing(Applicant::getName,
+                                Comparator.nullsLast(Comparator.reverseOrder())))
+                        .toList();
+            case "bookmark" -> // 찜한 순 (현재 단계에서 찜=true 먼저, 그 다음 이름 오름차순)
+                applicants.stream()
+                        .sorted(Comparator
+                                .comparing(
+                                        (Applicant applicant) -> applicant.isBookmarkedFor(stage),
+                                        Comparator.reverseOrder())
+                                .thenComparing(Applicant::getName,
+                                        Comparator.nullsLast(Comparator
+                                                .naturalOrder())))
+                        .toList();
+            default -> // 기본: 이름 오름차순
+                applicants.stream()
+                        .sorted(Comparator.comparing(Applicant::getName,
+                                Comparator.nullsLast(Comparator.naturalOrder())))
+                        .toList();
+        };
+
+        // 5. 단계별 댓글 개수 집계 (해당 프로젝트 + 단계 기준)
+        Map<Long, Long> commentCountMap = commentRepository
+                .findAllByProjectIdAndStageOrderByCreatedAtAsc(projectId, stage)
+                .stream()
+                .collect(Collectors.groupingBy(
+                        Comment::getApplicantId,
+                        Collectors.counting()));
+
+        // 6. 면접 단계일 때만 최종 배정 면접 시간 조회
+        Map<Long, InterviewAssignedTimeResponse> tempAssignedTimeMap = Map.of();
+        if (stage == RecruitmentStage.INTERVIEW) {
+            List<InterviewAssignedTimeResponse> assignedTimes = interviewAssignmentQueryService
+                    .getAssignedTimes(
+                            projectId, userId);
+            tempAssignedTimeMap = assignedTimes.stream()
+                    .collect(Collectors.toMap(
+                            InterviewAssignedTimeResponse::getApplicantId,
+                            it -> it,
+                            (existing, replacement) -> existing));
+        }
+        final Map<Long, InterviewAssignedTimeResponse> assignedTimeMap = tempAssignedTimeMap;
+
+        // 7. DTO로 변환하기
         List<ApplicantResponse> applicantDtos = applicants.stream()
-                .map(applicant -> ApplicantResponse.builder()
-                        .id(applicant.getId())
-                        .name(applicant.getName())
-                        .major(applicant.getMajor()) // 학과
-                        .phone(applicant.getPhone()) // 전화번호
-                        .bookmarked(applicant.getBookmarked()) // ★ 찜 여부
-                        // 필요한 필드가 더 있다면 여기에 계속 추가
-                        // .email(applicant.getEmail())
-                        .build())
+                .map(applicant -> {
+                    // 현재 탭(stage)에 맞는 상태값 선택
+                    ScreeningResult currentStatus = (stage == RecruitmentStage.DOCUMENT)
+                            ? applicant.getDocumentStatus()
+                            : applicant.getInterviewStatus();
+
+                    long commentCount = commentCountMap.getOrDefault(applicant.getId(), 0L);
+
+                    // 면접 단계일 때만 배정 시간 매핑
+                    LocalDate interviewDate = null;
+                    LocalTime interviewStartTime = null;
+                    InterviewTimeSource interviewTimeSource = null;
+
+                    if (stage == RecruitmentStage.INTERVIEW) {
+                        InterviewAssignedTimeResponse assigned = assignedTimeMap
+                                .get(applicant.getId());
+                        if (assigned != null
+                                && assigned.getSource() != InterviewTimeSource.NONE) {
+                            interviewDate = assigned.getInterviewDate();
+                            interviewStartTime = assigned.getStartTime();
+                            interviewTimeSource = assigned.getSource();
+                        }
+                    }
+
+                    return ApplicantResponse.builder()
+                            .id(applicant.getId())
+                            .name(applicant.getName())
+                            .major(applicant.getMajor()) // 학과
+                            // 현재 단계 기준 즐겨찾기 여부
+                            .bookmarked(applicant.isBookmarkedFor(stage))
+                            .status(currentStatus.name()) // 현재 단계 기준 상태
+                            .commentCount(commentCount) // 현재 단계 댓글 개수
+                            .interviewDate(interviewDate)
+                            .interviewStartTime(interviewStartTime)
+                            .interviewTimeSource(interviewTimeSource)
+                            .build();
+                })
                 .toList();
 
         // 4. [추가] 최종 응답 객체(ApplicantListResponse)로 감싸서 반환
         return ApplicantListResponse.builder()
-                .status(ApplicantListResponse.ApplicantStatus.builder()
+                .status(ApplicantListResponse.ApplicantStatistics.builder()
                         .totalCount(total)
                         .pendingCount(pending)
                         .passCount(pass)
@@ -88,7 +178,7 @@ public class ApplicantService {
 
     @Transactional
     public ApplicantStatusUpdateResponse updateApplicantStatus(Long applicantId, RecruitmentStage stage,
-            ApplicantStatus status) {
+            ScreeningResult status) {
         // 1. 지원자 찾기
         Applicant applicant = applicantRepository.findById(applicantId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 지원자입니다."));
@@ -99,9 +189,9 @@ public class ApplicantService {
         validateStageActive(project, stage);
 
         // 3. 상태 변경 (도메인 로직 호출)
-        applicant.updateApplicantStatus(stage, status);
+        applicant.updateScreeningResult(stage, status);
         // 3. 변경된 결과 응답 생성 , 현재 상태 확인!
-        ApplicantStatus updatedStatus = (stage == RecruitmentStage.DOCUMENT)
+        ScreeningResult updatedStatus = (stage == RecruitmentStage.DOCUMENT)
                 ? applicant.getDocumentStatus()
                 : applicant.getInterviewStatus();
 
@@ -114,10 +204,11 @@ public class ApplicantService {
 
     // 찜하기 토글
     @Transactional
-    public void Bookmark(Long applicantId) {
+    public void Bookmark(Long applicantId, RecruitmentStage stage) {
         Applicant applicant = applicantRepository.findById(applicantId)
                 .orElseThrow(() -> new IllegalArgumentException("지원자가 존재하지 않습니다."));
-        applicant.Bookmark();
+        // 현재 탭(서류/면접)에 맞게 단계별 즐겨찾기 필드를 토글
+        applicant.toggleBookmark(stage);
     }
 
     @Transactional(readOnly = true)
@@ -127,7 +218,7 @@ public class ApplicantService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 지원자입니다."));
 
         // 2. 현재 단계(Stage)에 맞는 합격 상태(Status) 가져오기
-        ApplicantStatus currentStatus = (stage == RecruitmentStage.DOCUMENT)
+        ScreeningResult currentStatus = (stage == RecruitmentStage.DOCUMENT)
                 ? applicant.getDocumentStatus()
                 : applicant.getInterviewStatus();
 
@@ -158,7 +249,8 @@ public class ApplicantService {
                 .phoneNumber(applicant.getPhone())
                 .email(applicant.getEmail())
                 .status(currentStatus.name())
-                .isFavorite(applicant.getBookmarked())
+                // 상세 조회도 단계별 즐겨찾기 여부를 사용
+                .isFavorite(applicant.isBookmarkedFor(stage))
                 .answers(answerDtos)
                 .build();
     }

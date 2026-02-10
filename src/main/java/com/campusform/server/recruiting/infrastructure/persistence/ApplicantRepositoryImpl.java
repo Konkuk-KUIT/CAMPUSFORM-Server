@@ -6,8 +6,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Repository;
 
 import com.campusform.server.recruiting.domain.model.applicant.Applicant;
-import com.campusform.server.recruiting.domain.model.applicant.value.ApplicantStatus;
-import com.campusform.server.recruiting.domain.model.applicant.value.RecruitmentStage;
+import com.campusform.server.recruiting.domain.model.applicant.value.ScreeningResult;
 import com.campusform.server.recruiting.domain.repository.ApplicantRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -58,13 +57,13 @@ public class ApplicantRepositoryImpl implements ApplicantRepository {
 
     // 6. 서류 전형 상태별 조회
     @Override
-    public List<Applicant> findByProjectIdAndDocumentStatus(Long projectId, ApplicantStatus status) {
+    public List<Applicant> findByProjectIdAndDocumentStatus(Long projectId, ScreeningResult status) {
         return applicantJpaRepository.findByProjectIdAndDocumentStatus(projectId, status);
     }
 
     // 7. 면접 전형 상태별 조회
     @Override
-    public List<Applicant> findByProjectIdAndInterviewStatus(Long projectId, ApplicantStatus status) {
+    public List<Applicant> findByProjectIdAndInterviewStatus(Long projectId, ScreeningResult status) {
         return applicantJpaRepository.findByProjectIdAndInterviewStatus(projectId, status);
     }
 
@@ -73,39 +72,26 @@ public class ApplicantRepositoryImpl implements ApplicantRepository {
         return applicantJpaRepository.existsById(applicantId);
     }
 
-    @Override
-    public List<Applicant> findByProjectIdOrderByBookmarkedDescNameAsc(Long projectId) {
-        return applicantJpaRepository.findByProjectIdOrderByBookmarkedDescNameAsc(projectId);
-    }
-
-    @Override
-    public List<Applicant> findByProjectIdOrderByNameAsc(Long projectId) {
-        return applicantJpaRepository.findByProjectIdOrderByBookmarkedDescNameAsc(projectId);
-    }
-
-    @Override
-    public List<Applicant> findByProjectIdOrderByNameDesc(Long projectId) {
-        return applicantJpaRepository.findByProjectIdOrderByNameDesc(projectId);
-    }
-
-    @Override
-    public List<Applicant> findByProjectIdAndStage(Long projectId, RecruitmentStage stage) {
-        return applicantJpaRepository.findByProjectIdAndStage(projectId, stage);
-    }
-
-    // public long countByProjectIdAndStatus(Long projectId, ApplicantStatus
+    // public long countByProjectIdAndStatus(Long projectId, ScreeningResult
     // applicantStatus){
     // return applicantJpaRepository.countByProjectIdAndStatus(projectId,
     // applicantStatus);
     // }
     @Override
-    public long countByProjectIdAndDocumentStatus(Long projectId, ApplicantStatus status) {
+    public long countByProjectIdAndDocumentStatus(Long projectId, ScreeningResult status) {
         return applicantJpaRepository.countByProjectIdAndDocumentStatus(projectId, status);
     }
 
     @Override
-    public long countByProjectIdAndInterviewStatus(Long projectId, ApplicantStatus status) {
+    public long countByProjectIdAndInterviewStatus(Long projectId, ScreeningResult status) {
         return applicantJpaRepository.countByProjectIdAndInterviewStatus(projectId, status);
+    }
+
+    @Override
+    public long countByProjectIdAndDocumentStatusAndInterviewStatus(Long projectId, ScreeningResult documentStatus,
+            ScreeningResult interviewStatus) {
+        return applicantJpaRepository.countByProjectIdAndDocumentStatusAndInterviewStatus(projectId, documentStatus,
+                interviewStatus);
     }
 
     @Override

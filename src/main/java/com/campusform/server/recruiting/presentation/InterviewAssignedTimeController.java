@@ -13,6 +13,7 @@ import com.campusform.server.identity.application.service.AuthService;
 import com.campusform.server.recruiting.application.dto.response.InterviewAssignedTimeResponse;
 import com.campusform.server.recruiting.application.service.InterviewAssignmentQueryService;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,6 +33,7 @@ public class InterviewAssignedTimeController {
     private final InterviewAssignmentQueryService queryService;
     private final AuthService authService;
 
+    @Hidden
     @Operation(summary = "전체 지원자 최종 면접시간 조회", description = "프로젝트의 모든 지원자에게 배정된 최종 면접 시간을 조회합니다. 수동 배정이 스마트 시간표(자동)보다 우선됩니다.")
     @GetMapping
     public ResponseEntity<List<InterviewAssignedTimeResponse>> getAssignedTimes(
@@ -42,4 +44,3 @@ public class InterviewAssignedTimeController {
         return ResponseEntity.ok(responses);
     }
 }
-

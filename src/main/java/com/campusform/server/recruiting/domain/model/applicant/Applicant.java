@@ -10,8 +10,8 @@ import org.springframework.data.domain.AbstractAggregateRoot;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.campusform.server.recruiting.domain.exception.StatusChangeNotAllowedException;
-import com.campusform.server.recruiting.domain.model.applicant.value.ApplicantStatus;
 import com.campusform.server.recruiting.domain.model.applicant.value.RecruitmentStage;
+import com.campusform.server.recruiting.domain.model.applicant.value.ScreeningResult;
 import com.campusform.server.recruiting.domain.model.event.ApplicantUpdated;
 
 import jakarta.persistence.CascadeType;
@@ -58,22 +58,31 @@ public class Applicant extends AbstractAggregateRoot<Applicant> {
     @Column(nullable = false)
     private String email;
     private String position;
-    private RecruitmentStage stage;
+
     /**
      * 서류 단계 심사 상태
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "document_status", nullable = false)
-    private ApplicantStatus documentStatus = ApplicantStatus.HOLD;
+    private ScreeningResult documentStatus = ScreeningResult.HOLD;
     /**
      * 면접 단계 심사 상태
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "interview_status")
-    private ApplicantStatus interviewStatus = ApplicantStatus.HOLD;
+    private ScreeningResult interviewStatus = ScreeningResult.HOLD;
 
-    @Column(nullable = false)
-    private Boolean bookmarked = false;
+    /**
+     * 서류 단계 즐겨찾기 여부
+     */
+    @Column(name = "document_bookmarked", nullable = false)
+    private Boolean documentBookmarked = false;
+
+    /**
+     * 면접 단계 즐겨찾기 여부
+     */
+    @Column(name = "interview_bookmarked")
+    private Boolean interviewBookmarked = false;
 
     @OneToMany(mappedBy = "applicant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ApplicantExtraAnswer> extraAnswers = new ArrayList<>();
@@ -85,11 +94,6 @@ public class Applicant extends AbstractAggregateRoot<Applicant> {
     @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
-
-    // 누르면 true <-> false 바뀜
-    public void Bookmark() {
-        this.bookmarked = !this.bookmarked;
-    }
 
     public static Applicant create(Long projectId, String name, String email, String phone, String gender,
             String school, String major, String position) {
@@ -114,7 +118,7 @@ public class Applicant extends AbstractAggregateRoot<Applicant> {
      * 
      * 면접 단계로 진행하려면 서류 단계에서 합격(PASS) 상태여야 합니다.
      */
-    public void updateApplicantStatus(RecruitmentStage stage, ApplicantStatus status) {
+    public void updateScreeningResult(RecruitmentStage stage, ScreeningResult status) {
         if (status == null) {
             throw new IllegalArgumentException("Status must not be null");
         }
@@ -126,7 +130,7 @@ public class Applicant extends AbstractAggregateRoot<Applicant> {
         } else {
             if (stage == RecruitmentStage.INTERVIEW) {
                 // 면접 단계로 진행하려면 서류 단계에서 합격해야 함
-                if (this.documentStatus != ApplicantStatus.PASS) {
+                if (this.documentStatus != ScreeningResult.PASS) {
                     throw new StatusChangeNotAllowedException(
                             "면접 단계로 진행하려면 서류 단계에서 합격(PASS) 상태여야 합니다. 현재 서류 상태: " + this.documentStatus);
                 }
@@ -161,5 +165,29 @@ public class Applicant extends AbstractAggregateRoot<Applicant> {
         this.position = position;
         // extraAnswers는 orphanRemoval=true이므로 리스트를 비우면 자동 삭제됨
         this.extraAnswers.clear();
+    }
+
+    /**
+     * 단계별 즐겨찾기 여부 조회
+     */
+    public boolean isBookmarkedFor(RecruitmentStage stage) {
+        if (stage == RecruitmentStage.DOCUMENT) {
+            return Boolean.TRUE.equals(documentBookmarked);
+        }
+        if (stage == RecruitmentStage.INTERVIEW) {
+            return Boolean.TRUE.equals(interviewBookmarked);
+        }
+        return false;
+    }
+
+    /**
+     * 단계별 즐겨찾기 토글
+     */
+    public void toggleBookmark(RecruitmentStage stage) {
+        if (stage == RecruitmentStage.DOCUMENT) {
+            this.documentBookmarked = !Boolean.TRUE.equals(this.documentBookmarked);
+        } else if (stage == RecruitmentStage.INTERVIEW) {
+            this.interviewBookmarked = !Boolean.TRUE.equals(this.interviewBookmarked);
+        }
     }
 }
