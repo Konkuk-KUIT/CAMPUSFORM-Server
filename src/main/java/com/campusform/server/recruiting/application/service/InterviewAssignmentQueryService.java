@@ -43,8 +43,6 @@ public class InterviewAssignmentQueryService {
         InterviewContext ctx = contextLoader.loadContext(projectId);
         ctx.project().validateAdminAccess(userId);
 
-        int slotDurationMin = ctx.setting().getSlotDurationMin();
-
         List<Applicant> applicants = applicantRepository.findByProjectId(projectId);
 
         /**
@@ -72,7 +70,6 @@ public class InterviewAssignmentQueryService {
                     if (manual != null) {
                         LocalDate date = manual.getInterviewDate();
                         LocalTime start = manual.getStartTime();
-                        LocalTime end = (start == null) ? null : start.plusMinutes(slotDurationMin);
 
                         return InterviewAssignedTimeResponse.of(
                                 applicantId,
@@ -82,7 +79,6 @@ public class InterviewAssignmentQueryService {
                                 applicant.getPosition(),
                                 date,
                                 start,
-                                end,
                                 InterviewTimeSource.MANUAL);
                     }
 
@@ -91,7 +87,6 @@ public class InterviewAssignmentQueryService {
                     if (auto != null) {
                         LocalDate date = auto.date();
                         LocalTime start = auto.startTime();
-                        LocalTime end = start.plusMinutes(slotDurationMin);
 
                         return InterviewAssignedTimeResponse.of(
                                 applicantId,
@@ -101,7 +96,6 @@ public class InterviewAssignmentQueryService {
                                 applicant.getPosition(),
                                 date,
                                 start,
-                                end,
                                 InterviewTimeSource.AUTO);
                     }
 
@@ -112,7 +106,6 @@ public class InterviewAssignmentQueryService {
                             applicant.getSchool(),
                             applicant.getMajor(),
                             applicant.getPosition(),
-                            null,
                             null,
                             null,
                             InterviewTimeSource.NONE);

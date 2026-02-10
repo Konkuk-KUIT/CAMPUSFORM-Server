@@ -30,8 +30,7 @@ public class InterviewAssignedTimeResponse {
     private final LocalDate interviewDate;
     @Schema(description = "배정된 면접 시작 시간", example = "10:00")
     private final LocalTime startTime;
-    @Schema(description = "배정된 면접 종료 시간", example = "10:20")
-    private final LocalTime endTime;
+    // 종료 시간은 클라이언트에서 slotDuration 등 설정값으로 계산 가능하므로 응답에서 제외합니다.
 
     @Schema(description = "면접 시간 출처 (MANUAL: 수동 배정, AUTO: 자동 배정, NONE: 미배정)")
     private final InterviewTimeSource source;
@@ -44,7 +43,6 @@ public class InterviewAssignedTimeResponse {
             String position,
             LocalDate interviewDate,
             LocalTime startTime,
-            LocalTime endTime,
             InterviewTimeSource source) {
         return new InterviewAssignedTimeResponse(
                 applicantId,
@@ -54,7 +52,6 @@ public class InterviewAssignedTimeResponse {
                 position,
                 interviewDate,
                 startTime,
-                endTime,
                 source);
     }
 }
