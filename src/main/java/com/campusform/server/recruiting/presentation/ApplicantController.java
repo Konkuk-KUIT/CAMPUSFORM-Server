@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.campusform.server.identity.application.service.AuthService;
 import com.campusform.server.recruiting.application.dto.request.ApplicantStatusUpdateRequest;
 import com.campusform.server.recruiting.application.dto.response.ApplicantDetailResponse;
 import com.campusform.server.recruiting.application.dto.response.ApplicantListResponse;
@@ -30,12 +29,14 @@ import lombok.RequiredArgsConstructor;
 public class ApplicantController {
 
     private final ApplicantService applicantService;
-    private final AuthService authService;
 
     /**
-     * 지원자 목록 조회
+     * 프로젝트의 지원자 목록을 모집 단계에 따라 조회
+     * 원하는 정렬 기준으로 반환
      */
-    @Operation(summary = "지원자 목록 조회", description = "프로젝트의 전체 지원자 목록을 정렬하여 조회합니다.")
+    @Operation(summary = "지원자 목록 조회", description = "프로젝트 ID에 해당하는 지원자 목록을 모집 단계(stage)별로 조회하고, 정렬 기준(sort)에 따라 결과를 반환합니다. "
+            +
+            "서류·면접 단계별 지원자 현황(전체, 합격, 불합격, 보류 수)과 각 지원자의 간략 정보가 포함됩니다.")
     @GetMapping
     public ResponseEntity<ApplicantListResponse> getApplicants(
             @Parameter(description = "프로젝트 ID") @PathVariable Long projectId,
@@ -52,9 +53,6 @@ public class ApplicantController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * 지원자 상태변경 (보류/합격/불합격)
-     */
     @Operation(summary = "지원자 상태 변경", description = "특정 지원자의 서류/면접 전형 상태를 변경합니다. (예: 보류, 합격, 불합격)")
     @PatchMapping("/{applicantId}")
     public ResponseEntity<ApplicantStatusUpdateResponse> updateStatus(
@@ -70,10 +68,8 @@ public class ApplicantController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * 즐겨찾기
-     */
-    @Operation(summary = "즐겨찾기", description = "특정 지원자를 찜하거나 찜을 해제합니다.")
+    /** 즐겨찾기 토글 */
+    @Operation(summary = "즐겨찾기", description = "특정 지원자를 서류/면접 단계별로 찜하거나 찜을 해제합니다.")
     @PatchMapping("/{applicantId}/bookmark") // 또는 POST
     public ResponseEntity<Void> Bookmark(
             @Parameter(description = "프로젝트 ID") @PathVariable Long projectId,
@@ -86,6 +82,29 @@ public class ApplicantController {
 
     /**
      * 특정 단계의 지원자 상세정보
+     *
+     * 응답 예시:
+     * 
+     * <pre>
+     * {
+     *   "applicantId": 1,
+     *   "name": "홍길동",
+     *   "gender": "MALE",
+     *   "school": "캠퍼스대학교",
+     *   "major": "컴퓨터공학과",
+     *   "position": "백엔드",
+     *   "phoneNumber": "010-1234-5678",
+     *   "email": "applicant@example.com",
+     *   "status": "PASS",
+     *   "isFavorite": true,
+     *   "answers": [
+     *     {
+     *       "question": "자기소개를 해주세요.",
+     *       "answer": "안녕하세요, 저는..."
+     *     }
+     *   ]
+     * }
+     * </pre>
      */
     @Operation(summary = "특정 단계의 지원자 상세 정보 조회", description = "특정 지원자의 상세 정보(인적사항, 답변, 댓글 등)를 조회합니다.")
     @GetMapping("/{applicantId}")

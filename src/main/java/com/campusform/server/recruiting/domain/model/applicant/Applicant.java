@@ -81,7 +81,7 @@ public class Applicant extends AbstractAggregateRoot<Applicant> {
     /**
      * 면접 단계 즐겨찾기 여부
      */
-    @Column(name = "interview_bookmarked")
+    @Column(name = "interview_bookmarked", nullable = false)
     private Boolean interviewBookmarked = false;
 
     @OneToMany(mappedBy = "applicant", cascade = CascadeType.ALL, orphanRemoval = true)

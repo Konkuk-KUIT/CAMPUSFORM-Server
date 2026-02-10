@@ -14,7 +14,7 @@ import com.campusform.server.recruiting.domain.model.applicant.value.ScreeningRe
  * 이 코드는 "도메인 영역의 요청"을 받아서 "스프링 JPA(DB)"에게 토스해주는 역할을 완벽하게 수행합니다.
  * 도메인 영역이므로 ApplicantJpaRepository에 의존 X
  */
-public interface ApplicantRepository{
+public interface ApplicantRepository {
 
     // 1. 저장 및 수정
     Applicant save(Applicant applicant);
