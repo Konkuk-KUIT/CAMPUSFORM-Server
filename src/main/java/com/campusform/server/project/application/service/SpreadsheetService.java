@@ -57,21 +57,17 @@ public class SpreadsheetService {
     }
 
     /**
-     * 포지션 컬럼 고유값 목록 조회 (편집하기용)
+     * 시트 URL 기준 포지션 컬럼 고유값 목록 조회 (프로젝트 생성 전 호출 가능)
      */
     @Transactional(readOnly = true)
-    public List<String> getDistinctPositionValues(Long projectId) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new IllegalArgumentException("프로젝트를 찾을 수 없습니다. projectId=" + projectId));
-
-        Integer positionIdx = project.getMapping().getPositionIdx();
-        if (positionIdx == null || positionIdx < 0) {
+    public List<String> getDistinctPositionValues(String sheetUrl, Long ownerId, Integer positionColumnIndex) {
+        // -1 또는 미지정 시 포지션 미선택으로 간주 → 빈 목록 반환
+        if (positionColumnIndex == null || positionColumnIndex < 0) {
             return List.of();
         }
-
-        List<String[]> dataRows = googleSheetsReader.readAllLines(project.getSheetUrl(), project.getOwnerId());
+        List<String[]> dataRows = googleSheetsReader.readAllLines(sheetUrl, ownerId);
         return dataRows.stream()
-                .map(columns -> getColumnValue(columns, positionIdx))
+                .map(columns -> getColumnValue(columns, positionColumnIndex))
                 .filter(Objects::nonNull)
                 .distinct()
                 .sorted()
