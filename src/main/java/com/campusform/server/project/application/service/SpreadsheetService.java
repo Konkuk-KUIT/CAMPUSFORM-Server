@@ -48,12 +48,26 @@ public class SpreadsheetService {
 
     /**
      * 스프레드시트 헤더 조회 -> 칼럼 매핑 위함
+     * 0번 인덱스이면서 헤더 이름이 'timestamp' 또는 '타임스탬프'인 컬럼은 응답에서 제외 (구글 폼 기본 컬럼)
      */
     public List<SpreadsheetColumnResponse> getSheetHeaders(String sheetUrl, Long ownerId) {
         return googleSheetsReader.readHeader(sheetUrl, ownerId).stream()
                 .filter(Objects::nonNull)
+                .filter(column -> !isTimestampHeader(column))
                 .map(column -> new SpreadsheetColumnResponse(column.getName(), column.getIndex()))
                 .toList();
+    }
+
+    /**
+     * 0번 인덱스이고 이름이 timestamp/타임스탬프인 헤더인지 여부 (응답 제외 대상)
+     */
+    private static boolean isTimestampHeader(SpreadsheetColumn column) {
+        if (column.getIndex() != 0) {
+            return false;
+        }
+        String name = column.getName() != null ? column.getName().trim() : "";
+        String lower = name.toLowerCase();
+        return "timestamp".equals(lower) || "타임스탬프".equals(name);
     }
 
     /**
