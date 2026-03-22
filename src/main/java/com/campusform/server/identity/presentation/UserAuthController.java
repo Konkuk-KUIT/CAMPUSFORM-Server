@@ -72,4 +72,13 @@ public class UserAuthController {
         String nickname = userService.updateNickname(userId, request.nickname());
         return new UpdateNicknameResponse(nickname);
     }
+    /**
+     * 회원 탈퇴
+     */
+    @Operation(summary = "회원 탈퇴", description = "현재 로그인한 사용자의 계정을 삭제합니다.")
+    @DeleteMapping("/me")
+    public void deleteUser(Authentication authentication) {
+        Long userId = authService.extractUserId(authentication);
+        userService.deleteUser(userId);
+    }
 }

@@ -47,4 +47,9 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
            "WHERE a.projectId = :projectId " +
            "ORDER BY c.createdAt ASC")
     List<Comment> findAllByProjectIdOrderByCreatedAtAsc(@Param("projectId") Long projectId);
+
+    /**
+     * 특정 작성자의 모든 댓글 삭제
+     */
+    void deleteByAuthorId(Long authorId);
 }
