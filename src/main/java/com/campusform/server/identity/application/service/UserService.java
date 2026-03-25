@@ -1,5 +1,6 @@
 package com.campusform.server.identity.application.service;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -7,6 +8,7 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.campusform.server.global.event.UserDeletedEvent;
 import com.campusform.server.global.infrastructure.S3Service;
 import com.campusform.server.identity.domain.model.User;
 import com.campusform.server.identity.domain.repository.UserRepository;
@@ -25,6 +27,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final S3Service s3Service;
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * 프로필 이미지 업데이트
@@ -108,5 +111,34 @@ public class UserService {
         log.info("닉네임 수정 완료: userId={}, newNickname={}", userId, newNickname);
 
         return user.getNickname();
+    }
+
+    /**
+     * 회원 탈퇴
+     *
+     * @param userId 사용자 ID
+     */
+    @Transactional
+    public void deleteUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+        // // 프로필 이미지가 있다면 S3에서도 삭제
+        // String profileImageUrl = user.getProfileImageUrl();
+        // if (profileImageUrl != null) {
+        //     TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+        //         @Override
+        //         public void afterCommit() {
+        //             s3Service.deleteFile(profileImageUrl);
+        //             log.info("S3 프로필 이미지 삭제 완료 (회원탈퇴): {}", profileImageUrl);
+        //         }
+        //     });
+        // }
+
+        userRepository.delete(user);
+        log.info("회원 탈퇴 완료: userId={}", userId);
+
+        // 연관된 데이터 삭제를 위한 이벤트 발행
+        eventPublisher.publishEvent(new UserDeletedEvent(userId));
     }
 }
